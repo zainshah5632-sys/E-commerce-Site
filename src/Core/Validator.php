@@ -133,6 +133,35 @@ final class Validator
                     $this->errors[$field] = "{$label} confirmation does not match.";
                 }
                 break;
+
+            case 'alpha_spaces':
+                if (!is_string($value) || !preg_match('/^[a-zA-Z\s\-\'\.]+$/u', $value)) {
+                    $this->errors[$field] = "{$label} must contain only alphabets (no numbers or special characters).";
+                }
+                break;
+
+            case 'username':
+                if (!is_string($value) || !preg_match('/^[a-zA-Z0-9_]{3,30}$/', $value)) {
+                    $this->errors[$field] = "Username must be between 3 and 30 characters and contain only letters, numbers, and underscores.";
+                }
+                break;
+
+            case 'complex_password':
+                $pass = (string)$value;
+                $hasLetter = preg_match('/[a-zA-Z]/', $pass);
+                $hasDigit  = preg_match('/[0-9]/', $pass);
+                $hasSymbol = preg_match('/[^a-zA-Z0-9]/', $pass);
+                if (!$hasLetter || !$hasDigit || !$hasSymbol) {
+                    $this->errors[$field] = "Password must include at least one letter, one number, and one symbol/sign.";
+                }
+                break;
+
+            case 'phone_11':
+                $cleaned = preg_replace('/[^0-9]/', '', (string)$value);
+                if (strlen($cleaned) !== 11) {
+                    $this->errors[$field] = "Phone number must be exactly 11 digits.";
+                }
+                break;
         }
     }
 

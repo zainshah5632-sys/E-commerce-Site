@@ -46,10 +46,15 @@ final class CheckoutController
         }
 
         $session = Session::instance();
+        $rawPhone = $request->string('phone');
+        $phone = preg_replace('/[^0-9]/', '', $rawPhone);
+        $countryCode = trim($request->string('country_code', '+1'));
+
         $data = [
             'customer_name'  => $request->string('customer_name'),
             'email'          => $request->string('email'),
-            'phone'          => $request->string('phone'),
+            'phone'          => $phone,
+            'country_code'   => $countryCode,
             'address_line_1' => $request->string('address_line_1'),
             'address_line_2' => $request->string('address_line_2'),
             'city'           => $request->string('city'),
@@ -61,15 +66,16 @@ final class CheckoutController
         ];
 
         $validator = Validator::make($data, [
-            'customer_name'  => 'required|min:2|max:100',
+            'customer_name'  => 'required|alpha_spaces|min:2|max:100',
             'email'          => 'required|email|max:150',
-            'phone'          => 'required|min:6|max:30',
+            'phone'          => 'required|phone_11',
             'address_line_1' => 'required|min:3|max:150',
             'city'           => 'required|min:2|max:80',
             'state'          => 'required|min:2|max:80',
             'postal_code'    => 'required|min:3|max:20',
             'payment_method' => 'required|in:cod,bank_transfer',
         ]);
+
 
         if ($validator->fails()) {
             $userProfile = $session->isAuthenticated() ? ProfileRepository::find((string)$session->userId()) : null;

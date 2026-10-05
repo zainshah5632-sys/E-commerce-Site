@@ -14,6 +14,7 @@ $userProfile = $userProfile ?? null;
 $defaultName = old('customer_name', $userProfile['full_name'] ?? Session::instance()->userName());
 $defaultEmail = old('email', Session::instance()->userEmail());
 $defaultPhone = old('phone', $userProfile['phone'] ?? '');
+$defaultCountryCode = old('country_code', $userProfile['country_code'] ?? '+1');
 ?>
 
 <div class="container" style="padding-top: var(--s-6); padding-bottom: var(--s-9);">
@@ -34,54 +35,98 @@ $defaultPhone = old('phone', $userProfile['phone'] ?? '');
         <h2 style="font-size: 1.35rem; margin-bottom: var(--s-4);">1. Contact Details</h2>
 
         <div class="form-group">
-          <label for="cust-name" class="form-label">Full Name</label>
-          <input
-            type="text"
-            id="cust-name"
-            name="customer_name"
-            class="form-input"
-            value="<?= ea($defaultName) ?>"
-            required
-            autocomplete="name"
-          >
+          <label for="cust-name" class="form-label">
+            <span>Full Name</span>
+            <span style="font-size: 0.75rem; color: var(--text-3); font-weight: 400;">(Alphabets only)</span>
+          </label>
+          <div class="input-with-icon-wrap">
+            <span class="input-icon-left"><?= icon('user') ?></span>
+            <input
+              type="text"
+              id="cust-name"
+              name="customer_name"
+              class="form-input form-input--with-icon"
+              value="<?= ea($defaultName) ?>"
+              required
+              autocomplete="name"
+              data-alpha-only="true"
+              pattern="[A-Za-z\s\-']+"
+              title="Alphabets only, no numbers allowed"
+            >
+          </div>
           <?php if (!empty($errors['customer_name'])): ?>
             <span class="form-error"><?= e($errors['customer_name']) ?></span>
+          <?php else: ?>
+            <span class="form-hint">Alphabets only. Numbers are prohibited.</span>
           <?php endif; ?>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3);">
-          <div class="form-group">
-            <label for="cust-email" class="form-label">Email Address</label>
+        <div class="form-group">
+          <label for="cust-email" class="form-label">Email Address</label>
+          <div class="input-with-icon-wrap">
+            <span class="input-icon-left"><?= icon('mail') ?></span>
             <input
               type="email"
               id="cust-email"
               name="email"
-              class="form-input"
+              class="form-input form-input--with-icon"
               value="<?= ea($defaultEmail) ?>"
               required
               autocomplete="email"
             >
-            <?php if (!empty($errors['email'])): ?>
-              <span class="form-error"><?= e($errors['email']) ?></span>
-            <?php endif; ?>
           </div>
-
-          <div class="form-group">
-            <label for="cust-phone" class="form-label">Phone Number</label>
-            <input
-              type="tel"
-              id="cust-phone"
-              name="phone"
-              class="form-input"
-              value="<?= ea($defaultPhone) ?>"
-              required
-              autocomplete="tel"
-            >
-            <?php if (!empty($errors['phone'])): ?>
-              <span class="form-error"><?= e($errors['phone']) ?></span>
-            <?php endif; ?>
-          </div>
+          <?php if (!empty($errors['email'])): ?>
+            <span class="form-error"><?= e($errors['email']) ?></span>
+          <?php endif; ?>
         </div>
+
+        <div class="form-group">
+          <label for="cust-phone" class="form-label">
+            <span>Phone Number</span>
+            <span style="font-size: 0.75rem; color: var(--text-3); font-weight: 400;">(Country code + exactly 11 digits)</span>
+          </label>
+          <div class="phone-input-group">
+            <select name="country_code" id="cust-country-code" class="form-select phone-country-code" aria-label="Country Code">
+              <option value="+1" <?= $defaultCountryCode === '+1' ? 'selected' : '' ?>>+1 (US/CA)</option>
+              <option value="+44" <?= $defaultCountryCode === '+44' ? 'selected' : '' ?>>+44 (UK)</option>
+              <option value="+92" <?= $defaultCountryCode === '+92' ? 'selected' : '' ?>>+92 (PK)</option>
+              <option value="+91" <?= $defaultCountryCode === '+91' ? 'selected' : '' ?>>+91 (IN)</option>
+              <option value="+971" <?= $defaultCountryCode === '+971' ? 'selected' : '' ?>>+971 (AE)</option>
+              <option value="+966" <?= $defaultCountryCode === '+966' ? 'selected' : '' ?>>+966 (SA)</option>
+              <option value="+61" <?= $defaultCountryCode === '+61' ? 'selected' : '' ?>>+61 (AU)</option>
+              <option value="+49" <?= $defaultCountryCode === '+49' ? 'selected' : '' ?>>+49 (DE)</option>
+              <option value="+33" <?= $defaultCountryCode === '+33' ? 'selected' : '' ?>>+33 (FR)</option>
+              <option value="+81" <?= $defaultCountryCode === '+81' ? 'selected' : '' ?>>+81 (JP)</option>
+              <option value="+86" <?= $defaultCountryCode === '+86' ? 'selected' : '' ?>>+86 (CN)</option>
+              <option value="+90" <?= $defaultCountryCode === '+90' ? 'selected' : '' ?>>+90 (TR)</option>
+              <option value="+60" <?= $defaultCountryCode === '+60' ? 'selected' : '' ?>>+60 (MY)</option>
+              <option value="+65" <?= $defaultCountryCode === '+65' ? 'selected' : '' ?>>+65 (SG)</option>
+            </select>
+            <div class="input-with-icon-wrap phone-digits">
+              <span class="input-icon-left"><?= icon('phone') ?></span>
+              <input
+                type="tel"
+                id="cust-phone"
+                name="phone"
+                class="form-input form-input--with-icon"
+                value="<?= ea($defaultPhone) ?>"
+                required
+                data-phone-11="true"
+                maxlength="11"
+                minlength="11"
+                pattern="[0-9]{11}"
+                placeholder="03001234567"
+                autocomplete="tel"
+              >
+            </div>
+          </div>
+          <?php if (!empty($errors['phone'])): ?>
+            <span class="form-error"><?= e($errors['phone']) ?></span>
+          <?php else: ?>
+            <span class="form-hint">Enter your country code and exactly 11 digits (e.g. 03001234567).</span>
+          <?php endif; ?>
+        </div>
+
 
         <h2 style="font-size: 1.35rem; margin-top: var(--s-6); margin-bottom: var(--s-4);">2. Shipping Address</h2>
 

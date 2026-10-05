@@ -12,8 +12,24 @@ final class ProfileRepository
         $client = new Client();
         $res = $client->get('profiles', [
             'id'     => 'eq.' . $id,
-            'select' => 'id,full_name,phone,role,created_at',
+            'select' => 'id,email,full_name,username,phone,country_code,role,created_at',
             'limit'  => '1',
+        ], ['single' => true]);
+
+        if ($res->ok && is_array($res->data)) {
+            return $res->data;
+        }
+
+        return null;
+    }
+
+    public static function findByUsername(string $username): ?array
+    {
+        $client = new Client();
+        $res = $client->get('profiles', [
+            'username' => 'eq.' . $username,
+            'select'   => 'id,email,full_name,username,phone,country_code,role,created_at',
+            'limit'    => '1',
         ], ['single' => true]);
 
         if ($res->ok && is_array($res->data)) {

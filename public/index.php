@@ -12,11 +12,13 @@ if (PHP_SAPI === 'cli-server') {
 require_once dirname(__DIR__) . '/src/bootstrap.php';
 
 use App\Controllers\AccountController;
+use App\Controllers\Admin\AdminAuthController;
 use App\Controllers\Admin\CategoryAdminController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\OrderAdminController;
 use App\Controllers\Admin\ProductAdminController;
 use App\Controllers\Admin\SettingsAdminController;
+
 use App\Controllers\AuthController;
 use App\Controllers\CartController;
 use App\Controllers\CheckoutController;
@@ -69,7 +71,12 @@ $router->get('/robots.txt', [SeoController::class, 'robots']);
 $router->get('/health', [HealthController::class, 'index']);
 
 // Admin routes
+$router->get('/admin/login', [AdminAuthController::class, 'loginForm']);
+$router->post('/admin/login', [AdminAuthController::class, 'login'], ['csrf']);
+$router->post('/admin/logout', [AdminAuthController::class, 'logout'], ['csrf']);
+
 $router->get('/admin', [DashboardController::class, 'index'], ['admin']);
+
 
 $router->get('/admin/products', [ProductAdminController::class, 'index'], ['admin']);
 $router->get('/admin/products/new', [ProductAdminController::class, 'create'], ['admin']);

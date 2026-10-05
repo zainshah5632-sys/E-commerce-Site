@@ -81,8 +81,9 @@ $session = Session::instance();
         </div>
         <div style="display: flex; gap: var(--s-2);">
           <a href="<?= url('/') ?>" class="btn btn--ghost btn--sm" style="flex-grow: 1;">View Store</a>
-          <form action="<?= url('/logout') ?>" method="POST" style="display: inline;">
+          <form action="<?= url('/admin/logout') ?>" method="POST" style="display: inline;">
             <?= csrf_field() ?>
+
             <button type="submit" class="btn btn--ghost btn--icon" title="Sign Out">
               <?= icon('logout') ?>
             </button>

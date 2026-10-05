@@ -38,33 +38,76 @@ final class AccountController
         $session = Session::instance();
         $uid = (string)$session->userId();
         $fullName = $request->string('full_name');
-        $phone = $request->string('phone');
+        $username = strtolower(trim($request->string('username')));
+        $countryCode = trim($request->string('country_code', '+1'));
+        $rawPhone = $request->string('phone');
+        $phone = preg_replace('/[^0-9]/', '', $rawPhone);
+
+        $rules = [
+            'full_name'    => 'required|alpha_spaces|min:2|max:100',
+            'country_code' => 'max:6',
+        ];
+
+        if ($username !== '') {
+            $rules['username'] = 'username';
+        }
+
+        if ($rawPhone !== '') {
+            $rules['phone'] = 'phone_11';
+        }
 
         $validator = Validator::make([
-            'full_name' => $fullName,
-            'phone'     => $phone,
-        ], [
-            'full_name' => 'required|min:2|max:100',
-            'phone'     => 'max:30',
-        ]);
+            'full_name'    => $fullName,
+            'username'     => $username,
+            'country_code' => $countryCode,
+            'phone'        => $phone,
+        ], $rules);
 
         if ($validator->fails()) {
             return Response::html(View::render('pages/account', [
-                'title'   => 'My Account — GlassCart',
-                'profile' => ['id' => $uid, 'full_name' => $fullName, 'phone' => $phone],
+                'title'   => 'My Account | GlassCart',
+                'profile' => [
+                    'id'           => $uid,
+                    'full_name'    => $fullName,
+                    'username'     => $username,
+                    'country_code' => $countryCode,
+                    'phone'        => $phone,
+                ],
                 'email'   => $session->userEmail(),
                 'errors'  => $validator->errors(),
             ]), 422);
         }
 
+        // Check unique username if altered
+        if ($username !== '') {
+            $existing = ProfileRepository::findByUsername($username);
+            if ($existing && ($existing['id'] ?? '') !== $uid) {
+                return Response::html(View::render('pages/account', [
+                    'title'   => 'My Account | GlassCart',
+                    'profile' => [
+                        'id'           => $uid,
+                        'full_name'    => $fullName,
+                        'username'     => $username,
+                        'country_code' => $countryCode,
+                        'phone'        => $phone,
+                    ],
+                    'email'   => $session->userEmail(),
+                    'errors'  => ['username' => 'This username is already taken.'],
+                ]), 422);
+            }
+        }
+
         ProfileRepository::update($uid, [
-            'full_name' => $fullName,
-            'phone'     => $phone,
+            'full_name'    => $fullName,
+            'username'     => $username,
+            'country_code' => $countryCode,
+            'phone'        => $phone,
         ]);
 
         $session->set('name', $fullName);
         $session->flash('success', 'Profile updated successfully.');
         return Response::redirect('/account');
+
     }
 
     public function orders(Request $request): Response

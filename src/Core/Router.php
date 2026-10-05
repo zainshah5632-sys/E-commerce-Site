@@ -124,7 +124,7 @@ final class Router
 
                 case 'admin':
                     if (!$session->isAuthenticated()) {
-                        return Response::redirect('/login?next=' . urlencode($request->path()));
+                        return Response::redirect('/admin/login?next=' . urlencode($request->path()));
                     }
                     // Re-check role from DB per AR §10
                     $uid = $session->userId();
@@ -137,9 +137,10 @@ final class Router
                     }
 
                     if (!$isAdmin) {
-                        return Response::html(View::render('pages/403', ['title' => 'Access Denied']), 403);
+                        return Response::redirect('/admin/login?error=denied');
                     }
                     break;
+
             }
         }
 

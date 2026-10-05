@@ -110,6 +110,49 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el.form) el.form.submit();
     });
   });
+
+  // Password Visibility Toggle
+  document.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('[data-action="toggle-password"]');
+    if (!toggleBtn) return;
+
+    const wrap = toggleBtn.closest('.password-input-wrap');
+    if (!wrap) return;
+
+    const input = wrap.querySelector('input');
+    if (!input) return;
+
+    const isPassword = (input.type === 'password');
+    input.type = isPassword ? 'text' : 'password';
+
+    toggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    const eyeIcon = toggleBtn.querySelector('.icon-eye');
+    const eyeOffIcon = toggleBtn.querySelector('.icon-eye-off');
+    if (eyeIcon && eyeOffIcon) {
+      eyeIcon.style.display = isPassword ? 'none' : 'inline-block';
+      eyeOffIcon.style.display = isPassword ? 'inline-block' : 'none';
+    }
+  });
+
+  // Alphabet-only input filter (no numbers allowed)
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.hasAttribute('data-alpha-only')) {
+      const sanitized = e.target.value.replace(/[^a-zA-Z\s\-\'\.]/g, '');
+      if (e.target.value !== sanitized) {
+        e.target.value = sanitized;
+      }
+    }
+  });
+
+  // 11-digits-only phone filter
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.hasAttribute('data-phone-11')) {
+      const sanitized = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+      if (e.target.value !== sanitized) {
+        e.target.value = sanitized;
+      }
+    }
+  });
 });
 
 // Toast notification trigger

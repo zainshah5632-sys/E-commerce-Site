@@ -27,7 +27,7 @@ final class Auth
      *
      * @return array{ok: bool, user?: array, error?: string}
      */
-    public function register(string $email, string $password, string $fullName): array
+    public function register(string $email, string $password, string $fullName, array $extraMetadata = []): array
     {
         $url = "{$this->baseUrl}/auth/v1/admin/users";
         $headers = [
@@ -38,13 +38,15 @@ final class Auth
             $headers[] = 'Authorization: Bearer ' . $this->secretKey;
         }
 
+        $meta = array_merge([
+            'full_name' => trim($fullName),
+        ], $extraMetadata);
+
         $body = [
             'email'         => strtolower(trim($email)),
             'password'      => $password,
             'email_confirm' => true,
-            'user_metadata' => [
-                'full_name' => trim($fullName),
-            ],
+            'user_metadata' => $meta,
         ];
 
         $res = $this->client->execute('POST', $url, $headers, json_encode($body));
@@ -53,10 +55,9 @@ final class Auth
             // Ensure profile exists
             $uid = $user['id'] ?? null;
             if ($uid !== null) {
-                ProfileRepository::upsert($uid, [
-                    'full_name' => trim($fullName),
-                    'role'      => 'customer',
-                ]);
+                ProfileRepository::upsert($uid, array_merge($meta, [
+                    'role' => 'customer',
+                ]));
             }
             return ['ok' => true, 'user' => $user];
         }

@@ -4,11 +4,13 @@
 
 -- ---------- Tables ----------
 create table if not exists public.profiles (
-  id          uuid primary key references auth.users(id) on delete cascade,
-  full_name   text,
-  phone       text,
-  role        text not null default 'customer' check (role in ('customer','admin')),
-  created_at  timestamptz not null default now()
+  id           uuid primary key references auth.users(id) on delete cascade,
+  full_name    text,
+  username     text unique,
+  phone        text,
+  country_code text default '+1',
+  role         text not null default 'customer' check (role in ('customer','admin')),
+  created_at   timestamptz not null default now()
 );
 
 create table if not exists public.categories (
@@ -97,9 +99,19 @@ create trigger orders_set_updated before update on public.orders
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, full_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', ''))
-  on conflict (id) do nothing;
+  insert into public.profiles (id, full_name, username, phone, country_code)
+  values (
+    new.id, 
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    new.raw_user_meta_data->>'username',
+    new.raw_user_meta_data->>'phone',
+    coalesce(new.raw_user_meta_data->>'country_code', '+1')
+  )
+  on conflict (id) do update set
+    full_name = coalesce(excluded.full_name, profiles.full_name),
+    username = coalesce(excluded.username, profiles.username),
+    phone = coalesce(excluded.phone, profiles.phone),
+    country_code = coalesce(excluded.country_code, profiles.country_code);
   return new;
 end $$;
 
