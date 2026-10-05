@@ -114,7 +114,7 @@ if (!function_exists('settings')) {
 }
 
 if (!function_exists('icon')) {
-    function icon(string $name, string $class = ''): string
+    function icon(string $name, string|int $classOrSize = ''): string
     {
         $iconsPath = dirname(__DIR__, 2) . '/views/partials/icons.php';
         if (!is_file($iconsPath)) {
@@ -125,8 +125,15 @@ if (!function_exists('icon')) {
             $icons = require $iconsPath;
         }
         $svg = $icons[$name] ?? '';
-        if ($class !== '' && $svg !== '') {
-            $svg = str_replace('<svg ', '<svg class="' . e($class) . '" ', $svg);
+        if ($svg === '') {
+            return '';
+        }
+        if (is_int($classOrSize)) {
+            $size = (string)$classOrSize;
+            $svg = preg_replace('/width="[0-9]+"/i', 'width="' . $size . '"', $svg);
+            $svg = preg_replace('/height="[0-9]+"/i', 'height="' . $size . '"', $svg);
+        } elseif ($classOrSize !== '') {
+            $svg = str_replace('<svg ', '<svg class="' . e((string)$classOrSize) . '" ', $svg);
         }
         return $svg;
     }
