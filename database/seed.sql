@@ -17,7 +17,7 @@ insert into public.products (
 ) values
   -- Audio
   (
-    'p1000000-0000-0000-0000-000000000001',
+    'a1000000-0000-0000-0000-000000000001',
     'c1000000-0000-0000-0000-000000000001',
     'Aura One Wireless Headphones',
     'aura-one-wireless-headphones',
@@ -32,7 +32,7 @@ insert into public.products (
     true
   ),
   (
-    'p1000000-0000-0000-0000-000000000002',
+    'a1000000-0000-0000-0000-000000000002',
     'c1000000-0000-0000-0000-000000000001',
     'Clarity Desktop Studio Monitors',
     'clarity-desktop-studio-monitors',
@@ -47,7 +47,7 @@ insert into public.products (
     false
   ),
   (
-    'p1000000-0000-0000-0000-000000000003',
+    'a1000000-0000-0000-0000-000000000003',
     'c1000000-0000-0000-0000-000000000001',
     'Pulse True Wireless Earbuds',
     'pulse-true-wireless-earbuds',
@@ -64,7 +64,7 @@ insert into public.products (
 
   -- Wearables
   (
-    'p1000000-0000-0000-0000-000000000004',
+    'a1000000-0000-0000-0000-000000000004',
     'c1000000-0000-0000-0000-000000000002',
     'Vektor Chrono Smartwatch',
     'vektor-chrono-smartwatch',
@@ -79,7 +79,7 @@ insert into public.products (
     true
   ),
   (
-    'p1000000-0000-0000-0000-000000000005',
+    'a1000000-0000-0000-0000-000000000005',
     'c1000000-0000-0000-0000-000000000002',
     'Lumen Blue-Light Frames',
     'lumen-blue-light-frames',
@@ -94,7 +94,7 @@ insert into public.products (
     false
   ),
   (
-    'p1000000-0000-0000-0000-000000000006',
+    'a1000000-0000-0000-0000-000000000006',
     'c1000000-0000-0000-0000-000000000002',
     'Apex Performance Fitness Ring',
     'apex-performance-fitness-ring',
@@ -111,7 +111,7 @@ insert into public.products (
 
   -- Desk & Home
   (
-    'p1000000-0000-0000-0000-000000000007',
+    'a1000000-0000-0000-0000-000000000007',
     'c1000000-0000-0000-0000-000000000003',
     'Horizon Linear Desk Lamp',
     'horizon-linear-desk-lamp',
@@ -126,7 +126,7 @@ insert into public.products (
     true
   ),
   (
-    'p1000000-0000-0000-0000-000000000008',
+    'a1000000-0000-0000-0000-000000000008',
     'c1000000-0000-0000-0000-000000000003',
     'Prism Solid Acrylic Laptop Stand',
     'prism-solid-acrylic-laptop-stand',
@@ -141,7 +141,7 @@ insert into public.products (
     false
   ),
   (
-    'p1000000-0000-0000-0000-000000000009',
+    'a1000000-0000-0000-0000-000000000009',
     'c1000000-0000-0000-0000-000000000003',
     'Vertex Felt & Cork Desk Mat',
     'vertex-felt-cork-desk-mat',
@@ -158,7 +158,7 @@ insert into public.products (
 
   -- Accessories
   (
-    'p1000000-0000-0000-0000-000000000010',
+    'a1000000-0000-0000-0000-000000000010',
     'c1000000-0000-0000-0000-000000000004',
     'Flux Braided Thunderbolt Cable (2m)',
     'flux-braided-thunderbolt-cable-2m',
@@ -173,7 +173,7 @@ insert into public.products (
     false
   ),
   (
-    'p1000000-0000-0000-0000-000000000011',
+    'a1000000-0000-0000-0000-000000000011',
     'c1000000-0000-0000-0000-000000000004',
     'Kinetics Magnetic Cable Anchor',
     'kinetics-magnetic-cable-anchor',
@@ -188,7 +188,7 @@ insert into public.products (
     false
   ),
   (
-    'p1000000-0000-0000-0000-000000000012',
+    'a1000000-0000-0000-0000-000000000012',
     'c1000000-0000-0000-0000-000000000004',
     'Nexus Anodized Multi-Port Hub',
     'nexus-anodized-multi-port-hub',
