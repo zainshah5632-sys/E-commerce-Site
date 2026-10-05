@@ -9,7 +9,10 @@ $newArrivals = $newArrivals ?? [];
 <!-- Hero Section -->
 <section class="hero">
   <div class="container hero__content">
-    <span class="badge badge--brand">New Collection 2026</span>
+    <span class="hero__badge">
+      <span class="hero__badge-dot"></span>
+      <span>New Collection 2026</span>
+    </span>
     <h1 class="hero__title">
       Crafted with <span class="hero__gradient-text">Translucent Precision</span> &amp; Acoustic Purity
     </h1>
@@ -17,11 +20,11 @@ $newArrivals = $newArrivals ?? [];
       Architectural audio monitors, ergonomic acrylic risers, and biometric timepieces designed for modern creative spaces.
     </p>
     <div class="hero__cta-group">
-      <a href="<?= url('/shop') ?>" class="btn btn--primary btn--lg">
+      <a href="<?= url('/shop') ?>" class="hero__cta-primary btn btn--primary btn--lg">
         <span>Explore Collection</span>
         <?= icon('arrow-right') ?>
       </a>
-      <a href="<?= url('/category/audio') ?>" class="btn btn--ghost btn--lg">
+      <a href="<?= url('/category/audio') ?>" class="hero__cta-secondary btn btn--ghost btn--lg">
         <span>Studio Audio</span>
       </a>
     </div>

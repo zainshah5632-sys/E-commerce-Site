@@ -167,6 +167,48 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Hero 3D interactive tilt effect on desktop
+  const heroSection = document.querySelector('.hero');
+  const heroContent = document.querySelector('.hero__content');
+  if (heroSection && heroContent && window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let rafId = null;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    function renderTilt() {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+      heroContent.style.transform = `perspective(1000px) rotateX(${currentY.toFixed(2)}deg) rotateY(${currentX.toFixed(2)}deg)`;
+      if (Math.abs(targetX - currentX) > 0.01 || Math.abs(targetY - currentY) > 0.01) {
+        rafId = requestAnimationFrame(renderTilt);
+      } else {
+        rafId = null;
+      }
+    }
+
+    heroSection.addEventListener('mousemove', (e) => {
+      const rect = heroSection.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      // Gentle tilt: max ~7 deg
+      targetX = x * 7;
+      targetY = -y * 7;
+      if (!rafId) {
+        rafId = requestAnimationFrame(renderTilt);
+      }
+    });
+
+    heroSection.addEventListener('mouseleave', () => {
+      targetX = 0;
+      targetY = 0;
+      if (!rafId) {
+        rafId = requestAnimationFrame(renderTilt);
+      }
+    });
+  }
 });
 
 // Toast notification trigger
