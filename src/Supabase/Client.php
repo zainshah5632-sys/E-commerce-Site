@@ -149,6 +149,8 @@ final class Client
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => (Env::get('APP_ENV') !== 'local'),
+            CURLOPT_SSL_VERIFYHOST => (Env::get('APP_ENV') !== 'local' ? 2 : 0),
             CURLOPT_HEADERFUNCTION => static function ($curl, string $headerLine) use (&$responseHeaders): int {
                 $len = strlen($headerLine);
                 $parts = explode(':', $headerLine, 2);
