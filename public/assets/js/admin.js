@@ -46,17 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = this.getAttribute('data-tab-target');
 
         settingsTabs.forEach(t => {
-          t.classList.remove('bg-white', 'shadow-sm', 'border', 'border-slate-200', 'text-slate-900', 'font-semibold');
-          t.classList.add('text-slate-600', 'font-medium');
+          t.classList.remove('bg-white', 'text-slate-900', 'font-semibold', 'shadow-sm');
+          t.classList.add('text-slate-600', 'hover:text-slate-900', 'font-medium');
         });
 
-        this.classList.add('bg-white', 'shadow-sm', 'border', 'border-slate-200', 'text-slate-900', 'font-semibold');
+        this.classList.add('bg-white', 'text-slate-900', 'font-semibold', 'shadow-sm');
         this.classList.remove('text-slate-600', 'font-medium');
 
         settingsPanes.forEach(pane => {
           if (pane.getAttribute('data-tab-pane') === target) {
+            pane.classList.remove('hidden');
             pane.style.display = 'block';
           } else {
+            pane.classList.add('hidden');
             pane.style.display = 'none';
           }
         });
