@@ -231,11 +231,48 @@
   line-height: 1.5;
 }
 
-/* Product Grid */
+/* =====================================================================
+   Product Grid System (1 to 4 responsive columns with gap-6 / 24px)
+   ===================================================================== */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: var(--s-5);
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem; /* gap-6 */
+}
+
+@media (min-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* In Shop layout (where 260px sidebar is present) */
+.shop-layout .product-grid {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .shop-layout .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .shop-layout .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* Shop Layout with Sticky Sidebar */
@@ -280,18 +317,21 @@
   margin-bottom: var(--s-2);
 }
 
-/* Product Detail Page (PDP) */
+/* =====================================================================
+   Product Detail Page (PDP) Modern SaaS / E-commerce Styling
+   ===================================================================== */
 .pdp-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--s-7);
-  padding-block: var(--s-6);
+  gap: 2rem;
+  padding-block: 1.5rem 3.5rem;
   align-items: start;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 920px) {
   .pdp-grid {
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 2.5rem;
   }
 }
 
@@ -305,13 +345,19 @@
 
 .pdp-gallery__main {
   aspect-ratio: 1;
-  border-radius: var(--r-xl);
+  border-radius: 1rem; /* rounded-2xl */
   overflow: hidden;
-  background: var(--glass-subtle);
-  border: 1px solid var(--glass-border);
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .pdp-gallery__main {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .pdp-gallery__main img {
@@ -347,20 +393,330 @@
 
 .pdp-gallery__thumb.is-active,
 .pdp-gallery__thumb:hover {
-  border-color: var(--brand-500);
+  border-color: #6366f1;
 }
 
+/* PDP Info Card Container (Flush Top with Gallery, Rounded 2xl Card) */
 .pdp-details {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 1rem; /* rounded-2xl */
+  padding: clamp(1.5rem, 3.5vw, 2rem); /* p-6 md:p-8 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+}
+
+[data-theme="dark"] .pdp-details {
+  background: rgba(18, 24, 38, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Category Micro-Badge */
+.pdp-category-badge {
+  display: inline-block;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 700;   /* font-bold */
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* tracking-wider */
+  color: #4f46e5;     /* text-indigo-600 */
+  background-color: #eef2ff; /* bg-indigo-50 */
+  padding: 0.25rem 0.625rem; /* px-2.5 py-1 */
+  border-radius: 0.375rem;   /* rounded-md */
+  margin-bottom: 0.75rem;    /* mb-3 */
+  text-decoration: none;
+  align-self: flex-start;
+  transition: all 0.15s ease;
+}
+
+.pdp-category-badge:hover {
+  background-color: #e0e7ff;
+}
+
+[data-theme="dark"] .pdp-category-badge {
+  background-color: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+/* Product Title */
+.pdp-title {
+  font-size: clamp(1.875rem, 3.5vw, 2.25rem); /* text-3xl md:text-4xl */
+  font-weight: 800; /* font-extrabold */
+  letter-spacing: -0.025em; /* tracking-tight */
+  color: #0f172a;   /* text-slate-900 */
+  line-height: 1.2;
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+[data-theme="dark"] .pdp-title {
+  color: #f8fafc;
+}
+
+/* Pricing Row */
+.pdp-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-block: 0.5rem 0.75rem;
+  flex-wrap: wrap;
 }
 
 .pdp-price {
-  font-size: 2.2rem;
-  font-weight: 800;
-  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem); /* text-2xl md:text-3xl */
+  font-weight: 700; /* font-bold */
+  color: #0f172a;   /* text-slate-900 */
   letter-spacing: -0.02em;
+}
+
+[data-theme="dark"] .pdp-price {
+  color: #ffffff;
+}
+
+.pdp-compare-price {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.pdp-discount-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4f46e5;
+  background-color: #eef2ff;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Stock Status Pill with Inline Pulsing Dot */
+.pdp-stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 600;   /* font-semibold */
+  padding: 0.25rem 0.65rem; /* px-2.5 py-1 */
+  border-radius: 9999px;   /* rounded-full */
+  margin-bottom: 0.5rem;
+  align-self: flex-start;
+}
+
+.pdp-stock-pill--in-stock {
+  color: #047857; /* text-emerald-700 */
+  background-color: #ecfdf5; /* bg-emerald-50 */
+  border: 1px solid rgba(167, 243, 208, 0.6); /* border-emerald-200/60 */
+}
+
+.pdp-stock-pill--low-stock {
+  color: #b45309; /* text-amber-700 */
+  background-color: #fffbeb; /* bg-amber-50 */
+  border: 1px solid rgba(253, 230, 138, 0.6);
+}
+
+.pdp-stock-pill--out-of-stock {
+  color: #be123c; /* text-rose-700 */
+  background-color: #fff1f2; /* bg-rose-50 */
+  border: 1px solid rgba(254, 205, 211, 0.6);
+}
+
+.pdp-pulse-dot {
+  position: relative;
+  display: flex;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.pdp-pulse-ping {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  opacity: 0.75;
+  animation: pdp-pulse-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pdp-pulse-ping--green { background-color: #34d399; }
+.pdp-pulse-ping--amber { background-color: #fbbf24; }
+
+.pdp-pulse-solid {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.pdp-pulse-solid--green { background-color: #10b981; }
+.pdp-pulse-solid--amber { background-color: #f59e0b; }
+.pdp-pulse-solid--rose { background-color: #f43f5e; }
+
+@keyframes pdp-pulse-ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Short Description */
+.pdp-short-desc {
+  font-size: 0.95rem; /* text-sm md:text-base */
+  line-height: 1.625; /* leading-relaxed */
+  color: #475569;     /* text-slate-600 */
+  margin-block: 1rem; /* my-4 */
+}
+
+[data-theme="dark"] .pdp-short-desc {
+  color: #94a3b8;
+}
+
+/* Action Row Alignment (Quantity Stepper + Add to Cart Button Side-by-Side) */
+.pdp-buy-form {
+  margin-top: 0.5rem;
+}
+
+.pdp-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* gap-3 */
+  width: 100%;
+}
+
+/* Quantity Stepper: joined sleek pill/box control */
+.pdp-qty-stepper {
+  display: flex;
+  align-items: center;
+  height: 3rem; /* h-12 (48px) */
+  border: 1px solid #e2e8f0; /* border-slate-200 */
+  border-radius: 0.75rem;     /* rounded-xl */
+  background-color: #f8fafc;  /* bg-slate-50 */
+  padding: 0 0.5rem;          /* px-2 */
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .pdp-qty-stepper {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.pdp-qty-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdp-qty-btn:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .pdp-qty-btn {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .pdp-qty-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.pdp-qty-input {
+  width: 2.75rem;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.pdp-qty-input::-webkit-outer-spin-button,
+.pdp-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+[data-theme="dark"] .pdp-qty-input {
+  color: #ffffff;
+}
+
+/* Add to Shopping Cart CTA Button */
+.pdp-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3rem; /* h-12 */
+  flex: 1;      /* flex-1 */
+  border-radius: 0.75rem; /* rounded-xl */
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: #4f46e5; /* indigo-600 */
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25), 0 2px 4px -2px rgba(79, 70, 229, 0.2);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pdp-cta-btn:hover {
+  opacity: 0.95;
+  background-color: #4338ca;
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+}
+
+.pdp-cta-btn:active {
+  transform: scale(0.99);
+}
+
+.pdp-cta-btn:disabled {
+  background-color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Product Details Section Divider */
+.pdp-details-section {
+  border-top: 1px solid #f1f5f9; /* border-t border-slate-100 */
+  padding-top: 1.5rem; /* pt-6 */
+  margin-top: 1.5rem;  /* mt-6 */
+}
+
+[data-theme="dark"] .pdp-details-section {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.pdp-details-heading {
+  font-size: 1rem; /* text-base */
+  font-weight: 700; /* font-bold */
+  color: #0f172a;  /* text-slate-900 */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+[data-theme="dark"] .pdp-details-heading {
+  color: #f8fafc;
+}
+
+.pdp-details-body {
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.625;  /* leading-relaxed */
+  color: #475569;      /* text-slate-600 */
+  margin: 0;
+}
+
+[data-theme="dark"] .pdp-details-body {
+  color: #94a3b8;
 }
 
 /* Cart & Checkout Layout */

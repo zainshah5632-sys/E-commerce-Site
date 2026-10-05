@@ -15,43 +15,65 @@ if ($compareCents && $compareCents > $priceCents) {
     $discountPercent = (int)round((($compareCents - $priceCents) / $compareCents) * 100);
 }
 ?>
-<article class="product-card glass" data-product-id="<?= ea($product['id']) ?>">
-  <div class="product-card__image-wrap">
+<article class="product-card group" data-product-id="<?= ea($product['id']) ?>">
+  <!-- Square Image Box with Zoom-on-Hover -->
+  <div class="product-card__image-box">
+    <!-- Tag Badge: Top-Left Rounded Pill -->
     <?php if ($isOutOfStock): ?>
-      <span class="badge badge--danger product-card__badge">Out of Stock</span>
+      <span class="product-card__pill-badge product-card__pill-badge--danger">Sold Out</span>
     <?php elseif ($discountPercent > 0): ?>
-      <span class="badge badge--brand product-card__badge">-<?= $discountPercent ?>%</span>
+      <span class="product-card__pill-badge product-card__pill-badge--brand">-<?= $discountPercent ?>%</span>
     <?php elseif ($isLowStock): ?>
-      <span class="badge badge--warning product-card__badge">Only <?= $stock ?> left</span>
+      <span class="product-card__pill-badge product-card__pill-badge--warning">Only <?= $stock ?> Left</span>
     <?php endif; ?>
 
-    <a href="<?= url('/product/' . rawurlencode($product['slug'])) ?>" aria-label="<?= ea($product['name']) ?>" style="display:block; width:100%; height:100%;">
-      <img src="<?= e($imgUrl) ?>" alt="<?= ea($product['name']) ?>" width="300" height="300" loading="lazy" class="product-card__image">
+    <a href="<?= url('/product/' . rawurlencode($product['slug'])) ?>" aria-label="<?= ea($product['name']) ?>" class="product-card__img-link">
+      <img src="<?= e($imgUrl) ?>" alt="<?= ea($product['name']) ?>" width="400" height="400" loading="lazy" class="product-card__img">
     </a>
   </div>
 
-  <div class="product-card__content">
-    <div class="product-card__category"><?= e($categoryName) ?></div>
-    <h3 class="product-card__title">
-      <a href="<?= url('/product/' . rawurlencode($product['slug'])) ?>"><?= e($product['name']) ?></a>
+  <!-- Content & Info Hierarchy -->
+  <div class="product-card__body">
+    <!-- Category Eyebrow -->
+    <div class="product-card__eyebrow"><?= e($categoryName) ?></div>
+
+    <!-- Product Title -->
+    <h3 class="product-card__heading">
+      <a href="<?= url('/product/' . rawurlencode($product['slug'])) ?>">
+        <?= e($product['name']) ?>
+      </a>
     </h3>
 
-    <div class="product-card__price-row">
-      <div class="product-card__price"><?= money($priceCents) ?></div>
-      <?php if ($compareCents && $compareCents > $priceCents): ?>
-        <div class="product-card__compare"><?= money($compareCents) ?></div>
-      <?php endif; ?>
-    </div>
+    <!-- Short Description -->
+    <?php if (!empty($product['short_description'])): ?>
+      <p class="product-card__snippet">
+        <?= e($product['short_description']) ?>
+      </p>
+    <?php endif; ?>
 
-    <!-- Quick Add to Cart Form -->
-    <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart" style="margin-top: var(--s-3);">
-      <?= csrf_field() ?>
-      <input type="hidden" name="product_id" value="<?= ea($product['id']) ?>">
-      <input type="hidden" name="quantity" value="1">
-      <button type="submit" class="btn btn--ghost btn--block btn--sm" <?= $isOutOfStock ? 'disabled' : '' ?>>
-        <?= icon('cart') ?>
-        <span><?= $isOutOfStock ? 'Sold Out' : 'Add to Cart' ?></span>
-      </button>
-    </form>
+    <!-- Bottom Action Row: Price & Quick Add to Cart Button -->
+    <div class="product-card__footer">
+      <div class="product-card__price-wrap">
+        <span class="product-card__current-price"><?= money($priceCents) ?></span>
+        <?php if ($compareCents && $compareCents > $priceCents): ?>
+          <span class="product-card__strikethrough-price"><?= money($compareCents) ?></span>
+        <?php endif; ?>
+      </div>
+
+      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart">
+        <?= csrf_field() ?>
+        <input type="hidden" name="product_id" value="<?= ea($product['id']) ?>">
+        <input type="hidden" name="quantity" value="1">
+        <button
+          type="submit"
+          class="product-card__cart-btn"
+          <?= $isOutOfStock ? 'disabled' : '' ?>
+          title="<?= $isOutOfStock ? 'Sold Out' : 'Add to Cart' ?>"
+        >
+          <?= icon('cart') ?>
+          <span><?= $isOutOfStock ? 'Sold Out' : 'Add to Cart' ?></span>
+        </button>
+      </form>
+    </div>
   </div>
 </article>

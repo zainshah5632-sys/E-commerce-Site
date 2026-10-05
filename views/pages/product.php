@@ -83,52 +83,69 @@ $jsonLd = [
       <?php endif; ?>
     </div>
 
-    <!-- Product Details & Buy Box -->
-    <div class="pdp-details glass--strong" style="padding: var(--s-6);">
+    <!-- Product Details & Buy Box (Flush with Gallery, Rounded 2xl Card) -->
+    <div class="pdp-details">
+      <!-- Category Micro-Badge -->
       <?php if ($category): ?>
-        <a href="<?= url('/category/' . rawurlencode($category['slug'])) ?>" class="product-card__category">
+        <a href="<?= url('/category/' . rawurlencode($category['slug'])) ?>" class="pdp-category-badge">
           <?= e($category['name']) ?>
         </a>
       <?php endif; ?>
 
-      <h1 style="font-size: 2.2rem; line-height: 1.15;"><?= e($product['name']) ?></h1>
+      <!-- Product Title -->
+      <h1 class="pdp-title"><?= e($product['name']) ?></h1>
 
-      <!-- Pricing Stack -->
-      <div style="display: flex; align-items: baseline; gap: var(--s-3); margin-block: var(--s-2);">
+      <!-- Pricing Row -->
+      <div class="pdp-price-row">
         <span class="pdp-price"><?= money($priceCents) ?></span>
         <?php if ($compareCents && $compareCents > $priceCents): ?>
-          <span style="font-size: 1.15rem; color: var(--text-3); text-decoration: line-through;"><?= money($compareCents) ?></span>
-          <span class="badge badge--brand">-<?= $discountPercent ?>% OFF</span>
+          <span class="pdp-compare-price"><?= money($compareCents) ?></span>
+          <span class="pdp-discount-badge">-<?= $discountPercent ?>% OFF</span>
         <?php endif; ?>
       </div>
 
-      <!-- Stock Status -->
+      <!-- Stock Status Pill with Pulsing Indicator Dot -->
       <div>
         <?php if ($isOutOfStock): ?>
-          <span class="badge badge--danger" style="font-size: 0.85rem; padding: 6px 14px;">Out of Stock</span>
+          <span class="pdp-stock-pill pdp-stock-pill--out-of-stock">
+            <span class="pdp-pulse-solid pdp-pulse-solid--rose"></span>
+            <span>Out of Stock</span>
+          </span>
         <?php elseif ($isLowStock): ?>
-          <span class="badge badge--warning" style="font-size: 0.85rem; padding: 6px 14px;">Low Stock: Only <?= $stock ?> remaining</span>
+          <span class="pdp-stock-pill pdp-stock-pill--low-stock">
+            <span class="pdp-pulse-dot">
+              <span class="pdp-pulse-ping pdp-pulse-ping--amber"></span>
+              <span class="pdp-pulse-solid pdp-pulse-solid--amber"></span>
+            </span>
+            <span>Only <?= $stock ?> Left &amp; Ready to Ship</span>
+          </span>
         <?php else: ?>
-          <span class="badge badge--success" style="font-size: 0.85rem; padding: 6px 14px;">In Stock &amp; Ready to Ship</span>
+          <span class="pdp-stock-pill pdp-stock-pill--in-stock">
+            <span class="pdp-pulse-dot">
+              <span class="pdp-pulse-ping pdp-pulse-ping--green"></span>
+              <span class="pdp-pulse-solid pdp-pulse-solid--green"></span>
+            </span>
+            <span>In Stock &amp; Ready to Ship</span>
+          </span>
         <?php endif; ?>
       </div>
 
       <!-- Short Description -->
       <?php if (!empty($product['short_description'])): ?>
-        <p style="font-size: 1.05rem; line-height: 1.6; margin-block: var(--s-2);">
+        <p class="pdp-short-desc">
           <?= e($product['short_description']) ?>
         </p>
       <?php endif; ?>
 
-      <!-- Purchase Form -->
-      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart" style="margin-top: var(--s-4); border-top: 1px solid var(--line); padding-top: var(--s-4);">
+      <!-- Action Row Alignment (Quantity Stepper + Add to Cart Button Side-by-Side) -->
+      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart pdp-buy-form">
         <?= csrf_field() ?>
         <input type="hidden" name="product_id" value="<?= ea($product['id']) ?>">
 
-        <div style="display: flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-4);">
-          <!-- Quantity Control -->
-          <div class="qty-control" style="display: flex; align-items: center; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--r-md); overflow: hidden;">
-            <button type="button" class="btn btn--ghost btn--icon" data-qty-step="-1" aria-label="Decrease quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
+        <div class="pdp-action-row">
+          <!-- Quantity Stepper: joined sleek pill/box control -->
+          <div class="pdp-qty-stepper qty-control">
+            <button type="button" class="pdp-qty-btn" data-qty-step="-1" aria-label="Decrease quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
               <?= icon('minus') ?>
             </button>
             <input
@@ -138,18 +155,18 @@ $jsonLd = [
               min="1"
               max="<?= min(10, max(1, $stock)) ?>"
               aria-label="Quantity"
+              class="pdp-qty-input"
               <?= $isOutOfStock ? 'disabled' : '' ?>
-              style="width: 48px; text-align: center; border: none; background: transparent; font-weight: 700;"
             >
-            <button type="button" class="btn btn--ghost btn--icon" data-qty-step="1" aria-label="Increase quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
+            <button type="button" class="pdp-qty-btn" data-qty-step="1" aria-label="Increase quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
               <?= icon('plus') ?>
             </button>
           </div>
 
+          <!-- Add to Cart CTA Button -->
           <button
             type="submit"
-            class="btn btn--primary btn--lg"
-            style="flex-grow: 1;"
+            class="pdp-cta-btn"
             <?= $isOutOfStock ? 'disabled' : '' ?>
           >
             <?= icon('cart') ?>
@@ -158,11 +175,11 @@ $jsonLd = [
         </div>
       </form>
 
-      <!-- Full Description -->
+      <!-- Product Details Section with Subtle Divider -->
       <?php if (!empty($product['description'])): ?>
-        <div style="border-top: 1px solid var(--line); padding-top: var(--s-4); margin-top: var(--s-3);">
-          <h3 style="font-size: 1.1rem; margin-bottom: var(--s-2);">Product Details</h3>
-          <p style="line-height: 1.7;"><?= nl2br(e($product['description'])) ?></p>
+        <div class="pdp-details-section">
+          <h3 class="pdp-details-heading">Product Details</h3>
+          <p class="pdp-details-body"><?= nl2br(e($product['description'])) ?></p>
         </div>
       <?php endif; ?>
     </div>
