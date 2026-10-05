@@ -2,23 +2,42 @@
 declare(strict_types=1);
 
 $page = $page ?? ['title' => 'Information', 'summary' => '', 'content' => []];
-?>
-<div class="container" style="padding-top: var(--s-7); padding-bottom: var(--s-9); max-width: 800px;">
-  <div class="glass--strong" style="padding: var(--s-7);">
-    <h1 style="font-size: 2.25rem; margin-bottom: var(--s-2);"><?= e($page['title']) ?></h1>
-    <?php if (!empty($page['summary'])): ?>
-      <p style="font-size: 1.15rem; color: var(--text-2); margin-bottom: var(--s-6); border-bottom: 1px solid var(--line); padding-bottom: var(--s-4);">
-        <?= e($page['summary']) ?>
-      </p>
-    <?php endif; ?>
 
-    <div style="display: flex; flex-direction: column; gap: var(--s-5);">
+$iconMap = [
+    'Data Collection'     => 'database',
+    'Security Storage'    => 'lock',
+    'Your Rights'         => 'shield',
+    'Domestic Rates'      => 'truck',
+    'Fulfillment Times'   => 'package',
+    'Tracking & Transit'  => 'globe',
+    'Return Window'       => 'arrow-left',
+    'How to Initiate'     => 'mail',
+    'Refund Processing'   => 'check',
+    'Account Terms'       => 'user',
+    'Product Inventory'   => 'package',
+    'Governing Law'       => 'shield',
+];
+?>
+<div class="container content-card-shell">
+  <article class="content-card">
+    <header class="content-card__header">
+      <h1 class="content-card__title"><?= e($page['title']) ?></h1>
+      <?php if (!empty($page['summary'])): ?>
+        <p class="content-card__summary"><?= e($page['summary']) ?></p>
+      <?php endif; ?>
+    </header>
+
+    <div class="content-card__grid">
       <?php foreach ($page['content'] as $sectionTitle => $sectionBody): ?>
-        <div>
-          <h2 style="font-size: 1.35rem; margin-bottom: var(--s-2);"><?= e($sectionTitle) ?></h2>
-          <p style="line-height: 1.7;"><?= e($sectionBody) ?></p>
-        </div>
+        <?php $iconName = $iconMap[$sectionTitle] ?? 'file-text'; ?>
+        <section class="content-subcard">
+          <div class="content-subcard__icon" aria-hidden="true">
+            <?= icon($iconName) ?>
+          </div>
+          <h2 class="content-subcard__title"><?= e($sectionTitle) ?></h2>
+          <p class="content-subcard__body"><?= e($sectionBody) ?></p>
+        </section>
       <?php endforeach; ?>
     </div>
-  </div>
+  </article>
 </div>

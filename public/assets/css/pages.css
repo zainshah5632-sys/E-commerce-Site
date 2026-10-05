@@ -518,3 +518,133 @@
   flex-wrap: wrap;
   gap: var(--s-3);
 }
+
+/* Content & Policy Card Refinement (Modern Visual Hierarchy & Vertical Rhythm) */
+.content-card-shell {
+  padding-top: var(--s-7);
+  padding-bottom: var(--s-9);
+  max-width: 880px;
+  margin-inline: auto;
+}
+
+.content-card {
+  padding: 2.5rem; /* Generous inner padding (p-8 / 40px) */
+  border-radius: var(--r-xl);
+  background: var(--surface-card);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-md);
+  backdrop-filter: blur(20px);
+}
+
+.content-card__header {
+  margin-bottom: 2rem; /* 2rem gap between distinct blocks */
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.content-card__title {
+  font-size: 1.875rem; /* 30px main h1 */
+  font-weight: 700;    /* font-bold / semi-bold */
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--text-1);
+  margin-bottom: 0.5rem; /* 8px breathing room */
+}
+
+.content-card__summary {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #475569; /* Soft accessible slate-600 */
+  margin: 0;
+}
+
+[data-theme="dark"] .content-card__summary {
+  color: #94a3b8; /* Slate-400 in dark mode */
+}
+
+/* Option A: List / Dividers Layout */
+.content-card__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-card__list-item {
+  padding-block: 1.75rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.7); /* Subtle low-opacity divider */
+}
+
+[data-theme="dark"] .content-card__list-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.content-card__list-item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.content-card__list-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Option B: Responsive 2-Column Sub-Card Grid with Lightweight Icon Accents */
+.content-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.content-subcard {
+  padding: 1.5rem;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-subcard:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-glow);
+  box-shadow: var(--sh-sm);
+}
+
+.content-subcard__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--grad-brand-soft);
+  color: var(--brand-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .content-subcard__icon {
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.content-subcard__title,
+.content-card__section-title {
+  font-size: 1.25rem; /* 20px subheading h3 */
+  font-weight: 600;   /* font-semibold */
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--text-1);
+  margin-bottom: 0.5rem; /* 8px breathing room */
+}
+
+.content-subcard__body,
+.content-card__section-body {
+  font-size: 0.95rem;
+  line-height: 1.65; /* Optimal 1.6 - 1.7 line height */
+  color: #475569;    /* Soft accessible slate */
+  margin: 0;
+}
+
+[data-theme="dark"] .content-subcard__body,
+[data-theme="dark"] .content-card__section-body {
+  color: #94a3b8;
+}
