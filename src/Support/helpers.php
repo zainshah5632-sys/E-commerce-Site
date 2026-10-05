@@ -130,8 +130,8 @@ if (!function_exists('icon')) {
         }
         if (is_int($classOrSize)) {
             $size = (string)$classOrSize;
-            $svg = preg_replace('/width="[0-9]+"/i', 'width="' . $size . '"', $svg);
-            $svg = preg_replace('/height="[0-9]+"/i', 'height="' . $size . '"', $svg);
+            $svg = preg_replace('/(?<!-)width="[0-9]+"/i', 'width="' . $size . '"', $svg);
+            $svg = preg_replace('/(?<!-)height="[0-9]+"/i', 'height="' . $size . '"', $svg);
         } elseif ($classOrSize !== '') {
             $svg = str_replace('<svg ', '<svg class="' . e((string)$classOrSize) . '" ', $svg);
         }

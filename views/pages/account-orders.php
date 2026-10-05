@@ -7,25 +7,34 @@ $pages = $pages ?? 1;
 $total = $total ?? 0;
 ?>
 
-<div class="container" style="padding-top: var(--s-6); padding-bottom: var(--s-9);">
-  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--s-5);">
+<div class="container orders-shell max-w-4xl mx-auto">
+  <!-- Header Row: Micro-nav, Title & Profile Settings aligned on same horizontal line -->
+  <div class="orders-header-row flex items-center justify-between mb-8">
     <div>
-      <div class="breadcrumbs" style="display: flex; gap: var(--s-2); font-size: 0.85rem; color: var(--text-3); margin-bottom: var(--s-2);">
-        <a href="<?= url('/account') ?>">Account</a>
-        <span>/</span>
-        <span style="color: var(--text-1);">Orders</span>
-      </div>
-      <h1>Order History</h1>
+      <nav class="orders-breadcrumb text-xs font-medium text-slate-500 tracking-wide mb-2" aria-label="Breadcrumb">
+        <a href="<?= url('/account') ?>" class="orders-breadcrumb__link">Account</a>
+        <span class="orders-breadcrumb__sep">/</span>
+        <span class="orders-breadcrumb__current">Orders</span>
+      </nav>
+      <h1 class="orders-title text-3xl font-extrabold tracking-tight text-slate-900">Order History</h1>
     </div>
-    <a href="<?= url('/account') ?>" class="btn btn--ghost btn--sm">Profile Settings</a>
+    <a href="<?= url('/account') ?>" class="orders-settings-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white/80 border border-slate-200 hover:bg-slate-50 transition shadow-sm">
+      <?= icon('user', 14) ?>
+      <span>Profile Settings</span>
+    </a>
   </div>
 
   <?php if (empty($orders)): ?>
-    <div class="glass" style="text-align: center; padding: var(--s-8) var(--s-4);">
-      <div style="color: var(--text-3); margin-bottom: var(--s-3);"><?= icon('package') ?></div>
-      <h2>No orders yet</h2>
-      <p style="margin-top: var(--s-2); margin-bottom: var(--s-5);">When you place orders, they will appear here with real-time tracking.</p>
-      <a href="<?= url('/shop') ?>" class="btn btn--primary btn--sm">Start Shopping</a>
+    <!-- Centered Empty State Card Layout -->
+    <div class="orders-empty-card max-w-4xl mx-auto bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center py-16 px-6 mt-6">
+      <div class="orders-empty__badge w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
+        <?= icon('package', 24) ?>
+      </div>
+      <h2 class="orders-empty__title text-xl font-bold text-slate-900 mb-2">No orders yet</h2>
+      <p class="orders-empty__desc text-sm text-slate-500 max-w-md leading-relaxed mb-6">When you place orders, they will appear here with real-time tracking.</p>
+      <a href="<?= url('/shop') ?>" class="orders-empty__cta inline-flex items-center justify-center px-6 py-2.5 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:opacity-95 shadow-md shadow-indigo-500/20 transition active:scale-95">
+        <span>Start Shopping</span>
+      </a>
     </div>
   <?php else: ?>
     <div class="glass--strong data-table-wrap">
