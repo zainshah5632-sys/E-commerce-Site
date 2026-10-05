@@ -31,58 +31,71 @@ $newArrivals = $newArrivals ?? [];
   </div>
 </section>
 
-<!-- Value Propositions -->
-<section style="padding-block: var(--s-4);">
-  <div class="container">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-4);">
-      <div class="glass" style="padding: var(--s-4); display: flex; align-items: center; gap: var(--s-3);">
-        <div style="color: var(--brand-500);"><?= icon('truck') ?></div>
-        <div>
-          <div style="font-weight: 700; font-size: 0.95rem;">Complimentary Shipping</div>
-          <div style="font-size: 0.82rem; color: var(--text-3);">Free on all orders over $75</div>
+<!-- Trust / Value Propositions Bar -->
+<section class="trust-bar-section">
+  <div class="container max-w-6xl mx-auto">
+    <div class="trust-bar bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200/80 p-6 shadow-sm my-12">
+      <div class="trust-grid grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Feature 1: Complimentary Shipping -->
+        <div class="trust-item flex items-center gap-4">
+          <div class="trust-item__badge w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0">
+            <?= icon('truck', 22) ?>
+          </div>
+          <div>
+            <div class="trust-item__title text-sm sm:text-base font-bold text-slate-900">Complimentary Shipping</div>
+            <div class="trust-item__desc text-xs text-slate-500 mt-0.5 leading-snug">Free on all orders over $75</div>
+          </div>
         </div>
-      </div>
 
-      <div class="glass" style="padding: var(--s-4); display: flex; align-items: center; gap: var(--s-3);">
-        <div style="color: var(--brand-500);"><?= icon('shield') ?></div>
-        <div>
-          <div style="font-weight: 700; font-size: 0.95rem;">30-Day Studio Trial</div>
-          <div style="font-size: 0.82rem; color: var(--text-3);">Hassle-free return policy</div>
+        <!-- Feature 2: 30-Day Studio Trial -->
+        <div class="trust-item flex items-center gap-4">
+          <div class="trust-item__badge w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0">
+            <?= icon('shield', 22) ?>
+          </div>
+          <div>
+            <div class="trust-item__title text-sm sm:text-base font-bold text-slate-900">30-Day Studio Trial</div>
+            <div class="trust-item__desc text-xs text-slate-500 mt-0.5 leading-snug">Hassle-free return policy</div>
+          </div>
         </div>
-      </div>
 
-      <div class="glass" style="padding: var(--s-4); display: flex; align-items: center; gap: var(--s-3);">
-        <div style="color: var(--brand-500);"><?= icon('check') ?></div>
-        <div>
-          <div style="font-weight: 700; font-size: 0.95rem;">Precision Guaranteed</div>
-          <div style="font-size: 0.82rem; color: var(--text-3);">2-year manufacturer warranty</div>
+        <!-- Feature 3: Precision Guaranteed -->
+        <div class="trust-item flex items-center gap-4">
+          <div class="trust-item__badge w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0">
+            <?= icon('check', 22) ?>
+          </div>
+          <div>
+            <div class="trust-item__title text-sm sm:text-base font-bold text-slate-900">Precision Guaranteed</div>
+            <div class="trust-item__desc text-xs text-slate-500 mt-0.5 leading-snug">2-year manufacturer warranty</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Category Tiles -->
+<!-- Category Tiles / Curated Disciplines -->
 <?php if (!empty($categories)): ?>
-  <section class="section">
-    <div class="container">
-      <div class="section__header">
-        <div>
-          <span class="badge badge--neutral">Browse by Focus</span>
-          <h2 class="section__title" style="margin-top: var(--s-2);">Curated Disciplines</h2>
-        </div>
+  <section class="disciplines-section mt-16 mb-8">
+    <div class="container max-w-6xl mx-auto">
+      <div class="disciplines-header mb-8">
+        <span class="disciplines-badge text-[11px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full inline-block mb-3">
+          Browse by Focus
+        </span>
+        <h2 class="disciplines-title text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+          Curated Disciplines
+        </h2>
       </div>
 
-      <div class="category-grid">
+      <div class="category-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <?php foreach ($categories as $cat): ?>
-          <a href="<?= url('/category/' . rawurlencode($cat['slug'])) ?>" class="category-card glass">
+          <a href="<?= url('/category/' . rawurlencode($cat['slug'])) ?>" class="category-card bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md hover:border-indigo-200 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
             <div>
-              <div class="category-card__name"><?= e($cat['name']) ?></div>
-              <div class="category-card__desc"><?= e($cat['description'] ?? '') ?></div>
+              <h3 class="category-card__name text-lg font-bold text-slate-900 mb-2"><?= e($cat['name']) ?></h3>
+              <p class="category-card__desc text-xs sm:text-sm text-slate-600 leading-relaxed flex-1 mb-4"><?= e($cat['description'] ?? '') ?></p>
             </div>
-            <div style="display: flex; align-items: center; gap: var(--s-1); color: var(--brand-500); font-weight: 600; font-size: 0.88rem; margin-top: var(--s-4);">
+            <div class="category-card__link inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 group-hover:text-indigo-700 transition">
               <span>Explore</span>
-              <?= icon('arrow-right') ?>
+              <?= icon('arrow-right', 14) ?>
             </div>
           </a>
         <?php endforeach; ?>
