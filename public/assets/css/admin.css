@@ -372,3 +372,84 @@ summary::-webkit-details-marker {
   border-radius: var(--r-sm);
   font-size: 0.88rem;
 }
+
+/* =====================================================================
+   Modern Executive SaaS Dashboard & Settings Enhancements
+   ===================================================================== */
+
+/* KPI Cards */
+.kpi-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
+}
+
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .bg-white {
+  background-color: rgba(18, 24, 38, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .bg-slate-50\/70,
+[data-theme="dark"] .bg-slate-50 {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-200\/80 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .hover\:bg-slate-50\/60:hover,
+[data-theme="dark"] .hover\:bg-slate-50\/70:hover,
+[data-theme="dark"] .hover\:bg-slate-50:hover {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+[data-theme="dark"] .bg-slate-100 {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .bg-slate-100\/80 {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .bg-white\/90 {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+[data-theme="dark"] input.bg-white,
+[data-theme="dark"] textarea.bg-white {
+  background-color: rgba(15, 23, 42, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] input.bg-white:focus,
+[data-theme="dark"] textarea.bg-white:focus {
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+}

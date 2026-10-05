@@ -36,4 +36,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Admin Settings Tab Switcher
+  const settingsTabs = document.querySelectorAll('.settings-tab');
+  const settingsPanes = document.querySelectorAll('.settings-pane');
+  if (settingsTabs.length > 0 && settingsPanes.length > 0) {
+    settingsTabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        const target = this.getAttribute('data-tab-target');
+
+        settingsTabs.forEach(t => {
+          t.classList.remove('bg-white', 'shadow-sm', 'border', 'border-slate-200', 'text-slate-900', 'font-semibold');
+          t.classList.add('text-slate-600', 'font-medium');
+        });
+
+        this.classList.add('bg-white', 'shadow-sm', 'border', 'border-slate-200', 'text-slate-900', 'font-semibold');
+        this.classList.remove('text-slate-600', 'font-medium');
+
+        settingsPanes.forEach(pane => {
+          if (pane.getAttribute('data-tab-pane') === target) {
+            pane.style.display = 'block';
+          } else {
+            pane.style.display = 'none';
+          }
+        });
+      });
+    });
+  }
 });
+
