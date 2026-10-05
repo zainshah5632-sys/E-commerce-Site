@@ -114,7 +114,7 @@ final class AuthController
         // - full_name: alphabets only (no numbers)
         // - username: alphanumeric/underscore 3-30
         // - phone: exactly 11 digits
-        // - password: letter, number, and sign
+        // - password: letter, number, and sign (min 6 chars per Supabase Auth)
         $validator = Validator::make([
             'full_name'             => $fullName,
             'username'              => $username,
@@ -129,10 +129,19 @@ final class AuthController
             'email'        => 'required|email|max:150',
             'country_code' => 'required|max:6',
             'phone'        => 'required|phone_11',
-            'password'     => 'required|min:8|max:100|complex_password|confirmed',
+            'password'     => 'required|min:6|max:100|complex_password|confirmed',
         ]);
 
+        $oldSafeInput = [
+            'full_name'    => $fullName,
+            'username'     => $username,
+            'email'        => $email,
+            'country_code' => $countryCode,
+            'phone'        => $request->string('phone'),
+        ];
+
         if ($validator->fails()) {
+            $session->set('_old_input', $oldSafeInput);
             return Response::html(View::render('pages/register', [
                 'title'   => 'Sign Up | GlassCart',
                 'errors'  => $validator->errors(),
@@ -140,9 +149,21 @@ final class AuthController
             ]), 422);
         }
 
+        // Check if email is already taken
+        $existingEmail = ProfileRepository::findByEmail($email);
+        if ($existingEmail !== null) {
+            $session->set('_old_input', $oldSafeInput);
+            return Response::html(View::render('pages/register', [
+                'title'   => 'Sign Up | GlassCart',
+                'errors'  => ['email' => 'An account with this email address already exists. Please sign in instead.'],
+                'noindex' => true,
+            ]), 422);
+        }
+
         // Check if username is already taken
         $existingProfile = ProfileRepository::findByUsername($username);
         if ($existingProfile !== null) {
+            $session->set('_old_input', $oldSafeInput);
             return Response::html(View::render('pages/register', [
                 'title'   => 'Sign Up | GlassCart',
                 'errors'  => ['username' => 'This username is already taken. Please choose another.'],
@@ -158,14 +179,26 @@ final class AuthController
 
         $regRes = $this->auth->register($email, $password, $fullName, $extraMetadata);
         if (!$regRes['ok']) {
+            $session->set('_old_input', $oldSafeInput);
             return Response::html(View::render('pages/register', [
                 'title'   => 'Sign Up | GlassCart',
                 'errors'  => ['registration' => $regRes['error'] ?? 'Registration failed.'],
                 'noindex' => true,
-            ]), 400);
+            ]), 422);
         }
 
+        // Clear old input on success
+        $session->remove('_old_input');
+
         // Auto-login after registration (Decision D-007)
+        $user = $regRes['user'] ?? [];
+        $uid = $user['id'] ?? null;
+        if ($uid) {
+            $session->setAuth((string)$uid, $email, $fullName, 'customer');
+            $session->flash('success', 'Your account has been created successfully!');
+            return Response::redirect('/account');
+        }
+
         $loginRes = $this->auth->login($email, $password);
         if ($loginRes['ok'] && !empty($loginRes['user'])) {
             $user = $loginRes['user'];

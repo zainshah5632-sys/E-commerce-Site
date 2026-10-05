@@ -52,22 +52,30 @@ final class Auth
         $res = $this->client->execute('POST', $url, $headers, json_encode($body));
         if ($res->ok && is_array($res->data)) {
             $user = $res->data;
-            // Ensure profile exists
+            // Ensure profile exists and has all customer metadata populated
             $uid = $user['id'] ?? null;
             if ($uid !== null) {
                 ProfileRepository::upsert($uid, array_merge($meta, [
-                    'role' => 'customer',
+                    'email' => strtolower(trim($email)),
+                    'role'  => 'customer',
                 ]));
             }
             return ['ok' => true, 'user' => $user];
         }
 
         $rawError = strtolower($res->error ?? '');
-        if (str_contains($rawError, 'already registered') || str_contains($rawError, 'already exists')) {
-            return ['ok' => false, 'error' => 'An account with this email already exists.'];
+        $data = is_array($res->data) ? $res->data : [];
+        $errorCode = strtolower((string)($data['error_code'] ?? ''));
+
+        if ($errorCode === 'email_exists' || str_contains($rawError, 'already registered') || str_contains($rawError, 'already exists') || str_contains($rawError, 'email address has already been registered')) {
+            return ['ok' => false, 'error' => 'An account with this email address already exists. Please sign in instead.'];
         }
 
-        return ['ok' => false, 'error' => 'Unable to complete registration. Please check your details and try again.'];
+        if (str_contains($rawError, 'password')) {
+            return ['ok' => false, 'error' => $res->error ?: 'Password does not meet security requirements.'];
+        }
+
+        return ['ok' => false, 'error' => $res->error ?: 'Unable to complete registration. Please check your details and try again.'];
     }
 
     /**

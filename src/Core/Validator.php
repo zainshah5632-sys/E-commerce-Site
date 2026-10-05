@@ -48,7 +48,7 @@ final class Validator
                     $ruleName = $rule;
                 }
 
-                $this->applyRule($field, $ruleName, $value, $params);
+                $this->applyRule($field, $ruleName, $value, $params, $ruleList);
                 if (isset($this->errors[$field])) {
                     break; // Stop at first error for this field
                 }
@@ -64,7 +64,7 @@ final class Validator
         return $this->passes();
     }
 
-    private function applyRule(string $field, string $rule, mixed $value, array $params): void
+    private function applyRule(string $field, string $rule, mixed $value, array $params, array $allFieldRules = []): void
     {
         $label = ucwords(str_replace('_', ' ', $field));
 
@@ -83,19 +83,37 @@ final class Validator
 
             case 'min':
                 $min = (int)($params[0] ?? 0);
-                if (is_numeric($value) && (float)$value < $min) {
-                    $this->errors[$field] = "{$label} must be at least {$min}.";
-                } elseif (is_string($value) && mb_strlen($value) < $min) {
-                    $this->errors[$field] = "{$label} must be at least {$min} characters.";
+                $isNumeric = in_array('int', $allFieldRules, true)
+                    || in_array('integer', $allFieldRules, true)
+                    || in_array('numeric', $allFieldRules, true)
+                    || is_int($value)
+                    || is_float($value);
+                if ($isNumeric && is_numeric($value)) {
+                    if ((float)$value < $min) {
+                        $this->errors[$field] = "{$label} must be at least {$min}.";
+                    }
+                } elseif (is_string($value)) {
+                    if (mb_strlen($value) < $min) {
+                        $this->errors[$field] = "{$label} must be at least {$min} characters.";
+                    }
                 }
                 break;
 
             case 'max':
                 $max = (int)($params[0] ?? 0);
-                if (is_numeric($value) && (float)$value > $max) {
-                    $this->errors[$field] = "{$label} must not exceed {$max}.";
-                } elseif (is_string($value) && mb_strlen($value) > $max) {
-                    $this->errors[$field] = "{$label} must not exceed {$max} characters.";
+                $isNumeric = in_array('int', $allFieldRules, true)
+                    || in_array('integer', $allFieldRules, true)
+                    || in_array('numeric', $allFieldRules, true)
+                    || is_int($value)
+                    || is_float($value);
+                if ($isNumeric && is_numeric($value)) {
+                    if ((float)$value > $max) {
+                        $this->errors[$field] = "{$label} must not exceed {$max}.";
+                    }
+                } elseif (is_string($value)) {
+                    if (mb_strlen($value) > $max) {
+                        $this->errors[$field] = "{$label} must not exceed {$max} characters.";
+                    }
                 }
                 break;
 
@@ -135,8 +153,8 @@ final class Validator
                 break;
 
             case 'alpha_spaces':
-                if (!is_string($value) || !preg_match('/^[a-zA-Z\s\-\'\.]+$/u', $value)) {
-                    $this->errors[$field] = "{$label} must contain only alphabets (no numbers or special characters).";
+                if (!is_string($value) || !preg_match('/^[\p{L}\s\-\'\.]+$/u', $value)) {
+                    $this->errors[$field] = "{$label} must contain only alphabets (no numbers allowed).";
                 }
                 break;
 

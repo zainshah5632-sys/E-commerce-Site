@@ -14,10 +14,10 @@ final class ProfileRepository
             'id'     => 'eq.' . $id,
             'select' => 'id,email,full_name,username,phone,country_code,role,created_at',
             'limit'  => '1',
-        ], ['single' => true]);
+        ]);
 
-        if ($res->ok && is_array($res->data)) {
-            return $res->data;
+        if ($res->ok && is_array($res->data) && !empty($res->data[0])) {
+            return $res->data[0];
         }
 
         return null;
@@ -30,10 +30,26 @@ final class ProfileRepository
             'username' => 'eq.' . $username,
             'select'   => 'id,email,full_name,username,phone,country_code,role,created_at',
             'limit'    => '1',
-        ], ['single' => true]);
+        ]);
 
-        if ($res->ok && is_array($res->data)) {
-            return $res->data;
+        if ($res->ok && is_array($res->data) && !empty($res->data[0])) {
+            return $res->data[0];
+        }
+
+        return null;
+    }
+
+    public static function findByEmail(string $email): ?array
+    {
+        $client = new Client();
+        $res = $client->get('profiles', [
+            'email'  => 'eq.' . strtolower(trim($email)),
+            'select' => 'id,email,full_name,username,phone,country_code,role,created_at',
+            'limit'  => '1',
+        ]);
+
+        if ($res->ok && is_array($res->data) && !empty($res->data[0])) {
+            return $res->data[0];
         }
 
         return null;
@@ -43,7 +59,10 @@ final class ProfileRepository
     {
         $client = new Client();
         $payload = array_merge($data, ['id' => $id]);
-        $res = $client->insert('profiles', $payload, true);
+        $res = $client->upsert('profiles', $payload, 'id');
+        if (!$res->ok) {
+            $res = $client->update('profiles', ['id' => 'eq.' . $id], $data);
+        }
         return $res->ok;
     }
 

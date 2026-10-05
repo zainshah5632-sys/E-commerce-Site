@@ -87,6 +87,23 @@ final class Client
         return $this->execute('POST', $url, $headers, $body !== false ? $body : '{}');
     }
 
+    public function upsert(string $table, array $row, string $onConflict = 'id'): Result
+    {
+        $queryString = $onConflict !== '' ? "?on_conflict=" . urlencode($onConflict) : '';
+        $url = "{$this->baseUrl}/rest/v1/{$table}{$queryString}";
+        $headers = [
+            'apikey: ' . $this->secretKey,
+            'Content-Type: application/json',
+            'Prefer: return=representation,resolution=merge-duplicates',
+        ];
+        if (str_starts_with($this->secretKey, 'eyJ')) {
+            $headers[] = 'Authorization: Bearer ' . $this->secretKey;
+        }
+
+        $body = json_encode($row, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return $this->execute('POST', $url, $headers, $body !== false ? $body : '{}');
+    }
+
     public function update(string $table, array $filters, array $patch): Result
     {
         $query = http_build_query($filters);
@@ -191,7 +208,13 @@ final class Client
         $ok = ($status >= 200 && $status < 300);
         $error = null;
         if (!$ok) {
-            $msg = is_array($parsedData) ? ($parsedData['message'] ?? $parsedData['error'] ?? 'API error') : 'API error';
+            $msg = is_array($parsedData) ? (
+                $parsedData['msg']
+                ?? $parsedData['message']
+                ?? $parsedData['error_description']
+                ?? $parsedData['error']
+                ?? 'API error'
+            ) : 'API error';
             Logger::error("Supabase error response: {$method} {$url}", [
                 'status' => $status,
                 'error'  => $msg,

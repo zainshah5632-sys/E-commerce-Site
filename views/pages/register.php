@@ -14,9 +14,14 @@ $selectedCountry = old('country_code', '+1');
       <p>Join GlassCart for swift checkout and real-time order tracking.</p>
     </div>
 
-    <?php if (!empty($errors['registration'])): ?>
-      <div class="alert alert--error glass--strong">
-        <span><?= e($errors['registration']) ?></span>
+    <?php if (!empty($errors)): ?>
+      <div class="alert alert--error glass--strong" style="margin-bottom: var(--s-5);">
+        <div style="font-weight: 600; margin-bottom: 4px;">Please review the following:</div>
+        <ul style="margin: 0; padding-left: 20px; font-size: 0.88rem; display: flex; flex-direction: column; gap: 4px;">
+          <?php foreach ($errors as $field => $err): ?>
+            <li><?= e($err) ?></li>
+          <?php endforeach; ?>
+        </ul>
       </div>
     <?php endif; ?>
 
@@ -176,7 +181,7 @@ $selectedCountry = old('country_code', '+1');
           <span class="password-req-badge"><?= icon('check') ?> Alphabet</span>
           <span class="password-req-badge"><?= icon('check') ?> Number</span>
           <span class="password-req-badge"><?= icon('check') ?> Any sign/symbol</span>
-          <span class="password-req-badge"><?= icon('check') ?> 8+ chars</span>
+          <span class="password-req-badge"><?= icon('check') ?> 6+ chars</span>
         </div>
 
         <?php if (!empty($errors['password'])): ?>
