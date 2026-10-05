@@ -1,0 +1,404 @@
+/* Glassmorphism Surfaces (Design.md §4) */
+.glass, .glass--strong, .glass--subtle, .glass--flat {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  position: relative;
+  transition: background var(--t-base) var(--ease), border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+
+.glass {
+  background: var(--glass);
+  box-shadow: var(--shadow-md), var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(160%);
+          backdrop-filter: blur(var(--blur-md)) saturate(160%);
+}
+
+.glass--strong {
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-md), var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(170%);
+          backdrop-filter: blur(var(--blur-lg)) saturate(170%);
+}
+
+.glass--subtle {
+  background: var(--glass-subtle);
+  box-shadow: var(--shadow-sm), var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(150%);
+          backdrop-filter: blur(var(--blur-sm)) saturate(150%);
+}
+
+/* Flat glass fallback for repeated list items to maximize performance (D-013) */
+.glass--flat {
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reduced transparency support */
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass--strong, .glass--subtle {
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+    background: var(--glass-strong) !important;
+  }
+}
+
+/* Buttons (Design.md §7) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  background: var(--grad-brand);
+  color: var(--on-brand);
+  box-shadow: 0 4px 16px rgba(99,102,241,.32);
+}
+
+.btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 24px rgba(99,102,241,.45);
+  color: var(--on-brand);
+}
+
+.btn--ghost {
+  background: var(--glass);
+  color: var(--text-1);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+          backdrop-filter: blur(var(--blur-sm));
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--glass-strong);
+  border-color: var(--brand-400);
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn--sm {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: var(--r-md);
+}
+
+.btn--lg {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--icon {
+  padding: 10px;
+  border-radius: var(--r-pill);
+}
+
+/* Form Controls (Design.md §7) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.form-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  color: var(--text-1);
+  font-size: 0.95rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.04);
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+          backdrop-filter: blur(var(--blur-sm));
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+  outline: none;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+  color: var(--text-3);
+  opacity: 0.8;
+}
+
+.form-error {
+  font-size: 0.82rem;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.form-hint {
+  font-size: 0.82rem;
+  color: var(--text-3);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+.badge--brand   { background: var(--grad-brand-soft); color: var(--brand-600); border: 1px solid var(--brand-400); }
+.badge--success { background: rgba(4,120,87,.12); color: var(--success); border: 1px solid var(--success); }
+.badge--warning { background: rgba(180,83,9,.12); color: var(--warning); border: 1px solid var(--warning); }
+.badge--danger  { background: rgba(185,28,28,.12); color: var(--danger); border: 1px solid var(--danger); }
+.badge--neutral { background: var(--glass); color: var(--text-2); border: 1px solid var(--glass-border); }
+
+/* Alerts / Flash Messages */
+.alert {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s-4);
+  font-size: 0.92rem;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  border: 1px solid transparent;
+}
+
+.alert--success { background: rgba(4,120,87,.14); color: var(--success); border-color: var(--success); }
+.alert--error   { background: rgba(185,28,28,.14); color: var(--danger); border-color: var(--danger); }
+.alert--info    { background: rgba(3,105,161,.14); color: var(--info); border-color: var(--info); }
+
+/* Product Card */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--glass-edge);
+}
+
+.product-card__image-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--glass-subtle);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--t-slow) var(--ease);
+}
+
+.product-card:hover .product-card__image {
+  transform: scale(1.04);
+}
+
+.product-card__badge {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 2;
+}
+
+.product-card__content {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--s-2);
+}
+
+.product-card__category {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.product-card__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.product-card__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin-top: auto;
+  padding-top: var(--s-3);
+}
+
+.product-card__price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-1);
+}
+
+.product-card__compare {
+  font-size: 0.9rem;
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+/* Drawer / Mini-Cart */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  z-index: var(--z-drawer);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+.drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+          backdrop-filter: blur(var(--blur-lg));
+  border-left: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  z-index: calc(var(--z-drawer) + 1);
+  display: flex;
+  flex-direction: column;
+  transform: translate3d(100%, 0, 0);
+  transition: transform var(--t-base) var(--ease);
+}
+
+.drawer.is-open {
+  transform: translate3d(0, 0, 0);
+}
+
+.drawer__header {
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer__body {
+  padding: var(--s-5);
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.drawer__footer {
+  padding: var(--s-5);
+  border-top: 1px solid var(--line);
+  background: var(--glass);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: var(--s-5);
+  right: var(--s-5);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  pointer-events: none;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--r-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+
+.toast.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Progress bar for free shipping */
+.shipping-bar {
+  background: var(--glass-subtle);
+  border-radius: var(--r-pill);
+  height: 8px;
+  overflow: hidden;
+  margin-block: var(--s-2);
+  border: 1px solid var(--line);
+}
+
+.shipping-bar__fill {
+  background: var(--grad-brand);
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width var(--t-base) var(--ease);
+}

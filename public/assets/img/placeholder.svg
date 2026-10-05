@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" fill="none">
+  <defs>
+    <linearGradient id="ph-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(99,102,241,0.15)"/>
+      <stop offset="100%" stop-color="rgba(236,72,153,0.10)"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#ph-grad)"/>
+  <rect x="50" y="50" width="300" height="300" rx="24" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+  <circle cx="200" cy="180" r="45" stroke="rgba(99,102,241,0.5)" stroke-width="3"/>
+  <path d="M110 300L170 230L220 270L280 200L330 300H110Z" fill="rgba(99,102,241,0.2)" stroke="rgba(99,102,241,0.4)" stroke-width="2" stroke-linejoin="round"/>
+</svg>

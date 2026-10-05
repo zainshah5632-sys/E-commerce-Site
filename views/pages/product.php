@@ -1,0 +1,184 @@
+<?php
+declare(strict_types=1);
+
+$product = $product ?? [];
+$related = $related ?? [];
+
+$images = $product['images'] ?? [];
+$mainImg = (is_array($images) && count($images) > 0) ? $images[0] : asset('assets/img/placeholder.svg');
+$priceCents = (int)($product['price_cents'] ?? 0);
+$compareCents = !empty($product['compare_at_cents']) ? (int)$product['compare_at_cents'] : null;
+$stock = (int)($product['stock'] ?? 0);
+$isOutOfStock = ($stock <= 0);
+$isLowStock = ($stock > 0 && $stock <= 5);
+$category = $product['category'] ?? null;
+
+$discountPercent = 0;
+if ($compareCents && $compareCents > $priceCents) {
+    $discountPercent = (int)round((($compareCents - $priceCents) / $compareCents) * 100);
+}
+
+// JSON-LD structured data
+$jsonLd = [
+    '@context'    => 'https://schema.org/',
+    '@type'       => 'Product',
+    'name'        => $product['name'],
+    'image'       => is_array($images) && count($images) > 0 ? $images : [$mainImg],
+    'description' => $product['short_description'] ?? $product['description'] ?? '',
+    'sku'         => $product['sku'] ?? $product['slug'],
+    'offers'      => [
+        '@type'         => 'Offer',
+        'priceCurrency' => settings('currency_code', 'USD'),
+        'price'         => number_format($priceCents / 100, 2, '.', ''),
+        'availability'  => $isOutOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+    ],
+];
+?>
+<script type="application/ld+json">
+<?= json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+</script>
+
+<div class="container" style="padding-top: var(--s-6);">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb" style="display: flex; gap: var(--s-2); font-size: 0.85rem; color: var(--text-3); margin-bottom: var(--s-5);">
+    <a href="<?= url('/') ?>">Home</a>
+    <span>/</span>
+    <a href="<?= url('/shop') ?>">Shop</a>
+    <?php if ($category): ?>
+      <span>/</span>
+      <a href="<?= url('/category/' . rawurlencode($category['slug'])) ?>"><?= e($category['name']) ?></a>
+    <?php endif; ?>
+    <span>/</span>
+    <span style="color: var(--text-1);"><?= e($product['name']) ?></span>
+  </nav>
+
+  <!-- PDP Grid -->
+  <div class="pdp-grid">
+    <!-- Gallery -->
+    <div class="pdp-gallery">
+      <div class="pdp-gallery__main glass">
+        <img
+          id="pdp-main-image"
+          src="<?= e($mainImg) ?>"
+          alt="<?= ea($product['name']) ?>"
+          width="600"
+          height="600"
+          fetchpriority="high"
+        >
+      </div>
+
+      <?php if (is_array($images) && count($images) > 1): ?>
+        <div class="pdp-gallery__thumbs">
+          <?php foreach ($images as $index => $img): ?>
+            <button
+              type="button"
+              class="pdp-gallery__thumb <?= $index === 0 ? 'is-active' : '' ?>"
+              data-src="<?= ea($img) ?>"
+              aria-label="View Image <?= $index + 1 ?>"
+            >
+              <img src="<?= e($img) ?>" alt="" width="72" height="72" style="width: 100%; height: 100%; object-fit: cover;">
+            </button>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Product Details & Buy Box -->
+    <div class="pdp-details glass--strong" style="padding: var(--s-6);">
+      <?php if ($category): ?>
+        <a href="<?= url('/category/' . rawurlencode($category['slug'])) ?>" class="product-card__category">
+          <?= e($category['name']) ?>
+        </a>
+      <?php endif; ?>
+
+      <h1 style="font-size: 2.2rem; line-height: 1.15;"><?= e($product['name']) ?></h1>
+
+      <!-- Pricing Stack -->
+      <div style="display: flex; align-items: baseline; gap: var(--s-3); margin-block: var(--s-2);">
+        <span class="pdp-price"><?= money($priceCents) ?></span>
+        <?php if ($compareCents && $compareCents > $priceCents): ?>
+          <span style="font-size: 1.15rem; color: var(--text-3); text-decoration: line-through;"><?= money($compareCents) ?></span>
+          <span class="badge badge--brand">-<?= $discountPercent ?>% OFF</span>
+        <?php endif; ?>
+      </div>
+
+      <!-- Stock Status -->
+      <div>
+        <?php if ($isOutOfStock): ?>
+          <span class="badge badge--danger" style="font-size: 0.85rem; padding: 6px 14px;">Out of Stock</span>
+        <?php elseif ($isLowStock): ?>
+          <span class="badge badge--warning" style="font-size: 0.85rem; padding: 6px 14px;">Low Stock: Only <?= $stock ?> remaining</span>
+        <?php else: ?>
+          <span class="badge badge--success" style="font-size: 0.85rem; padding: 6px 14px;">In Stock &amp; Ready to Ship</span>
+        <?php endif; ?>
+      </div>
+
+      <!-- Short Description -->
+      <?php if (!empty($product['short_description'])): ?>
+        <p style="font-size: 1.05rem; line-height: 1.6; margin-block: var(--s-2);">
+          <?= e($product['short_description']) ?>
+        </p>
+      <?php endif; ?>
+
+      <!-- Purchase Form -->
+      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart" style="margin-top: var(--s-4); border-top: 1px solid var(--line); padding-top: var(--s-4);">
+        <?= csrf_field() ?>
+        <input type="hidden" name="product_id" value="<?= ea($product['id']) ?>">
+
+        <div style="display: flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-4);">
+          <!-- Quantity Control -->
+          <div class="qty-control" style="display: flex; align-items: center; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--r-md); overflow: hidden;">
+            <button type="button" class="btn btn--ghost btn--icon" data-qty-step="-1" aria-label="Decrease quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
+              <?= icon('minus') ?>
+            </button>
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              max="<?= min(10, max(1, $stock)) ?>"
+              aria-label="Quantity"
+              <?= $isOutOfStock ? 'disabled' : '' ?>
+              style="width: 48px; text-align: center; border: none; background: transparent; font-weight: 700;"
+            >
+            <button type="button" class="btn btn--ghost btn--icon" data-qty-step="1" aria-label="Increase quantity" <?= $isOutOfStock ? 'disabled' : '' ?>>
+              <?= icon('plus') ?>
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn--primary btn--lg"
+            style="flex-grow: 1;"
+            <?= $isOutOfStock ? 'disabled' : '' ?>
+          >
+            <?= icon('cart') ?>
+            <span><?= $isOutOfStock ? 'Sold Out' : 'Add to Shopping Cart' ?></span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Full Description -->
+      <?php if (!empty($product['description'])): ?>
+        <div style="border-top: 1px solid var(--line); padding-top: var(--s-4); margin-top: var(--s-3);">
+          <h3 style="font-size: 1.1rem; margin-bottom: var(--s-2);">Product Details</h3>
+          <p style="line-height: 1.7;"><?= nl2br(e($product['description'])) ?></p>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <!-- Related Products Section -->
+  <?php if (!empty($related)): ?>
+    <section class="section" style="margin-top: var(--s-8); margin-bottom: var(--s-8);">
+      <div class="section__header">
+        <h2 class="section__title">Complementary Pieces</h2>
+      </div>
+      <div class="product-grid">
+        <?php foreach ($related as $product): ?>
+          <?php require dirname(__DIR__) . '/partials/product-card.php'; ?>
+        <?php endforeach; ?>
+      </div>
+    </section>
+  <?php endif; ?>
+</div>
