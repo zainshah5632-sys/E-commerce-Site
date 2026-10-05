@@ -100,6 +100,21 @@ final class ProductAdminController
             ], layout: 'admin'), 422);
         }
 
+        // Handle direct image URLs (up to 5 total)
+        $imageUrls = $request->input('image_urls', []);
+        $imagesList = [];
+        if (is_array($imageUrls)) {
+            foreach ($imageUrls as $u) {
+                $trimmed = trim((string)$u);
+                if ($trimmed !== '' && filter_var($trimmed, FILTER_VALIDATE_URL) && count($imagesList) < 5) {
+                    $imagesList[] = $trimmed;
+                }
+            }
+        }
+        if (!empty($imagesList)) {
+            $data['images'] = '{' . implode(',', array_map(static fn($u) => '"' . $u . '"', $imagesList)) . '}';
+        }
+
         $created = ProductRepository::create($data);
         if (!$created || empty($created['id'])) {
             return Response::html(View::render('admin/product-form', [
@@ -116,6 +131,7 @@ final class ProductAdminController
 
         $session->flash('success', 'Product created successfully.');
         return Response::redirect('/admin/products');
+
     }
 
     public function edit(Request $request): Response
@@ -174,13 +190,25 @@ final class ProductAdminController
             $storage = new Storage();
             $storage->deleteImage($removeImage);
             $currentImages = array_values(array_filter($currentImages, static fn($img) => $img !== $removeImage));
-            $patch['images'] = '{' . implode(',', array_map(static fn($u) => '"' . $u . '"', $currentImages)) . '}';
         }
+
+        // Add any newly provided image URLs
+        $newUrls = $request->input('image_urls', []);
+        if (is_array($newUrls)) {
+            foreach ($newUrls as $u) {
+                $trimmed = trim((string)$u);
+                if ($trimmed !== '' && filter_var($trimmed, FILTER_VALIDATE_URL) && !in_array($trimmed, $currentImages, true) && count($currentImages) < 5) {
+                    $currentImages[] = $trimmed;
+                }
+            }
+        }
+        $patch['images'] = '{' . implode(',', array_map(static fn($u) => '"' . $u . '"', $currentImages)) . '}';
 
         ProductRepository::update($id, $patch);
 
         // Process newly uploaded files
         $this->processUploadedImages($id, $request);
+
 
         Session::instance()->flash('success', 'Product updated successfully.');
         return Response::redirect('/admin/products');

@@ -47,9 +47,6 @@ $announcement = settings('announcement', 'Free shipping on orders over $75');
           <span><?= e($session->userName() ?: 'Account') ?></span>
         </a>
 
-        <?php if ($session->isAdmin()): ?>
-          <a href="<?= url('/admin') ?>" class="btn btn--ghost btn--sm badge--brand">Admin</a>
-        <?php endif; ?>
 
         <!-- Sign Out Form (POST per AR §5 & T5.1) -->
         <form action="<?= url('/logout') ?>" method="POST" style="display: inline;">

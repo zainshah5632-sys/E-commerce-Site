@@ -66,11 +66,18 @@ $session = Session::instance();
             </a>
           </li>
           <li>
+            <a href="<?= url('/admin/users') ?>" class="admin-nav__link <?= is_active('/admin/users', 'admin-nav__link--active') ?>">
+              <?= icon('user') ?>
+              <span>Users &amp; Customers</span>
+            </a>
+          </li>
+          <li>
             <a href="<?= url('/admin/settings') ?>" class="admin-nav__link <?= is_active('/admin/settings', 'admin-nav__link--active') ?>">
               <?= icon('settings') ?>
               <span>Settings</span>
             </a>
           </li>
+
         </ul>
       </nav>
 

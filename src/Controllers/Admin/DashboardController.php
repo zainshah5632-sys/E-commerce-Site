@@ -8,6 +8,7 @@ use App\Core\Response;
 use App\Core\View;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\ProfileRepository;
 
 final class DashboardController
 {
@@ -16,12 +17,15 @@ final class DashboardController
         $stats = OrderRepository::stats();
         $recentOrders = OrderRepository::adminList([], 1, 8);
         $lowStockProducts = ProductRepository::lowStock(5);
+        $userCount = ProfileRepository::count();
 
         return Response::html(View::render('admin/dashboard', [
             'title'            => 'Admin Dashboard — GlassCart',
             'stats'            => $stats,
             'recentOrders'     => $recentOrders['orders'],
             'lowStockProducts' => $lowStockProducts,
+            'userCount'        => $userCount,
         ], layout: 'admin'));
     }
 }
+

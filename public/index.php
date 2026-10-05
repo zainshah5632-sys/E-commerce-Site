@@ -18,6 +18,8 @@ use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\OrderAdminController;
 use App\Controllers\Admin\ProductAdminController;
 use App\Controllers\Admin\SettingsAdminController;
+use App\Controllers\Admin\UserAdminController;
+
 
 use App\Controllers\AuthController;
 use App\Controllers\CartController;
@@ -97,8 +99,17 @@ $router->post('/admin/orders/{number}/status', [OrderAdminController::class, 'st
 $router->post('/admin/orders/{number}/payment', [OrderAdminController::class, 'payment'], ['admin', 'csrf']);
 $router->post('/admin/orders/{number}/cancel', [OrderAdminController::class, 'cancel'], ['admin', 'csrf']);
 
+$router->get('/admin/users', [UserAdminController::class, 'index'], ['admin']);
+$router->get('/admin/users/new', [UserAdminController::class, 'create'], ['admin']);
+$router->post('/admin/users', [UserAdminController::class, 'store'], ['admin', 'csrf']);
+$router->get('/admin/users/{id}/edit', [UserAdminController::class, 'edit'], ['admin']);
+$router->post('/admin/users/{id}', [UserAdminController::class, 'update'], ['admin', 'csrf']);
+$router->post('/admin/users/{id}/delete', [UserAdminController::class, 'destroy'], ['admin', 'csrf']);
+$router->post('/admin/users/{id}/role', [UserAdminController::class, 'toggleRole'], ['admin', 'csrf']);
+
 $router->get('/admin/settings', [SettingsAdminController::class, 'index'], ['admin']);
 $router->post('/admin/settings', [SettingsAdminController::class, 'update'], ['admin', 'csrf']);
+
 
 // Dispatch request
 $request = Request::capture();

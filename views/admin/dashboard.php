@@ -17,8 +17,8 @@ $lowStockProducts = $lowStockProducts ?? [];
   </a>
 </div>
 
-<!-- 4 Stats Cards (admin_stats RPC) -->
-<div class="stat-grid">
+<!-- 5 Stats Cards -->
+<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
   <div class="stat-card glass">
     <span class="stat-card__label">Orders Today</span>
     <span class="stat-card__value"><?= (int)($stats['orders_today'] ?? 0) ?></span>
@@ -35,12 +35,18 @@ $lowStockProducts = $lowStockProducts ?? [];
   </div>
 
   <div class="stat-card glass">
+    <span class="stat-card__label">Registered Users</span>
+    <span class="stat-card__value" style="color: var(--brand-600);"><?= (int)($userCount ?? 0) ?></span>
+  </div>
+
+  <div class="stat-card glass">
     <span class="stat-card__label">Low Stock Alerts</span>
     <span class="stat-card__value" style="color: <?= ((int)($stats['low_stock'] ?? 0) > 0) ? 'var(--danger)' : 'var(--text-1)' ?>;">
       <?= (int)($stats['low_stock'] ?? 0) ?>
     </span>
   </div>
 </div>
+
 
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--s-6);">
   <!-- Recent Orders -->

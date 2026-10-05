@@ -115,4 +115,42 @@ final class Auth
             ],
         ];
     }
+
+    /**
+     * Deletes a user account from Supabase Auth admin API.
+     */
+    public function deleteUser(string $uid): bool
+    {
+        $url = "{$this->baseUrl}/auth/v1/admin/users/{$uid}";
+        $headers = [
+            'apikey: ' . $this->secretKey,
+            'Content-Type: application/json',
+        ];
+        if (str_starts_with($this->secretKey, 'eyJ')) {
+            $headers[] = 'Authorization: Bearer ' . $this->secretKey;
+        }
+
+        $res = $this->client->execute('DELETE', $url, $headers, null);
+        return $res->ok;
+    }
+
+    /**
+     * Updates user credentials (e.g. password, email) via Supabase Auth admin API.
+     */
+    public function updateUser(string $uid, array $attributes): bool
+    {
+        $url = "{$this->baseUrl}/auth/v1/admin/users/{$uid}";
+        $headers = [
+            'apikey: ' . $this->secretKey,
+            'Content-Type: application/json',
+        ];
+        if (str_starts_with($this->secretKey, 'eyJ')) {
+            $headers[] = 'Authorization: Bearer ' . $this->secretKey;
+        }
+
+        $body = json_encode($attributes);
+        $res = $this->client->execute('PUT', $url, $headers, $body !== false ? $body : '{}');
+        return $res->ok;
+    }
 }
+

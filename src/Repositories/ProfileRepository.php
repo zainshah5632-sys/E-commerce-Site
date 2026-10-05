@@ -53,4 +53,53 @@ final class ProfileRepository
         $res = $client->update('profiles', ['id' => 'eq.' . $id], $patch);
         return $res->ok;
     }
+
+    public static function delete(string $id): bool
+    {
+        $client = new Client();
+        $res = $client->delete('profiles', ['id' => 'eq.' . $id]);
+        return $res->ok;
+    }
+
+    public static function list(array $filters = [], int $page = 1, int $perPage = 15): array
+    {
+        $client = new Client();
+        $query = [
+            'select' => 'id,email,full_name,username,phone,country_code,role,created_at',
+            'order'  => 'created_at.desc',
+            'limit'  => (string)$perPage,
+            'offset' => (string)(($page - 1) * $perPage),
+        ];
+
+        if (!empty($filters['role'])) {
+            $query['role'] = 'eq.' . $filters['role'];
+        }
+
+        if (!empty($filters['q'])) {
+            $clean = preg_replace('/[,()*%\\\\]/', '', (string)$filters['q']);
+            $clean = mb_substr(trim($clean ?? ''), 0, 60);
+            if ($clean !== '') {
+                $query['or'] = "(full_name.ilike.*{$clean}*,email.ilike.*{$clean}*,username.ilike.*{$clean}*)";
+            }
+        }
+
+        $res = $client->get('profiles', $query, ['count' => true]);
+        $users = ($res->ok && is_array($res->data)) ? $res->data : [];
+        $total = $res->count ?? count($users);
+
+        return [
+            'users' => $users,
+            'total' => $total,
+            'page'  => $page,
+            'pages' => max(1, (int)ceil($total / $perPage)),
+        ];
+    }
+
+    public static function count(): int
+    {
+        $client = new Client();
+        $res = $client->get('profiles', ['select' => 'id', 'limit' => '1'], ['count' => true]);
+        return $res->count ?? 0;
+    }
 }
+
