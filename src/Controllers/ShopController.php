@@ -64,10 +64,14 @@ final class ShopController
 
         $title = $activeCategory ? "{$activeCategory['name']} — GlassCart" : 'All Products — GlassCart';
 
+        $counts = CategoryRepository::counts();
+
         return Response::html(View::render('pages/shop', [
             'title'          => $title,
             'categories'     => $categories,
             'activeCategory' => $activeCategory,
+            'categoryCounts' => $counts,
+            'allTotal'       => array_sum($counts),
             'products'       => $catalog['products'],
             'total'          => $catalog['total'],
             'page'           => $catalog['page'],

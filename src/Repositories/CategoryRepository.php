@@ -24,6 +24,27 @@ final class CategoryRepository
         });
     }
 
+    public static function counts(): array
+    {
+        return Cache::remember('categories_product_counts', self::TTL, static function (): array {
+            $client = new Client();
+            $res = $client->get('products', [
+                'is_active' => 'eq.true',
+                'select'    => 'category_id',
+            ]);
+            $counts = [];
+            if ($res->ok && is_array($res->data)) {
+                foreach ($res->data as $p) {
+                    $cid = $p['category_id'] ?? '';
+                    if ($cid !== '') {
+                        $counts[$cid] = ($counts[$cid] ?? 0) + 1;
+                    }
+                }
+            }
+            return $counts;
+        });
+    }
+
     public static function allAdmin(): array
     {
         $client = new Client();

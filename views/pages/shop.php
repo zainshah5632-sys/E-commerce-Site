@@ -11,6 +11,8 @@ $sort = $sort ?? 'newest';
 $page = $page ?? 1;
 $pages = $pages ?? 1;
 $total = $total ?? 0;
+$categoryCounts = $categoryCounts ?? [];
+$allTotal = $allTotal ?? $total;
 ?>
 
 <div class="container">
@@ -58,23 +60,41 @@ $total = $total ?? 0;
           </div>
         </div>
 
-        <!-- Categories -->
+        <!-- Categories Section (Interactive Vertical Navigation) -->
         <div class="filter-group">
-          <div class="filter-group__title">Category</div>
-          <div style="display: flex; flex-direction: column; gap: var(--s-2);">
-            <label style="display: flex; align-items: center; gap: var(--s-2); font-size: 0.9rem; cursor: pointer;">
-              <input type="radio" name="category" value="" <?= empty($activeCategory) ? 'checked' : '' ?>>
-              <span>All Categories</span>
+          <div class="category-filter-header">Category</div>
+          <div class="category-nav" role="radiogroup" aria-label="Product Categories">
+            <!-- All Categories -->
+            <label class="category-nav__item <?= empty($activeCategory) ? 'is-active' : '' ?>">
+              <input
+                type="radio"
+                name="category"
+                value=""
+                class="category-nav__radio"
+                <?= empty($activeCategory) ? 'checked' : '' ?>
+              >
+              <span class="category-nav__label">All Categories</span>
+              <span class="category-nav__badge"><?= (int)$allTotal ?></span>
             </label>
+
+            <!-- Dynamic Categories (Audio, Wearables, Desk & Home, Accessories) -->
             <?php foreach ($categories as $cat): ?>
-              <label style="display: flex; align-items: center; gap: var(--s-2); font-size: 0.9rem; cursor: pointer;">
+              <?php
+                $isActive = ($activeCategory && $activeCategory['slug'] === $cat['slug']);
+                $catCount = $categoryCounts[$cat['id']] ?? null;
+              ?>
+              <label class="category-nav__item <?= $isActive ? 'is-active' : '' ?>">
                 <input
                   type="radio"
                   name="category"
                   value="<?= ea($cat['slug']) ?>"
-                  <?= ($activeCategory && $activeCategory['slug'] === $cat['slug']) ? 'checked' : '' ?>
+                  class="category-nav__radio"
+                  <?= $isActive ? 'checked' : '' ?>
                 >
-                <span><?= e($cat['name']) ?></span>
+                <span class="category-nav__label"><?= e($cat['name']) ?></span>
+                <?php if ($catCount !== null): ?>
+                  <span class="category-nav__badge"><?= (int)$catCount ?></span>
+                <?php endif; ?>
               </label>
             <?php endforeach; ?>
           </div>

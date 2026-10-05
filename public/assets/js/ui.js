@@ -153,6 +153,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Sidebar Category Filter Auto-submit
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList.contains('category-nav__radio')) {
+      const form = e.target.form;
+      if (form) {
+        if (typeof form.requestSubmit === 'function') {
+          form.requestSubmit();
+        } else {
+          form.submit();
+        }
+      }
+    }
+  });
 });
 
 // Toast notification trigger
