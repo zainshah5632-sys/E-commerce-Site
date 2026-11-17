@@ -27,7 +27,7 @@ insert into public.products (
     29900,
     'AUD-AURA-1',
     35,
-    '{}',
+    '{"/assets/img/products/aura-one-wireless-headphones.jpg"}',
     true,
     true
   ),
@@ -42,7 +42,7 @@ insert into public.products (
     null,
     'AUD-CLAR-2',
     18,
-    '{}',
+    '{"/assets/img/products/clarity-desktop-studio-monitors.jpg"}',
     true,
     false
   ),
@@ -57,7 +57,7 @@ insert into public.products (
     12900,
     'AUD-PULS-3',
     42,
-    '{}',
+    '{"/assets/img/products/pulse-true-wireless-earbuds.jpg"}',
     true,
     false
   ),
@@ -74,7 +74,7 @@ insert into public.products (
     null,
     'WEAR-VEK-1',
     25,
-    '{}',
+    '{"/assets/img/products/vektor-chrono-smartwatch.jpg"}',
     true,
     true
   ),
@@ -89,7 +89,7 @@ insert into public.products (
     null,
     'WEAR-LUM-2',
     50,
-    '{}',
+    '{"/assets/img/products/lumen-blue-light-frames.jpg"}',
     true,
     false
   ),
@@ -104,7 +104,7 @@ insert into public.products (
     null,
     'WEAR-APX-3',
     0, -- Stock 0 (out of stock testing item per T1.2)
-    '{}',
+    '{"/assets/img/products/apex-performance-fitness-ring.jpg"}',
     true,
     false
   ),
@@ -121,7 +121,7 @@ insert into public.products (
     null,
     'DSK-HOR-1',
     20,
-    '{}',
+    '{"/assets/img/products/horizon-linear-desk-lamp.jpg"}',
     true,
     true
   ),
@@ -136,7 +136,7 @@ insert into public.products (
     null,
     'DSK-PRM-2',
     30,
-    '{}',
+    '{"/assets/img/products/prism-solid-acrylic-laptop-stand.jpg"}',
     true,
     false
   ),
@@ -151,7 +151,7 @@ insert into public.products (
     null,
     'DSK-VTX-3',
     55,
-    '{}',
+    '{"/assets/img/products/vertex-felt-cork-desk-mat.jpg"}',
     true,
     false
   ),
@@ -168,7 +168,7 @@ insert into public.products (
     null,
     'ACC-FLX-1',
     60,
-    '{}',
+    '{"/assets/img/products/flux-braided-thunderbolt-cable-2m.jpg"}',
     true,
     false
   ),
@@ -183,7 +183,7 @@ insert into public.products (
     null,
     'ACC-KIN-2',
     40,
-    '{}',
+    '{"/assets/img/products/kinetics-magnetic-cable-anchor.jpg"}',
     true,
     false
   ),
@@ -198,7 +198,7 @@ insert into public.products (
     null,
     'ACC-NEX-3',
     22,
-    '{}',
+    '{"/assets/img/products/nexus-anodized-multi-port-hub.jpg"}',
     true,
     false
   )

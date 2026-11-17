@@ -65,5 +65,45 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // Dynamic discount calculation and preset buttons in product form
+  const priceInput = document.getElementById('prod-price');
+  const compareInput = document.getElementById('prod-compare');
+  const discountBadge = document.getElementById('discount-calc-badge');
+
+  function updateDiscountDisplay() {
+    if (!priceInput || !compareInput || !discountBadge) return;
+    const price = parseFloat(priceInput.value) || 0;
+    const compare = parseFloat(compareInput.value) || 0;
+
+    if (compare > price && price > 0) {
+      const diff = compare - price;
+      const pct = Math.round((diff / compare) * 100);
+      discountBadge.textContent = 'Discount: ' + pct + '% OFF (Save $' + diff.toFixed(2) + ')';
+      discountBadge.style.display = 'inline-flex';
+    } else {
+      discountBadge.style.display = 'none';
+    }
+  }
+
+  if (priceInput && compareInput) {
+    priceInput.addEventListener('input', updateDiscountDisplay);
+    compareInput.addEventListener('input', updateDiscountDisplay);
+    updateDiscountDisplay();
+  }
+
+  document.querySelectorAll('[data-action="apply-discount"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pct = parseInt(btn.getAttribute('data-pct'), 10);
+      let compare = parseFloat(compareInput.value);
+      if (!compare || compare <= 0) {
+        compare = parseFloat(priceInput.value) || 100;
+        compareInput.value = compare.toFixed(2);
+      }
+      const discounted = compare * (1 - (pct / 100));
+      priceInput.value = discounted.toFixed(2);
+      updateDiscountDisplay();
+    });
+  });
 });
 

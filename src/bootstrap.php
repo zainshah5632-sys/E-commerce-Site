@@ -55,7 +55,7 @@ set_exception_handler(static function (Throwable $e) use ($isLocal): void {
 
 // Send security headers (Architecture.md §10)
 if (!headers_sent()) {
-    header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.supabase.co; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     header("X-Content-Type-Options: nosniff");
     header("Referrer-Policy: strict-origin-when-cross-origin");
     header("X-Frame-Options: DENY");

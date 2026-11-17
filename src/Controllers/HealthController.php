@@ -30,10 +30,16 @@ final class HealthController
                 ]);
             }
 
+            $tip = null;
+            if ($res->status === 0) {
+                $tip = 'DNS resolution failed for SUPABASE_URL. If this is a Supabase Free Plan project, it pauses after 7 days of inactivity. Go to your Supabase Dashboard and click "Restore project" / "Resume", or verify SUPABASE_URL in .env.';
+            }
+
             return Response::json([
                 'status'    => 'degraded',
-                'database'  => 'error',
+                'database'  => 'unreachable',
                 'detail'    => $res->error,
+                'tip'       => $tip,
                 'timestamp' => time(),
             ], 503);
         } catch (\Throwable $e) {

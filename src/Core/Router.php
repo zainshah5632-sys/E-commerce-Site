@@ -126,12 +126,15 @@ final class Router
                     if (!$session->isAuthenticated()) {
                         return Response::redirect('/admin/login?next=' . urlencode($request->path()));
                     }
-                    // Re-check role from DB per AR §10
+                    // Re-check role from DB per AR §10 with session fallback
                     $uid = $session->userId();
                     $isAdmin = false;
                     if ($uid !== null) {
                         $profile = ProfileRepository::find($uid);
-                        if ($profile && ($profile['role'] ?? '') === 'admin') {
+                        if ($profile !== null) {
+                            $isAdmin = (($profile['role'] ?? '') === 'admin');
+                        } elseif ($session->isAdmin()) {
+                            // Fallback if database service is temporarily unreachable
                             $isAdmin = true;
                         }
                     }

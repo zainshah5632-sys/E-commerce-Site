@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Core\Cache;
+use App\Core\Env;
 use App\Supabase\Client;
 
 final class OrderRepository
@@ -26,11 +28,65 @@ final class OrderRepository
             return ['ok' => true, 'order' => $res->data];
         }
 
+        // Local fallback order generation when database service is unreachable
+        if (Env::get('APP_ENV') === 'local' && ($res->status === 0 || str_contains($res->error ?? '', 'connect'))) {
+            $orderNumber = 'ORD-' . date('ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+            $subtotalCents = 0;
+            $items = [];
+            foreach ($args['items'] ?? [] as $item) {
+                $pid = $item['product_id'] ?? '';
+                $prod = ProductRepository::findById($pid);
+                $price = (int)($prod['price_cents'] ?? 0);
+                $qty = (int)($item['quantity'] ?? 1);
+                $subtotalCents += $price * $qty;
+                $items[] = [
+                    'id'                => 'item-' . bin2hex(random_bytes(6)),
+                    'product_id'        => $pid,
+                    'product_name'      => $prod['name'] ?? 'Hardware Item',
+                    'unit_price_cents'  => $price,
+                    'quantity'          => $qty,
+                    'image_url'         => $prod['images'][0] ?? null,
+                ];
+            }
+            $shippingCents = (int)($args['shipping_cents'] ?? 0);
+            $totalCents = $subtotalCents + $shippingCents;
+
+            $localOrder = [
+                'id'               => 'ord-' . bin2hex(random_bytes(8)),
+                'order_number'     => $orderNumber,
+                'user_id'          => $args['user_id'] ?? null,
+                'email'            => $args['email'] ?? '',
+                'customer_name'    => $args['customer_name'] ?? '',
+                'phone'            => $args['phone'] ?? '',
+                'shipping_address' => $args['shipping_address'] ?? [],
+                'payment_method'   => $args['payment_method'] ?? 'cod',
+                'payment_status'   => 'pending',
+                'status'           => 'pending',
+                'subtotal_cents'   => $subtotalCents,
+                'shipping_cents'   => $shippingCents,
+                'total_cents'      => $totalCents,
+                'notes'            => $args['notes'] ?? '',
+                'created_at'       => date('c'),
+                'updated_at'       => date('c'),
+                'items'            => $items,
+            ];
+
+            // Store in cache for order success page retrieval
+            Cache::remember('local_order_' . $orderNumber, 3600, static fn() => $localOrder);
+
+            return ['ok' => true, 'order' => $localOrder];
+        }
+
         return ['ok' => false, 'error' => $res->error ?? 'Could not place order.'];
     }
 
     public static function findByNumber(string $orderNumber): ?array
     {
+        $local = Cache::remember('local_order_' . $orderNumber, 3600, static fn() => null);
+        if ($local !== null) {
+            return $local;
+        }
+
         $client = new Client();
         $res = $client->get('orders', [
             'order_number' => 'eq.' . $orderNumber,

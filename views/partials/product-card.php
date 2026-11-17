@@ -2,7 +2,15 @@
 declare(strict_types=1);
 
 $images = $product['images'] ?? [];
-$imgUrl = (is_array($images) && count($images) > 0) ? $images[0] : asset('assets/img/placeholder.svg');
+$imgUrl = asset('assets/img/placeholder.svg');
+if (is_array($images) && count($images) > 0) {
+    $imgUrl = $images[0];
+} elseif (!empty($product['slug'])) {
+    $localRel = 'assets/img/products/' . $product['slug'] . '.jpg';
+    if (is_file(dirname(__DIR__, 2) . '/public/' . $localRel)) {
+        $imgUrl = asset($localRel);
+    }
+}
 $priceCents = (int)($product['price_cents'] ?? 0);
 $compareCents = !empty($product['compare_at_cents']) ? (int)$product['compare_at_cents'] : null;
 $stock = (int)($product['stock'] ?? 0);

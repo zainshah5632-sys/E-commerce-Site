@@ -46,6 +46,12 @@ final class CartService
             $clampedQty = min(self::MAX_QTY_PER_ITEM, min($availableStock, max(1, $qty)));
             $images = $prod['images'] ?? [];
             $imgUrl = is_array($images) && count($images) > 0 ? $images[0] : null;
+            if ($imgUrl === null && !empty($prod['slug'])) {
+                $localRel = 'assets/img/products/' . $prod['slug'] . '.jpg';
+                if (is_file(dirname(__DIR__, 2) . '/public/' . $localRel)) {
+                    $imgUrl = '/' . $localRel;
+                }
+            }
 
             $hydrated[] = [
                 'product_id'        => $prod['id'],

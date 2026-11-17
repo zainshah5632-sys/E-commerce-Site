@@ -132,6 +132,11 @@ final class Session
         return $this->data['role'] ?? 'customer';
     }
 
+    public function role(): string
+    {
+        return $this->userRole();
+    }
+
     public function userName(): string
     {
         return $this->data['name'] ?? '';
