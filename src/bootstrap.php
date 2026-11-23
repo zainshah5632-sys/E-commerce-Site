@@ -55,7 +55,7 @@ set_exception_handler(static function (Throwable $e) use ($isLocal): void {
 
 // Send security headers (Architecture.md §10)
 if (!headers_sent()) {
-    header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://*.supabase.co https://*.elfsight.com https://*.elfsightcdn.com https://static.elfsight.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.elfsight.com https://*.elfsightcdn.com; font-src 'self' https://fonts.gstatic.com https://*.elfsight.com https://*.elfsightcdn.com data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://elfsightcdn.com https://*.elfsight.com https://*.elfsightcdn.com; connect-src 'self' https://*.supabase.co https://*.elfsight.com https://*.elfsightcdn.com; frame-src 'self' https://*.elfsight.com https://*.elfsightcdn.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     header("X-Content-Type-Options: nosniff");
     header("Referrer-Policy: strict-origin-when-cross-origin");
     header("X-Frame-Options: DENY");

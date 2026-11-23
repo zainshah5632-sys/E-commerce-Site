@@ -44,6 +44,10 @@
   <!-- Cookie & Privacy Consent Component -->
   <?php require dirname(__DIR__) . '/partials/cookie-consent.php'; ?>
 
+  <!-- Elfsight AI Chatbot | Untitled AI Chatbot -->
+  <script src="https://elfsightcdn.com/platform.js" async></script>
+  <div class="elfsight-app-b88fa5ae-6b55-4839-9f95-72bf026a2089" data-elfsight-app-lazy></div>
+
   <!-- Deferred Vanilla Scripts (CSP compliant, no inline scripts per D-012) -->
   <script src="<?= asset('assets/js/ui.js') ?>" defer></script>
   <script src="<?= asset('assets/js/cart.js') ?>" defer></script>
