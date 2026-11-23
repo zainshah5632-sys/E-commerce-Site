@@ -44,6 +44,9 @@
   <!-- Cookie & Privacy Consent Component -->
   <?php require dirname(__DIR__) . '/partials/cookie-consent.php'; ?>
 
+  <!-- WhatsApp Chat Widget -->
+  <?php require dirname(__DIR__) . '/partials/whatsapp-widget.php'; ?>
+
   <!-- Elfsight AI Chatbot | Untitled AI Chatbot -->
   <script src="https://elfsightcdn.com/platform.js" async></script>
   <div class="elfsight-app-b88fa5ae-6b55-4839-9f95-72bf026a2089" data-elfsight-app-lazy></div>
