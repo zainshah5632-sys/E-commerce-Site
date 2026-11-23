@@ -220,5 +220,41 @@ final class Auth
         $res = $this->client->execute('PUT', $url, $headers, $body !== false ? $body : '{}');
         return $res->ok;
     }
+
+    /**
+     * Generates a password recovery request for the given email.
+     *
+     * @return array{ok: bool, error?: string}
+     */
+    public function recoverPassword(string $email, string $redirectTo): array
+    {
+        $url = "{$this->baseUrl}/auth/v1/recover";
+        $headers = [
+            'apikey: ' . $this->publishableKey,
+            'Content-Type: application/json',
+        ];
+
+        $body = json_encode([
+            'email'       => strtolower(trim($email)),
+            'redirect_to' => $redirectTo,
+        ]);
+
+        $res = $this->client->execute('POST', $url, $headers, $body !== false ? $body : '{}');
+        if ($res->ok) {
+            return ['ok' => true];
+        }
+
+        return ['ok' => false, 'error' => $res->error ?: 'Unable to send recovery email.'];
+    }
+
+    /**
+     * Constructs the official OAuth authorization redirect URL.
+     */
+    public function getOAuthUrl(string $provider, string $redirectTo): string
+    {
+        $cleanProvider = strtolower(trim($provider));
+        return "{$this->baseUrl}/auth/v1/authorize?provider={$cleanProvider}&redirect_to=" . urlencode($redirectTo);
+    }
 }
+
 

@@ -6,206 +6,427 @@ $errors = $errors ?? [];
 $activeCount = count(array_filter($categories, fn($c) => !empty($c['is_active'])));
 ?>
 
-<!-- Header -->
-<div class="admin-header flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-  <div>
-    <div class="text-xs font-medium text-slate-500 tracking-wide mb-1 flex items-center gap-1.5">
-      <span>Admin</span>
-      <span class="text-slate-400">/</span>
-      <span class="text-indigo-600 font-semibold">Categories</span>
+<div class="category-page-container">
+  <!-- Page Header -->
+  <header class="category-page-header">
+    <div class="category-page-header__meta">
+      <nav class="category-breadcrumbs" aria-label="Breadcrumb">
+        <a href="<?= url('/admin') ?>">Admin</a>
+        <span class="category-breadcrumbs__sep">/</span>
+        <span class="category-breadcrumbs__current">Categories</span>
+      </nav>
+      <h1 class="category-page-title">Categories &amp; Navigation</h1>
+      <p class="category-page-desc">Organize catalog structure, product groupings, and storefront navigation menus.</p>
     </div>
-    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Categories &amp; Navigation</h1>
-    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Organize product groupings, disciplines, and navigation taxonomy.</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-      <?= $activeCount ?> / <?= count($categories) ?> Active in Menu
-    </span>
-  </div>
+
+    <div class="category-page-header__actions">
+      <!-- Summary Badges -->
+      <div class="category-stat-pills" aria-label="Category Statistics">
+        <span class="category-stat-pill">
+          <span class="category-stat-pill__label">Total:</span>
+          <strong class="category-stat-pill__val" id="cat-stat-total"><?= count($categories) ?></strong>
+        </span>
+        <span class="category-stat-pill category-stat-pill--active">
+          <span class="category-stat-pill__dot"></span>
+          <span class="category-stat-pill__label">Active:</span>
+          <strong class="category-stat-pill__val" id="cat-stat-active"><?= $activeCount ?></strong>
+        </span>
+      </div>
+
+      <!-- Add Category Button -->
+      <button
+        type="button"
+        class="category-btn-primary"
+        data-action="add-category"
+        aria-haspopup="dialog"
+      >
+        <?= icon('plus', 16) ?>
+        <span>Add Category</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Server Validation Errors (if any) -->
+  <?php if (!empty($errors)): ?>
+    <div class="category-alert category-alert--error" role="alert">
+      <div class="category-alert__icon">
+        <?= icon('shield', 18) ?>
+      </div>
+      <div class="category-alert__content">
+        <h4 class="category-alert__title">Please review the following errors:</h4>
+        <ul class="category-alert__list">
+          <?php foreach ($errors as $field => $err): ?>
+            <li><?= e(is_array($err) ? implode(', ', $err) : $err) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <!-- Active Categories Card & Table -->
+  <section class="category-table-card" aria-label="Categories Directory">
+    <!-- Toolbar -->
+    <div class="category-toolbar">
+      <div class="category-toolbar__left">
+        <!-- Live Search -->
+        <div class="category-search-wrap">
+          <span class="category-search-icon" aria-hidden="true">
+            <?= icon('search', 16) ?>
+          </span>
+          <input
+            type="search"
+            id="category-search"
+            class="category-search-input"
+            placeholder="Search categories by name, slug or description..."
+            autocomplete="off"
+            aria-label="Search categories"
+          >
+          <button type="button" id="category-search-clear" class="category-search-clear" style="display: none;" aria-label="Clear search">
+            <?= icon('close', 14) ?>
+          </button>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="category-filter-wrap">
+          <label for="category-status-filter" class="sr-only">Filter by status</label>
+          <select id="category-status-filter" class="category-select" aria-label="Filter by status">
+            <option value="all">All Statuses</option>
+            <option value="active">Active in Navigation</option>
+            <option value="hidden">Hidden from Navigation</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="category-toolbar__right">
+        <span class="category-count-badge" id="category-records-count">
+          Showing <strong id="category-visible-count"><?= count($categories) ?></strong> of <?= count($categories) ?> categories
+        </span>
+      </div>
+    </div>
+
+    <!-- Categories Data Table -->
+    <div class="category-table-wrapper">
+      <table class="category-table" id="category-table">
+        <thead>
+          <tr>
+            <th scope="col" class="th-category">Category</th>
+            <th scope="col" class="th-slug">URL Slug</th>
+            <th scope="col" class="th-order text-center">Sort Priority</th>
+            <th scope="col" class="th-status">Status</th>
+            <th scope="col" class="th-actions text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="category-table-body">
+          <?php if (empty($categories)): ?>
+            <tr id="category-empty-initial">
+              <td colspan="5" class="category-empty-cell">
+                <div class="category-empty-state">
+                  <div class="category-empty-icon">
+                    <?= icon('folder', 28) ?>
+                  </div>
+                  <h3 class="category-empty-title">No categories found</h3>
+                  <p class="category-empty-text">Organize your store catalog by creating your first product category.</p>
+                  <button type="button" class="category-btn-primary category-btn-sm mt-3" data-action="add-category">
+                    <?= icon('plus', 14) ?>
+                    <span>Add First Category</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($categories as $cat): ?>
+              <?php
+                $isActive = !empty($cat['is_active']);
+                $sortOrder = (int)($cat['sort_order'] ?? 0);
+                $catId = (string)($cat['id'] ?? '');
+                $catName = (string)($cat['name'] ?? '');
+                $catSlug = (string)($cat['slug'] ?? '');
+                $catDesc = (string)($cat['description'] ?? '');
+              ?>
+              <tr
+                class="category-row"
+                data-category-row
+                data-id="<?= ea($catId) ?>"
+                data-name="<?= ea($catName) ?>"
+                data-slug="<?= ea($catSlug) ?>"
+                data-desc="<?= ea($catDesc) ?>"
+                data-sort="<?= $sortOrder ?>"
+                data-status="<?= $isActive ? 'active' : 'hidden' ?>"
+              >
+                <!-- Category Name & Description -->
+                <td class="td-category">
+                  <div class="category-name-cell">
+                    <div class="category-avatar-badge" aria-hidden="true">
+                      <?= icon('folder', 16) ?>
+                    </div>
+                    <div class="category-name-info">
+                      <span class="category-row-name"><?= e($catName) ?></span>
+                      <?php if ($catDesc !== ''): ?>
+                        <p class="category-row-desc" title="<?= ea($catDesc) ?>"><?= e($catDesc) ?></p>
+                      <?php else: ?>
+                        <span class="category-row-desc category-row-desc--empty">No description provided</span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- URL Slug -->
+                <td class="td-slug">
+                  <code class="category-slug-badge" title="Storefront path: /category/<?= ea($catSlug) ?>">
+                    /<?= e($catSlug) ?>
+                  </code>
+                </td>
+
+                <!-- Sort Priority -->
+                <td class="td-order text-center">
+                  <span class="category-order-badge" title="Sort order index">
+                    #<?= $sortOrder ?>
+                  </span>
+                </td>
+
+                <!-- Status Badge -->
+                <td class="td-status">
+                  <?php if ($isActive): ?>
+                    <span class="category-status-pill category-status-pill--active">
+                      <span class="category-status-dot"></span>
+                      <span>Active</span>
+                    </span>
+                  <?php else: ?>
+                    <span class="category-status-pill category-status-pill--hidden">
+                      <span class="category-status-dot"></span>
+                      <span>Hidden</span>
+                    </span>
+                  <?php endif; ?>
+                </td>
+
+                <!-- Actions -->
+                <td class="td-actions text-right">
+                  <div class="category-actions-group">
+                    <!-- View Storefront Link -->
+                    <a
+                      href="<?= url('/category/' . rawurlencode($catSlug)) ?>"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="category-action-btn"
+                      title="View category page on storefront"
+                      aria-label="View <?= ea($catName) ?> on storefront"
+                    >
+                      <?= icon('external-link', 15) ?>
+                    </a>
+
+                    <!-- Edit Drawer Trigger -->
+                    <button
+                      type="button"
+                      class="category-action-btn category-action-btn--edit"
+                      data-action="edit-category"
+                      title="Edit category"
+                      aria-label="Edit <?= ea($catName) ?>"
+                    >
+                      <?= icon('pencil', 15) ?>
+                    </button>
+
+                    <!-- Delete Category Form -->
+                    <form action="<?= url('/admin/categories/' . ea($catId) . '/delete') ?>" method="POST" class="category-delete-form">
+                      <?= csrf_field() ?>
+                      <button
+                        type="submit"
+                        class="category-action-btn category-action-btn--delete"
+                        data-confirm="Are you sure you want to delete category &quot;<?= ea($catName) ?>&quot;? Products in this category will remain available in the store as unassigned."
+                        title="Delete category"
+                        aria-label="Delete <?= ea($catName) ?>"
+                      >
+                        <?= icon('trash', 15) ?>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+
+          <!-- Empty Search Filter State (Dynamic) -->
+          <tr id="category-empty-filter" style="display: none;">
+            <td colspan="5" class="category-empty-cell">
+              <div class="category-empty-state">
+                <div class="category-empty-icon">
+                  <?= icon('search', 24) ?>
+                </div>
+                <h3 class="category-empty-title">No matching categories</h3>
+                <p class="category-empty-text">No categories match your search or filter criteria. Try adjusting your query.</p>
+                <button type="button" id="category-reset-filters" class="category-btn-secondary category-btn-sm mt-3">
+                  Reset Filters
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
-<!-- Master-Detail 2-Column Layout (1/3 Form on Left, 2/3 List on Right) -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-  
-  <!-- Left Column: Add Category Form (1/3 width, sticky) -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm sticky top-6">
-    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-      <div>
-        <h2 class="text-base font-bold text-slate-900">Add / Edit Category</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Create a new customer discipline.</p>
-      </div>
-      <span class="p-2 rounded-xl bg-indigo-50 text-indigo-600 text-xs">
-        <?= icon('plus', 16) ?>
-      </span>
+<!-- =====================================================================
+     Modern Right-Side Slide-Over Drawer: Add / Edit Category
+     ===================================================================== -->
+<div id="category-drawer-backdrop" class="category-drawer-backdrop" aria-hidden="true"></div>
+
+<aside
+  id="category-drawer"
+  class="category-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="category-drawer-title"
+  aria-describedby="category-drawer-desc"
+  tabindex="-1"
+>
+  <!-- Drawer Header (Sticky Top) -->
+  <div class="category-drawer__header">
+    <div class="category-drawer__header-content">
+      <div class="category-drawer__tag" id="category-drawer-tag">Storefront Taxonomy</div>
+      <h2 id="category-drawer-title" class="category-drawer__title">Add Category</h2>
+      <p id="category-drawer-desc" class="category-drawer__desc">Configure category identity, URL path, and navigation visibility.</p>
     </div>
+    <button
+      type="button"
+      id="category-drawer-close"
+      class="category-drawer__close-btn"
+      aria-label="Close drawer"
+    >
+      <?= icon('close', 18) ?>
+    </button>
+  </div>
 
-    <form action="<?= url('/admin/categories') ?>" method="POST" class="space-y-4" id="category-form">
-      <?= csrf_field() ?>
+  <!-- Drawer Body (Scrollable Form) -->
+  <form id="category-drawer-form" action="<?= url('/admin/categories') ?>" method="POST" class="category-drawer__form">
+    <?= csrf_field() ?>
+    <input type="hidden" id="category-id" name="id" value="">
 
+    <div class="category-drawer__body">
       <!-- Category Name -->
-      <div>
-        <label for="cat-name" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-          Category Name
+      <div class="category-form-group">
+        <label for="cat-name" class="category-form-label">
+          Category Name <span class="text-rose-500">*</span>
         </label>
         <input
           type="text"
           id="cat-name"
           name="name"
-          class="w-full h-10 bg-white border border-slate-300 rounded-xl px-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-sm"
-          required
+          class="category-form-input"
           placeholder="e.g. Studio Monitors"
+          required
+          maxlength="80"
+          autocomplete="off"
         >
-        <p class="text-[11px] text-slate-400 mt-1">Visible name displayed across storefront menus.</p>
-        <?php if (!empty($errors['name'])): ?>
-          <span class="text-xs text-rose-600 mt-1 block"><?= e($errors['name']) ?></span>
-        <?php endif; ?>
+        <p class="category-form-helper">The public category title shown in navigation menus, headings, and breadcrumbs.</p>
       </div>
 
       <!-- URL Slug -->
-      <div>
-        <label for="cat-slug" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-          URL Slug
-        </label>
-        <input
-          type="text"
-          id="cat-slug"
-          name="slug"
-          class="w-full h-10 bg-white border border-slate-300 rounded-xl px-3.5 text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-sm"
-          placeholder="e.g. studio-monitors"
-        >
-        <p class="text-[11px] text-slate-400 mt-1">Unique URL path: <code>/category/<b>slug</b></code> (lowercase, hyphens only).</p>
-        <?php if (!empty($errors['slug'])): ?>
-          <span class="text-xs text-rose-600 mt-1 block"><?= e($errors['slug']) ?></span>
-        <?php endif; ?>
+      <div class="category-form-group">
+        <div class="flex items-center justify-between mb-1">
+          <label for="cat-slug" class="category-form-label mb-0">
+            URL Slug <span class="text-rose-500">*</span>
+          </label>
+          <button
+            type="button"
+            id="cat-slug-regenerate"
+            class="category-slug-auto-btn"
+            title="Generate slug from name"
+          >
+            Auto-generate
+          </button>
+        </div>
+        <div class="category-slug-input-group">
+          <span class="category-slug-prefix" aria-hidden="true">/category/</span>
+          <input
+            type="text"
+            id="cat-slug"
+            name="slug"
+            class="category-slug-input"
+            placeholder="studio-monitors"
+            required
+            pattern="[a-z0-9\-]+"
+            title="Lowercase letters, numbers, and hyphens only"
+            autocomplete="off"
+          >
+        </div>
+        <p class="category-form-helper">Permanent URL path. Lowercase letters, numbers, and hyphens only.</p>
       </div>
 
       <!-- Description -->
-      <div>
-        <label for="cat-desc" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+      <div class="category-form-group">
+        <label for="cat-desc" class="category-form-label">
           Description
         </label>
         <textarea
           id="cat-desc"
           name="description"
           rows="3"
-          class="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-sm"
-          placeholder="Brief summary displayed on category banners and SEO cards..."
+          class="category-form-textarea"
+          placeholder="Brief summary displayed on category banners, filter sidebars, and SEO metadata cards..."
         ></textarea>
+        <p class="category-form-helper">Optional. Context for catalog headers and search engine descriptions.</p>
       </div>
 
-      <!-- Sort Order -->
-      <div>
-        <label for="cat-sort" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+      <!-- Sort Priority -->
+      <div class="category-form-group">
+        <label for="cat-sort" class="category-form-label">
           Sort Priority
         </label>
-        <input
-          type="number"
-          id="cat-sort"
-          name="sort_order"
-          value="0"
-          min="0"
-          class="w-full h-10 bg-white border border-slate-300 rounded-xl px-3.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-sm"
-        >
-        <p class="text-[11px] text-slate-400 mt-1">Lower integers display first in navigation.</p>
+        <div class="category-sort-input-wrap">
+          <input
+            type="number"
+            id="cat-sort"
+            name="sort_order"
+            value="0"
+            min="0"
+            max="9999"
+            class="category-form-input category-form-input--sort"
+          >
+          <div class="category-sort-stepper">
+            <button type="button" id="cat-sort-inc" class="category-sort-btn" aria-label="Increase sort order">+</button>
+            <button type="button" id="cat-sort-dec" class="category-sort-btn" aria-label="Decrease sort order">-</button>
+          </div>
+        </div>
+        <p class="category-form-helper">Ordering weight in storefront menus. Lower numbers appear first (e.g. 0 before 10).</p>
       </div>
 
-      <!-- Active in Navigation -->
-      <div class="pt-2">
-        <label class="flex items-center gap-3 cursor-pointer select-none">
-          <input type="checkbox" name="is_active" value="1" checked class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-          <span class="text-sm font-semibold text-slate-700">Display in Storefront Navigation</span>
+      <!-- Display in Storefront Navigation (Modern SaaS Toggle Switch) -->
+      <div class="category-toggle-card">
+        <div class="category-toggle-card__info">
+          <span class="category-toggle-card__title">Display in Storefront Navigation</span>
+          <p class="category-toggle-card__desc">When enabled, this category is exposed in header menus, breadcrumbs, and catalog discovery filters.</p>
+        </div>
+        <label class="category-switch" for="cat-active">
+          <input
+            type="checkbox"
+            id="cat-active"
+            name="is_active"
+            value="1"
+            checked
+          >
+          <span class="category-switch__slider" aria-hidden="true"></span>
+          <span class="sr-only">Display in storefront navigation</span>
         </label>
       </div>
-
-      <!-- Action Button -->
-      <div class="pt-2">
-        <button
-          type="submit"
-          class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition shadow-md shadow-indigo-600/20 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <?= icon('plus', 14) ?>
-          <span>Save Category</span>
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Right Column: Active Categories List (2/3 width) -->
-  <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-      <div>
-        <h2 class="text-lg font-bold text-slate-900">Active Categories Table</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Manage existing classifications and hierarchy.</p>
-      </div>
-      <span class="text-xs text-slate-400 font-mono"><?= count($categories) ?> total records</span>
     </div>
 
-    <?php if (empty($categories)): ?>
-      <div class="p-12 text-center text-slate-500 text-sm">
-        No store categories found. Create one using the form on the left.
-      </div>
-    <?php else: ?>
-      <div class="divide-y divide-slate-100">
-        <?php foreach ($categories as $cat): ?>
-          <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition group">
-            
-            <!-- Left: Drag indicator, Title, Description, and Badges -->
-            <div class="flex items-start gap-3.5 min-w-0">
-              <span class="text-slate-300 group-hover:text-slate-500 transition cursor-grab text-lg select-none pt-0.5" title="Reorder">
-                ⋮⋮
-              </span>
-              <div>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                  <h3 class="text-sm font-semibold text-slate-900">
-                    <?= e($cat['name']) ?>
-                  </h3>
-                  <code class="text-[11px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
-                    /<?= e($cat['slug']) ?>
-                  </code>
-                  <span class="text-xs font-semibold px-2 py-0.5 rounded-full <?= !empty($cat['is_active']) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-500' ?>">
-                    <?= !empty($cat['is_active']) ? 'Active' : 'Hidden' ?>
-                  </span>
-                  <span class="text-[11px] text-slate-400 font-mono">
-                    Order: <?= (int)$cat['sort_order'] ?>
-                  </span>
-                </div>
-                <?php if (!empty($cat['description'])): ?>
-                  <p class="text-xs text-slate-500 mt-1 max-w-xl leading-relaxed">
-                    <?= e($cat['description']) ?>
-                  </p>
-                <?php endif; ?>
-              </div>
-            </div>
-
-            <!-- Right: Actions -->
-            <div class="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
-              <a
-                href="<?= url('/category/' . rawurlencode($cat['slug'])) ?>"
-                target="_blank"
-                class="p-2 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition"
-                title="View on Storefront"
-              >
-                <?= icon('eye', 15) ?>
-              </a>
-
-              <!-- Delete Form -->
-              <form action="<?= url('/admin/categories/' . ea($cat['id']) . '/delete') ?>" method="POST" style="display: inline;">
-                <?= csrf_field() ?>
-                <button
-                  type="submit"
-                  class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-                  data-confirm="Are you sure you want to delete category '<?= ea($cat['name']) ?>'? Any associated products will remain in the catalog as unassigned."
-                  title="Delete Category"
-                >
-                  <?= icon('trash', 15) ?>
-                </button>
-              </form>
-            </div>
-
-          </div>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-  </div>
-
-</div>
+    <!-- Drawer Footer (Sticky Bottom) -->
+    <div class="category-drawer__footer">
+      <button
+        type="button"
+        id="category-drawer-cancel"
+        class="category-btn-secondary"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        id="category-drawer-submit"
+        class="category-btn-primary"
+      >
+        <?= icon('check', 16) ?>
+        <span id="category-drawer-submit-label">Save Category</span>
+      </button>
+    </div>
+  </form>
+</aside>

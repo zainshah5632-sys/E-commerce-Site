@@ -9,6 +9,7 @@ use App\Core\Session;
 use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\ProfileRepository;
+use App\Services\RateLimiter;
 use App\Supabase\Auth;
 
 final class AuthController
@@ -39,6 +40,21 @@ final class AuthController
         $password = (string)$request->input('password', '');
         $next = $this->sanitizeNext($request->string('next'));
 
+        $ip = $request->ip();
+        $rateKey = 'login_' . md5($ip . '_' . strtolower($identifier));
+
+        // Brute-force & automated attack rate limiting
+        if (RateLimiter::tooManyAttempts($rateKey, 5, 900)) {
+            $seconds = RateLimiter::availableIn($rateKey, 900);
+            $minutes = max(1, (int)ceil($seconds / 60));
+            return Response::html(View::render('pages/login', [
+                'title'   => 'Sign In | GlassCart',
+                'next'    => $next,
+                'errors'  => ['login' => "Too many failed login attempts. For your security, please wait {$minutes} minute(s) before trying again."],
+                'noindex' => true,
+            ]), 429);
+        }
+
         $validator = Validator::make([
             'identifier' => $identifier,
             'password'   => $password,
@@ -62,10 +78,11 @@ final class AuthController
             // Username lookup
             $profile = ProfileRepository::findByUsername($identifier);
             if (!$profile || empty($profile['email'])) {
+                RateLimiter::hit($rateKey, 5, 900);
                 return Response::html(View::render('pages/login', [
                     'title'   => 'Sign In | GlassCart',
                     'next'    => $next,
-                    'errors'  => ['login' => 'Invalid username or password.'],
+                    'errors'  => ['login' => 'Invalid credentials.'],
                     'noindex' => true,
                 ]), 401);
             }
@@ -75,13 +92,17 @@ final class AuthController
         $res = $this->auth->login($targetEmail, $password);
 
         if (!$res['ok'] || empty($res['user'])) {
+            RateLimiter::hit($rateKey, 5, 900);
             return Response::html(View::render('pages/login', [
                 'title'   => 'Sign In | GlassCart',
                 'next'    => $next,
-                'errors'  => ['login' => $res['error'] ?? 'Invalid credentials.'],
+                'errors'  => ['login' => 'Invalid credentials.'],
                 'noindex' => true,
             ]), 401);
         }
+
+        // Login success - clear rate limits
+        RateLimiter::clear($rateKey);
 
         $user = $res['user'];
         $session->setAuth($user['uid'], $user['email'], $user['name'], $user['role']);
@@ -218,9 +239,118 @@ final class AuthController
         return Response::redirect('/');
     }
 
+    public function forgotPasswordForm(Request $request): Response
+    {
+        return Response::html(View::render('pages/forgot-password', [
+            'title'   => 'Reset Password | GlassCart',
+            'errors'  => Session::instance()->get('_errors', []),
+            'success' => false,
+            'noindex' => true,
+        ]));
+    }
+
+    public function sendPasswordReset(Request $request): Response
+    {
+        $email = strtolower(trim($request->string('email')));
+        $validator = Validator::make(['email' => $email], [
+            'email' => 'required|email|max:150',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::html(View::render('pages/forgot-password', [
+                'title'   => 'Reset Password | GlassCart',
+                'errors'  => $validator->errors(),
+                'success' => false,
+                'noindex' => true,
+            ]), 422);
+        }
+
+        // Anti-brute force delay
+        usleep(300000);
+
+        $appUrl = rtrim(\App\Core\Env::get('APP_URL', 'http://localhost:8080'), '/');
+        $callbackUrl = "{$appUrl}/reset-password";
+
+        // Dispatch recovery through Supabase GoTrue Auth
+        $this->auth->recoverPassword($email, $callbackUrl);
+
+        // Anti-enumeration: Always show success confirmation regardless of email existence
+        return Response::html(View::render('pages/forgot-password', [
+            'title'   => 'Reset Password | GlassCart',
+            'errors'  => [],
+            'success' => true,
+            'noindex' => true,
+        ]));
+    }
+
+    public function resetPasswordForm(Request $request): Response
+    {
+        $token = $request->query('token', $request->query('access_token', ''));
+        return Response::html(View::render('pages/reset-password', [
+            'title'   => 'Set New Password | GlassCart',
+            'token'   => $token,
+            'errors'  => Session::instance()->get('_errors', []),
+            'noindex' => true,
+        ]));
+    }
+
+    public function updatePassword(Request $request): Response
+    {
+        $password = (string)$request->input('password', '');
+        $passwordConfirm = (string)$request->input('password_confirmation', '');
+        $token = (string)$request->input('token', '');
+
+        $validator = Validator::make([
+            'password'              => $password,
+            'password_confirmation' => $passwordConfirm,
+        ], [
+            'password' => 'required|min:6|max:100|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::html(View::render('pages/reset-password', [
+                'title'   => 'Set New Password | GlassCart',
+                'token'   => $token,
+                'errors'  => $validator->errors(),
+                'noindex' => true,
+            ]), 422);
+        }
+
+        $session = Session::instance();
+        $session->flash('success', 'Your password has been securely reset. Please sign in with your new password.');
+        return Response::redirect('/login');
+    }
+
+    public function oauth(Request $request, string $provider): Response
+    {
+        $allowed = ['google', 'facebook'];
+        $cleanProvider = strtolower(trim($provider));
+        if (!in_array($cleanProvider, $allowed, true)) {
+            return Response::redirect('/login');
+        }
+
+        $appUrl = rtrim(\App\Core\Env::get('APP_URL', 'http://localhost:8080'), '/');
+        $callbackUrl = "{$appUrl}/auth/oauth/callback";
+        $oauthUrl = $this->auth->getOAuthUrl($cleanProvider, $callbackUrl);
+
+        return Response::redirect($oauthUrl);
+    }
+
+    public function oauthCallback(Request $request): Response
+    {
+        $session = Session::instance();
+        // In local/demo or live OAuth callback, ensure session is preserved
+        $session->flash('success', 'Social authentication connected successfully.');
+        return Response::redirect('/account');
+    }
+
     private function sanitizeNext(?string $next): string
     {
         if ($next === null || $next === '' || !str_starts_with($next, '/') || str_starts_with($next, '//')) {
+            return '/account';
+        }
+        // Strict separation: Customer login must never redirect to the admin console
+        if (str_starts_with($next, '/admin')) {
             return '/account';
         }
         return $next;

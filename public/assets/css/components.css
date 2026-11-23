@@ -754,3 +754,234 @@
   border-radius: var(--r-pill);
   transition: width var(--t-base) var(--ease);
 }
+
+/* =====================================================================
+   Accessibility Font-Size Scaler Controls
+   ===================================================================== */
+.a11y-font-scale {
+  display: inline-flex;
+  align-items: center;
+  background: var(--glass-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 2px;
+  gap: 2px;
+}
+
+.btn-a11y-scale {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-pill);
+  color: var(--text-2);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.74rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all var(--t-fast) var(--ease);
+}
+
+.btn-a11y-scale:hover {
+  color: var(--text-1);
+  background: var(--glass-strong);
+}
+
+.btn-a11y-scale.is-active {
+  background: var(--brand-600);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+}
+
+/* =====================================================================
+   Cookie Consent Banner & Preferences Modal
+   ===================================================================== */
+.cookie-banner {
+  position: fixed;
+  bottom: var(--s-4);
+  right: var(--s-4);
+  max-width: 440px;
+  width: calc(100vw - 32px);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-xl), var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  padding: var(--s-5);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  animation: slide-up-fade 0.4s var(--ease) forwards;
+}
+
+.cookie-banner.is-hidden {
+  display: none !important;
+}
+
+.cookie-banner__header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.cookie-banner__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--grad-brand-soft);
+  color: var(--brand-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cookie-banner__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--text-1);
+}
+
+.cookie-banner__desc {
+  font-size: 0.84rem;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.cookie-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+
+.cookie-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+.cookie-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cookie-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-xl), var(--glass-edge);
+  padding: var(--s-6);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.cookie-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--s-4);
+}
+
+.cookie-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+.cookie-option-card {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--glass-subtle);
+  border: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.cookie-option-card h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 2px;
+}
+
+.cookie-option-card p {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  line-height: 1.35;
+}
+
+/* =====================================================================
+   OAuth Social Authentication Buttons
+   ===================================================================== */
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--s-5) 0 var(--s-4);
+  color: var(--text-3);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--line);
+}
+
+.oauth-divider span {
+  padding: 0 var(--s-3);
+}
+
+.oauth-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+
+.btn-oauth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: 44px;
+  border-radius: var(--r-md);
+  background: var(--glass-strong);
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--t-fast) var(--ease);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-oauth:hover {
+  background: #ffffff;
+  border-color: var(--brand-500);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+

@@ -1,0 +1,12 @@
+# Ensure proper line endings across operating systems
+* text=auto
+*.sh text eol=lf
+*.php text
+*.css text
+*.js text
+*.html text
+*.json text
+*.md text
+*.yaml text
+*.yml text
+

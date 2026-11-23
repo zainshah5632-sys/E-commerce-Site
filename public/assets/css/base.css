@@ -12,6 +12,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html[data-font-scale="sm"] { font-size: 14px; }
+html[data-font-scale="md"] { font-size: 16px; }
+html[data-font-scale="lg"] { font-size: 18px; }
+html[data-font-scale="xl"] { font-size: 20px; }
+
 body {
   background-color: var(--bg-base);
   color: var(--text-1);

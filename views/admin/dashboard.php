@@ -5,256 +5,357 @@ $stats = $stats ?? [];
 $recentOrders = $recentOrders ?? [];
 $lowStockProducts = $lowStockProducts ?? [];
 $userCount = $userCount ?? 0;
+$lowStockCount = (int)($stats['low_stock'] ?? 0);
 ?>
 
-<!-- Executive Header & Action Row -->
-<div class="admin-dashboard-header flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-  <div>
-    <div class="text-xs font-medium text-slate-500 tracking-wide mb-1 flex items-center gap-1.5">
-      <span>Admin</span>
-      <span class="text-slate-400">/</span>
-      <span class="text-indigo-600 font-semibold">Overview</span>
-    </div>
-    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Dashboard &amp; Analytics</h1>
-    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Real-time telemetry, transaction flows, and stock health.</p>
-  </div>
-
-  <div class="flex items-center gap-3 flex-wrap">
-    <!-- Date-range picker button -->
-    <button type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer">
-      <span style="color: #6366f1;">📅</span>
-      <span>Last 30 Days</span>
-      <span class="text-slate-400 text-[10px]">▼</span>
-    </button>
-
-    <!-- Export Report CTA -->
-    <a href="data:text/csv;charset=utf-8,Order,Customer,Status,Total%0A<?= urlencode(implode("%0A", array_map(fn($o) => "{$o['order_number']},{$o['customer_name']},{$o['status']},{$o['total_cents']}", $recentOrders))) ?>" download="glasscart-telemetry.csv" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition">
-      <?= icon('file-text', 14) ?>
-      <span>Export Report</span>
-    </a>
-
-    <!-- New Product CTA -->
-    <a href="<?= url('/admin/products/new') ?>" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm shadow-indigo-600/20 active:scale-[0.99]">
-      <?= icon('plus', 14) ?>
-      <span>New Product</span>
-    </a>
-  </div>
-</div>
-
-<!-- KPI Metric Cards (Revenue, Orders, Customers, Inventory) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+<div class="dashboard-page-container">
   
-  <!-- 1. Total Revenue -->
-  <div class="kpi-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Gross Revenue (30d)</span>
-        <span class="text-indigo-600 bg-indigo-50 p-1.5 rounded-lg"><?= icon('cart', 16) ?></span>
-      </div>
-      <div class="text-3xl font-extrabold tracking-tight text-slate-900 mt-2">
-        <?= money((int)($stats['revenue_30d_cents'] ?? 0)) ?>
-      </div>
+  <!-- Executive Page Header -->
+  <header class="dashboard-header">
+    <div class="dashboard-header__meta">
+      <nav class="dashboard-breadcrumbs" aria-label="Breadcrumb">
+        <a href="<?= url('/admin') ?>">Admin</a>
+        <span class="dashboard-breadcrumbs__sep">/</span>
+        <span class="dashboard-breadcrumbs__current">Overview</span>
+      </nav>
+      <h1 class="dashboard-title">Dashboard &amp; Analytics</h1>
+      <p class="dashboard-subtitle">
+        Real-time telemetry, transaction flows, customer acquisition, and warehouse stock health.
+      </p>
     </div>
-    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-      <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>↑</span> +12.4% vs last month
-      </span>
-      <span class="text-slate-400">Net Settled</span>
-    </div>
-  </div>
 
-  <!-- 2. Orders Volume -->
-  <div class="kpi-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Orders Today</span>
-        <span class="text-indigo-600 bg-indigo-50 p-1.5 rounded-lg"><?= icon('package', 16) ?></span>
-      </div>
-      <div class="text-3xl font-extrabold tracking-tight text-slate-900 mt-2">
-        <?= (int)($stats['orders_today'] ?? 0) ?>
-      </div>
-    </div>
-    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-      <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>↑</span> +8.6% this week
-      </span>
-      <span class="text-amber-600 font-medium"><?= (int)($stats['pending_orders'] ?? 0) ?> pending</span>
-    </div>
-  </div>
-
-  <!-- 3. Registered Customers -->
-  <div class="kpi-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Registered Customers</span>
-        <span class="text-indigo-600 bg-indigo-50 p-1.5 rounded-lg"><?= icon('user', 16) ?></span>
-      </div>
-      <div class="text-3xl font-extrabold tracking-tight text-slate-900 mt-2">
-        <?= (int)$userCount ?>
-      </div>
-    </div>
-    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-      <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-        <span>↑</span> +18.3% this quarter
-      </span>
-      <span class="text-slate-400">Active accounts</span>
-    </div>
-  </div>
-
-  <!-- 4. Inventory Health -->
-  <?php $lowStockCount = (int)($stats['low_stock'] ?? 0); ?>
-  <div class="kpi-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Inventory Health</span>
-        <span class="<?= $lowStockCount > 0 ? 'text-rose-600 bg-rose-50' : 'text-emerald-600 bg-emerald-50' ?> p-1.5 rounded-lg">
-          <?= icon('truck', 16) ?>
+    <div class="dashboard-header__actions">
+      <!-- Date Range Filter Pill -->
+      <div class="dashboard-date-filter" id="dashboard-date-picker">
+        <span class="dashboard-date-filter__icon" aria-hidden="true">
+          <?= icon('calendar', 15) ?>
+        </span>
+        <span class="dashboard-date-filter__label">Last 30 Days</span>
+        <span class="dashboard-date-filter__arrow" aria-hidden="true">
+          <?= icon('chevron-down', 13) ?>
         </span>
       </div>
-      <div class="text-3xl font-extrabold tracking-tight <?= $lowStockCount > 0 ? 'text-rose-600' : 'text-slate-900' ?> mt-2">
-        <?= $lowStockCount > 0 ? "{$lowStockCount} Alerts" : 'Optimal' ?>
-      </div>
+
+      <!-- Export CSV Report -->
+      <a
+        href="data:text/csv;charset=utf-8,Order,Customer,Status,Total%0A<?= urlencode(implode("%0A", array_map(fn($o) => "{$o['order_number']},{$o['customer_name']},{$o['status']},{$o['total_cents']}", $recentOrders))) ?>"
+        download="glasscart-telemetry-report.csv"
+        class="dashboard-btn-secondary"
+        title="Download CSV transaction export"
+      >
+        <?= icon('download', 15) ?>
+        <span>Export Report</span>
+      </a>
+
+      <!-- New Product CTA -->
+      <a
+        href="<?= url('/admin/products/new') ?>"
+        class="dashboard-btn-primary"
+      >
+        <?= icon('plus', 16) ?>
+        <span>New Product</span>
+      </a>
     </div>
-    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-      <?php if ($lowStockCount > 0): ?>
-        <span class="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-          <span>⚠</span> Low stock warning
-        </span>
-      <?php else: ?>
-        <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-          <span>✓</span> 100% adequate stock
-        </span>
-      <?php endif; ?>
-      <span class="text-slate-400">Warehouse level</span>
-    </div>
-  </div>
+  </header>
 
-</div>
-
-<!-- Content Split: Recent Orders Table (2/3) & Low Stock Watch (1/3) -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-  <!-- Recent Orders Table Container -->
-  <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">Recent Transactions</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Latest order fulfillments and customer payments.</p>
+  <!-- 4 KPI Metric Cards -->
+  <section class="dashboard-kpi-grid" aria-label="Key Performance Indicators">
+    
+    <!-- 1. Gross Revenue -->
+    <div class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card__top">
+        <span class="dashboard-kpi-card__label">Gross Revenue (30d)</span>
+        <div class="dashboard-kpi-card__icon dashboard-kpi-card__icon--indigo" aria-hidden="true">
+          <?= icon('cart', 18) ?>
         </div>
-        <a href="<?= url('/admin/orders') ?>" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+      </div>
+      <div class="dashboard-kpi-card__middle">
+        <div class="dashboard-kpi-card__value">
+          <?= money((int)($stats['revenue_30d_cents'] ?? 0)) ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__bottom">
+        <span class="dashboard-kpi-trend dashboard-kpi-trend--up">
+          <?= icon('trending-up', 13) ?>
+          <span>+12.4% vs last period</span>
+        </span>
+        <span class="dashboard-kpi-card__context">Net settled</span>
+      </div>
+    </div>
+
+    <!-- 2. Orders Volume -->
+    <div class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card__top">
+        <span class="dashboard-kpi-card__label">Orders Today</span>
+        <div class="dashboard-kpi-card__icon dashboard-kpi-card__icon--violet" aria-hidden="true">
+          <?= icon('package', 18) ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__middle">
+        <div class="dashboard-kpi-card__value">
+          <?= (int)($stats['orders_today'] ?? 0) ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__bottom">
+        <span class="dashboard-kpi-trend dashboard-kpi-trend--up">
+          <?= icon('trending-up', 13) ?>
+          <span>+8.6% this week</span>
+        </span>
+        <span class="dashboard-kpi-card__context">
+          <strong class="text-amber-600 font-semibold"><?= (int)($stats['pending_orders'] ?? 0) ?></strong> pending
+        </span>
+      </div>
+    </div>
+
+    <!-- 3. Registered Customers -->
+    <div class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card__top">
+        <span class="dashboard-kpi-card__label">Registered Customers</span>
+        <div class="dashboard-kpi-card__icon dashboard-kpi-card__icon--blue" aria-hidden="true">
+          <?= icon('user', 18) ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__middle">
+        <div class="dashboard-kpi-card__value">
+          <?= (int)$userCount ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__bottom">
+        <span class="dashboard-kpi-trend dashboard-kpi-trend--up">
+          <?= icon('trending-up', 13) ?>
+          <span>+18.3% this quarter</span>
+        </span>
+        <span class="dashboard-kpi-card__context">Active accounts</span>
+      </div>
+    </div>
+
+    <!-- 4. Inventory Health -->
+    <div class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card__top">
+        <span class="dashboard-kpi-card__label">Inventory Health</span>
+        <div class="dashboard-kpi-card__icon <?= $lowStockCount > 0 ? 'dashboard-kpi-card__icon--rose' : 'dashboard-kpi-card__icon--emerald' ?>" aria-hidden="true">
+          <?= $lowStockCount > 0 ? icon('alert-triangle', 18) : icon('truck', 18) ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__middle">
+        <div class="dashboard-kpi-card__value <?= $lowStockCount > 0 ? 'text-rose-600' : 'text-slate-900' ?>">
+          <?= $lowStockCount > 0 ? "{$lowStockCount} Items Low" : 'Optimal' ?>
+        </div>
+      </div>
+      <div class="dashboard-kpi-card__bottom">
+        <?php if ($lowStockCount > 0): ?>
+          <span class="dashboard-kpi-trend dashboard-kpi-trend--down">
+            <?= icon('trending-down', 13) ?>
+            <span>Restock required</span>
+          </span>
+          <span class="dashboard-kpi-card__context text-rose-600 font-medium">Critical tier</span>
+        <?php else: ?>
+          <span class="dashboard-kpi-trend dashboard-kpi-trend--up">
+            <?= icon('check', 13) ?>
+            <span>100% Stocked</span>
+          </span>
+          <span class="dashboard-kpi-card__context">Healthy levels</span>
+        <?php endif; ?>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Content Split: Recent Transactions (2/3) + Low Stock Watch (1/3) -->
+  <div class="dashboard-main-grid">
+
+    <!-- Recent Transactions Table Card (2/3) -->
+    <section class="dashboard-card dashboard-orders-card" aria-labelledby="heading-recent-orders">
+      <div class="dashboard-card__header">
+        <div>
+          <h2 id="heading-recent-orders" class="dashboard-card__title">Recent Transactions</h2>
+          <p class="dashboard-card__desc">Latest customer orders, fulfillment workflows, and payment captures.</p>
+        </div>
+        <a href="<?= url('/admin/orders') ?>" class="dashboard-card__link">
           <span>View All Orders</span>
-          <?= icon('arrow-right', 12) ?>
+          <?= icon('arrow-right', 13) ?>
         </a>
       </div>
 
-      <?php if (empty($recentOrders)): ?>
-        <div class="p-12 text-center text-slate-500 text-sm">
-          <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
-            <?= icon('cart', 20) ?>
+      <div class="dashboard-card__body p-0">
+        <?php if (empty($recentOrders)): ?>
+          <div class="dashboard-empty-state">
+            <div class="dashboard-empty-icon" aria-hidden="true">
+              <?= icon('cart', 24) ?>
+            </div>
+            <h3 class="dashboard-empty-title">No transactions recorded yet</h3>
+            <p class="dashboard-empty-desc">When buyers complete checkout, order invoices and delivery statuses will populate here in real-time.</p>
+            <a href="<?= url('/admin/products') ?>" class="dashboard-btn-secondary dashboard-btn-sm mt-3">
+              Explore Products Catalog
+            </a>
           </div>
-          No customer orders placed yet.
-        </div>
-      <?php else: ?>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50/70 border-b border-slate-200">
-                <th class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3.5">Order</th>
-                <th class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3.5">Customer</th>
-                <th class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3.5">Fulfillment</th>
-                <th class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-6 py-3.5 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <?php foreach ($recentOrders as $ord): ?>
-                <?php
-                  $status = strtolower($ord['status'] ?? 'pending');
-                  $badgeClasses = match($status) {
-                    'delivered', 'confirmed' => 'text-emerald-700 bg-emerald-50 border border-emerald-200/60',
-                    'shipped' => 'text-indigo-700 bg-indigo-50 border border-indigo-200/60',
-                    'cancelled' => 'text-rose-700 bg-rose-50 border border-rose-200/60',
-                    default => 'text-amber-700 bg-amber-50 border border-amber-200/60',
-                  };
-                ?>
-                <tr class="hover:bg-slate-50/60 transition text-sm text-slate-700">
-                  <td class="px-6 py-4">
-                    <a href="<?= url('/admin/orders/' . rawurlencode($ord['order_number'])) ?>" class="font-bold text-indigo-600 hover:text-indigo-700">
-                      <?= e($ord['order_number']) ?>
-                    </a>
-                    <div class="text-[11px] text-slate-400 mt-0.5">
-                      <?= date('j M Y, H:i', strtotime($ord['created_at'])) ?>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="font-medium text-slate-900"><?= e($ord['customer_name'] ?? 'Guest Customer') ?></div>
-                    <div class="text-[11px] text-slate-500"><?= e($ord['customer_email'] ?? '') ?></div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize <?= $badgeClasses ?>">
-                      <?= e($status) ?>
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right font-bold text-slate-900">
-                    <?= money((int)$ord['total_cents']) ?>
-                  </td>
+        <?php else: ?>
+          <div class="dashboard-table-wrap">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="th-order">Order Reference</th>
+                  <th scope="col" class="th-customer">Customer</th>
+                  <th scope="col" class="th-status">Fulfillment Status</th>
+                  <th scope="col" class="th-amount text-right">Total Amount</th>
+                  <th scope="col" class="th-action text-right"></th>
                 </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php endif; ?>
-    </div>
-  </div>
+              </thead>
+              <tbody>
+                <?php foreach ($recentOrders as $ord): ?>
+                  <?php
+                    $status = strtolower($ord['status'] ?? 'pending');
+                    $orderNum = (string)$ord['order_number'];
+                    $custName = (string)($ord['customer_name'] ?? 'Guest Customer');
+                    $custEmail = (string)($ord['customer_email'] ?? '');
+                    $totalCents = (int)($ord['total_cents'] ?? 0);
+                    $createdAt = !empty($ord['created_at']) ? strtotime($ord['created_at']) : time();
+                  ?>
+                  <tr class="dashboard-table-row">
+                    <!-- Order Reference & Date -->
+                    <td class="td-order">
+                      <div class="dashboard-order-cell">
+                        <a href="<?= url('/admin/orders/' . rawurlencode($orderNum)) ?>" class="dashboard-order-link font-mono">
+                          #<?= e($orderNum) ?>
+                        </a>
+                        <span class="dashboard-order-date">
+                          <?= date('M j, Y', $createdAt) ?> &bull; <?= date('H:i', $createdAt) ?>
+                        </span>
+                      </div>
+                    </td>
 
-  <!-- Low Stock Watch Container (1/3) -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <h2 class="text-lg font-bold text-slate-900">Low Stock Watch</h2>
-        <span class="text-xs font-semibold px-2 py-0.5 rounded-md <?= count($lowStockProducts) > 0 ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600' ?>">
-          <?= count($lowStockProducts) ?> items
+                    <!-- Customer -->
+                    <td class="td-customer">
+                      <div class="dashboard-customer-cell">
+                        <span class="dashboard-customer-name"><?= e($custName) ?></span>
+                        <span class="dashboard-customer-email"><?= e($custEmail !== '' ? $custEmail : 'No email provided') ?></span>
+                      </div>
+                    </td>
+
+                    <!-- Fulfillment Status -->
+                    <td class="td-status">
+                      <?php if ($status === 'delivered' || $status === 'confirmed'): ?>
+                        <span class="dashboard-badge dashboard-badge--delivered">
+                          <span class="dashboard-badge__dot"></span>
+                          <span>Delivered</span>
+                        </span>
+                      <?php elseif ($status === 'shipped'): ?>
+                        <span class="dashboard-badge dashboard-badge--shipped">
+                          <span class="dashboard-badge__dot"></span>
+                          <span>In Transit</span>
+                        </span>
+                      <?php elseif ($status === 'cancelled'): ?>
+                        <span class="dashboard-badge dashboard-badge--cancelled">
+                          <span class="dashboard-badge__dot"></span>
+                          <span>Cancelled</span>
+                        </span>
+                      <?php else: ?>
+                        <span class="dashboard-badge dashboard-badge--pending">
+                          <span class="dashboard-badge__dot"></span>
+                          <span>Pending Payment</span>
+                        </span>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Total Amount -->
+                    <td class="td-amount text-right">
+                      <span class="dashboard-order-total font-mono">
+                        <?= money($totalCents) ?>
+                      </span>
+                    </td>
+
+                    <!-- View Action -->
+                    <td class="td-action text-right">
+                      <a
+                        href="<?= url('/admin/orders/' . rawurlencode($orderNum)) ?>"
+                        class="dashboard-row-action"
+                        title="View order details"
+                        aria-label="View order <?= ea($orderNum) ?>"
+                      >
+                        <?= icon('external-link', 14) ?>
+                      </a>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        <?php endif; ?>
+      </div>
+    </section>
+
+    <!-- Low Stock Watch Card (1/3) -->
+    <aside class="dashboard-card dashboard-stock-card" aria-labelledby="heading-stock-watch">
+      <div class="dashboard-card__header">
+        <div>
+          <h2 id="heading-stock-watch" class="dashboard-card__title">Low Stock Watch</h2>
+          <p class="dashboard-card__desc">Inventory items approaching or below alert threshold (5 units).</p>
+        </div>
+        <span class="dashboard-stock-count-pill <?= count($lowStockProducts) > 0 ? 'dashboard-stock-count-pill--alert' : 'dashboard-stock-count-pill--ok' ?>">
+          <?= count($lowStockProducts) ?> Alert<?= count($lowStockProducts) === 1 ? '' : 's' ?>
         </span>
       </div>
 
-      <?php if (empty($lowStockProducts)): ?>
-        <div class="py-8 text-center text-slate-500 text-xs">
-          <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-2 font-bold">
-            ✓
-          </div>
-          All products currently maintain inventory levels above minimum thresholds.
-        </div>
-      <?php else: ?>
-        <div class="space-y-3">
-          <?php foreach ($lowStockProducts as $p): ?>
-            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
-              <div class="min-w-0 pr-2">
-                <div class="text-sm font-semibold text-slate-900 truncate">
-                  <?= e($p['name']) ?>
-                </div>
-                <div class="text-xs text-slate-500 font-mono">
-                  SKU: <?= e($p['sku'] ?? 'N/A') ?>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <span class="text-xs font-bold px-2 py-1 rounded-md <?= ((int)$p['stock'] <= 2) ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800' ?>">
-                  <?= (int)$p['stock'] ?> left
-                </span>
-                <a href="<?= url('/admin/products/' . ea($p['id']) . '/edit') ?>" class="p-1 text-slate-400 hover:text-slate-700" title="Restock">
-                  <?= icon('arrow-right', 14) ?>
-                </a>
-              </div>
+      <div class="dashboard-card__body">
+        <?php if (empty($lowStockProducts)): ?>
+          <div class="dashboard-empty-state py-6">
+            <div class="dashboard-empty-icon dashboard-empty-icon--emerald" aria-hidden="true">
+              <?= icon('check', 20) ?>
             </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
-    </div>
+            <h3 class="dashboard-empty-title">Stock Levels Optimal</h3>
+            <p class="dashboard-empty-desc">All products across the warehouse currently maintain sufficient inventory levels above minimum thresholds.</p>
+          </div>
+        <?php else: ?>
+          <div class="dashboard-stock-list">
+            <?php foreach ($lowStockProducts as $p): ?>
+              <?php
+                $stock = (int)($p['stock'] ?? 0);
+                $isCritical = $stock <= 2;
+                $pct = min(100, max(10, (int)round(($stock / 5) * 100)));
+              ?>
+              <div class="dashboard-stock-item">
+                <div class="dashboard-stock-item__meta">
+                  <div class="dashboard-stock-item__header">
+                    <span class="dashboard-stock-item__name" title="<?= ea($p['name']) ?>">
+                      <?= e($p['name']) ?>
+                    </span>
+                    <span class="dashboard-stock-badge <?= $isCritical ? 'dashboard-stock-badge--critical' : 'dashboard-stock-badge--warning' ?>">
+                      <?= $stock ?> left
+                    </span>
+                  </div>
+                  <div class="dashboard-stock-item__sub">
+                    <span class="dashboard-stock-sku font-mono">SKU: <?= e($p['sku'] ?? 'N/A') ?></span>
+                    <a
+                      href="<?= url('/admin/products/' . ea($p['id']) . '/edit') ?>"
+                      class="dashboard-stock-restock-link"
+                      title="Adjust inventory in product editor"
+                    >
+                      <span>Restock</span>
+                      <?= icon('arrow-right', 11) ?>
+                    </a>
+                  </div>
+                  <!-- Mini Progress Bar Indicator -->
+                  <div class="dashboard-stock-progress" aria-hidden="true">
+                    <div
+                      class="dashboard-stock-progress__bar <?= $isCritical ? 'dashboard-stock-progress__bar--critical' : 'dashboard-stock-progress__bar--warning' ?>"
+                      style="width: <?= $pct ?>%;"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
 
-    <div class="mt-6 pt-4 border-t border-slate-100">
-      <a href="<?= url('/admin/products') ?>" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 block text-center">
-        Manage Catalog &amp; Warehouse Inventory →
-      </a>
-    </div>
+      <div class="dashboard-card__footer">
+        <a href="<?= url('/admin/products') ?>" class="dashboard-card__footer-link">
+          <span>Manage Full Catalog &amp; Warehouse Inventory</span>
+          <?= icon('arrow-right', 13) ?>
+        </a>
+      </div>
+    </aside>
+
   </div>
 
 </div>

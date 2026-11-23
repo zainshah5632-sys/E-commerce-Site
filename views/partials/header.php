@@ -35,6 +35,13 @@ $announcement = settings('announcement', 'Free shipping on orders over $75');
 
     <!-- Header Actions -->
     <div class="header__actions">
+      <!-- Accessibility Font-Size Scaler (A- / A / A+) -->
+      <div class="a11y-font-scale" role="group" aria-label="Text size scaling controls">
+        <button type="button" class="btn-a11y-scale" data-action="font-scale" data-scale="sm" title="Decrease font size" aria-label="Decrease font size">A-</button>
+        <button type="button" class="btn-a11y-scale is-active" data-action="font-scale" data-scale="md" title="Default font size" aria-label="Default font size">A</button>
+        <button type="button" class="btn-a11y-scale" data-action="font-scale" data-scale="lg" title="Increase font size" aria-label="Increase font size">A+</button>
+      </div>
+
       <!-- Theme Switcher -->
       <button type="button" class="btn btn--ghost btn--icon" data-action="toggle-theme" aria-label="Toggle Light/Dark Theme">
         <span class="theme-icon-light"><?= icon('sun') ?></span>

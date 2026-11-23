@@ -9,6 +9,7 @@ use App\Core\Session;
 use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\ProfileRepository;
+use App\Services\RateLimiter;
 use App\Supabase\Auth;
 
 final class AdminAuthController
@@ -50,6 +51,20 @@ final class AdminAuthController
         $password = (string)$request->input('password', '');
         $next = $request->string('next', '/admin');
 
+        $ip = $request->ip();
+        $rateKey = 'admin_login_' . md5($ip . '_' . strtolower($identifier));
+
+        if (RateLimiter::tooManyAttempts($rateKey, 5, 900)) {
+            $seconds = RateLimiter::availableIn($rateKey, 900);
+            $minutes = max(1, (int)ceil($seconds / 60));
+            return Response::html(View::render('admin/login', [
+                'title'   => 'Admin Portal | GlassCart Control Center',
+                'next'    => $next,
+                'errors'  => ['login' => "Security lockout active. Too many failed attempts. Please retry in {$minutes} minute(s)."],
+                'noindex' => true,
+            ], layout: null), 429);
+        }
+
         $validator = Validator::make([
             'identifier' => $identifier,
             'password'   => $password,
@@ -72,6 +87,7 @@ final class AdminAuthController
         if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
             $profile = ProfileRepository::findByUsername($identifier);
             if (!$profile || empty($profile['email'])) {
+                RateLimiter::hit($rateKey, 5, 900);
                 return Response::html(View::render('admin/login', [
                     'title'   => 'Admin Portal | GlassCart Control Center',
                     'next'    => $next,
@@ -85,6 +101,7 @@ final class AdminAuthController
         $res = $this->auth->login($targetEmail, $password);
 
         if (!$res['ok'] || empty($res['user'])) {
+            RateLimiter::hit($rateKey, 5, 900);
             return Response::html(View::render('admin/login', [
                 'title'   => 'Admin Portal | GlassCart Control Center',
                 'next'    => $next,
@@ -101,6 +118,7 @@ final class AdminAuthController
         $role = $dbProfile['role'] ?? $user['role'];
 
         if ($role !== 'admin') {
+            RateLimiter::hit($rateKey, 5, 900);
             return Response::html(View::render('admin/login', [
                 'title'   => 'Admin Portal | GlassCart Control Center',
                 'next'    => $next,
@@ -108,6 +126,8 @@ final class AdminAuthController
                 'noindex' => true,
             ], layout: null), 403);
         }
+
+        RateLimiter::clear($rateKey);
 
 
         $session->setAuth($uid, $user['email'], $user['name'] ?: 'Administrator', 'admin');

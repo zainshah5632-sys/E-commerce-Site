@@ -79,6 +79,14 @@ final class Request
         return $this->query[$key] ?? $default;
     }
 
+    public function server(?string $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $this->server;
+        }
+        return $this->server[$key] ?? $default;
+    }
+
     public function input(?string $key = null, mixed $default = null): mixed
     {
         if ($this->json !== null) {

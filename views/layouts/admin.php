@@ -30,69 +30,88 @@ $session = Session::instance();
   <div class="admin-shell">
     <!-- Admin Sidebar -->
     <aside class="admin-sidebar">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <a href="<?= url('/admin') ?>" class="admin-sidebar__logo">
-          GlassCart Admin
+      <div class="admin-sidebar__header">
+        <a href="<?= url('/admin') ?>" class="admin-sidebar__brand-link">
+          <span class="admin-sidebar__logo-mark">G</span>
+          <div class="admin-sidebar__logo-text">
+            <span class="admin-sidebar__logo-title">GlassCart</span>
+            <span class="admin-sidebar__logo-sub">Console v2.4</span>
+          </div>
         </a>
-        <button type="button" class="btn btn--ghost btn--icon" data-action="toggle-theme" aria-label="Toggle Theme">
-          <?= icon('sun') ?>
-        </button>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div class="a11y-font-scale" role="group" aria-label="Text size scaling controls">
+            <button type="button" class="btn-a11y-scale" data-action="font-scale" data-scale="sm" title="Decrease font size" aria-label="Decrease font size">A-</button>
+            <button type="button" class="btn-a11y-scale is-active" data-action="font-scale" data-scale="md" title="Default font size" aria-label="Default font size">A</button>
+            <button type="button" class="btn-a11y-scale" data-action="font-scale" data-scale="lg" title="Increase font size" aria-label="Increase font size">A+</button>
+          </div>
+          <button type="button" class="admin-sidebar__theme-btn" data-action="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme">
+            <?= icon('sun', 16) ?>
+          </button>
+        </div>
       </div>
 
-      <nav aria-label="Admin Navigation" style="flex-grow: 1;">
+      <nav aria-label="Admin Navigation" class="admin-sidebar__nav-wrap">
+        <div class="admin-nav__group-label">Platform Core</div>
         <ul class="admin-nav">
           <li>
             <a href="<?= url('/admin') ?>" class="admin-nav__link <?= is_active('/admin', 'admin-nav__link--active') ?>">
-              <?= icon('truck') ?>
-              <span>Dashboard</span>
+              <span class="admin-nav__icon"><?= icon('layout-dashboard', 18) ?></span>
+              <span class="admin-nav__label">Overview</span>
             </a>
           </li>
           <li>
             <a href="<?= url('/admin/products') ?>" class="admin-nav__link <?= is_active('/admin/products', 'admin-nav__link--active') ?>">
-              <?= icon('package') ?>
-              <span>Products</span>
+              <span class="admin-nav__icon"><?= icon('package', 18) ?></span>
+              <span class="admin-nav__label">Products</span>
             </a>
           </li>
           <li>
             <a href="<?= url('/admin/categories') ?>" class="admin-nav__link <?= is_active('/admin/categories', 'admin-nav__link--active') ?>">
-              <?= icon('menu') ?>
-              <span>Categories</span>
+              <span class="admin-nav__icon"><?= icon('folder', 18) ?></span>
+              <span class="admin-nav__label">Categories</span>
             </a>
           </li>
           <li>
             <a href="<?= url('/admin/orders') ?>" class="admin-nav__link <?= is_active('/admin/orders', 'admin-nav__link--active') ?>">
-              <?= icon('cart') ?>
-              <span>Orders</span>
+              <span class="admin-nav__icon"><?= icon('cart', 18) ?></span>
+              <span class="admin-nav__label">Orders</span>
             </a>
           </li>
           <li>
             <a href="<?= url('/admin/users') ?>" class="admin-nav__link <?= is_active('/admin/users', 'admin-nav__link--active') ?>">
-              <?= icon('user') ?>
-              <span>Users &amp; Customers</span>
+              <span class="admin-nav__icon"><?= icon('user', 18) ?></span>
+              <span class="admin-nav__label">Customers &amp; Staff</span>
             </a>
           </li>
           <li>
             <a href="<?= url('/admin/settings') ?>" class="admin-nav__link <?= is_active('/admin/settings', 'admin-nav__link--active') ?>">
-              <?= icon('settings') ?>
-              <span>Settings</span>
+              <span class="admin-nav__icon"><?= icon('settings', 18) ?></span>
+              <span class="admin-nav__label">Store Settings</span>
             </a>
           </li>
-
         </ul>
       </nav>
 
-      <!-- Sidebar Footer -->
-      <div style="border-top: 1px solid var(--line); padding-top: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2);">
-        <div style="font-size: 0.85rem; color: var(--text-3); font-weight: 500;">
-          Signed in as <strong><?= e($session->userName() ?: 'Admin') ?></strong>
+      <!-- Sidebar User Section & Footer -->
+      <div class="admin-sidebar__user-box">
+        <div class="admin-sidebar__user-meta">
+          <div class="admin-sidebar__user-avatar">
+            <?= strtoupper(substr($session->userName() ?: 'A', 0, 1)) ?>
+          </div>
+          <div class="admin-sidebar__user-info">
+            <span class="admin-sidebar__user-name"><?= e($session->userName() ?: 'Administrator') ?></span>
+            <span class="admin-sidebar__user-role">Super Admin</span>
+          </div>
         </div>
-        <div style="display: flex; gap: var(--s-2);">
-          <a href="<?= url('/') ?>" class="btn btn--ghost btn--sm" style="flex-grow: 1;">View Store</a>
-          <form action="<?= url('/admin/logout') ?>" method="POST" style="display: inline;">
+        <div class="admin-sidebar__user-actions">
+          <a href="<?= url('/') ?>" target="_blank" class="admin-sidebar__btn-store">
+            <?= icon('external-link', 13) ?>
+            <span>Storefront</span>
+          </a>
+          <form action="<?= url('/admin/logout') ?>" method="POST" style="display: inline; margin: 0;">
             <?= csrf_field() ?>
-
-            <button type="submit" class="btn btn--ghost btn--icon" title="Sign Out">
-              <?= icon('logout') ?>
+            <button type="submit" class="admin-sidebar__btn-logout" title="Sign Out" aria-label="Sign Out">
+              <?= icon('logout', 14) ?>
             </button>
           </form>
         </div>

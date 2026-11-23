@@ -99,6 +99,9 @@ if (!function_exists('is_active')) {
         if ($path === '/' && $currentPath === '/') {
             return $activeClass;
         }
+        if ($path === '/admin') {
+            return ($currentPath === '/admin' || $currentPath === '/admin/') ? $activeClass : '';
+        }
         if ($path !== '/' && str_starts_with($currentPath, $path)) {
             return $activeClass;
         }
@@ -130,8 +133,8 @@ if (!function_exists('icon')) {
         }
         if (is_int($classOrSize)) {
             $size = (string)$classOrSize;
-            $svg = preg_replace('/(?<!-)width="[0-9]+"/i', 'width="' . $size . '"', $svg);
-            $svg = preg_replace('/(?<!-)height="[0-9]+"/i', 'height="' . $size . '"', $svg);
+            $svg = preg_replace('/(?<!-)width="[0-9]+"/i', 'width="' . $size . '"', $svg, 1);
+            $svg = preg_replace('/(?<!-)height="[0-9]+"/i', 'height="' . $size . '"', $svg, 1);
         } elseif ($classOrSize !== '') {
             $svg = str_replace('<svg ', '<svg class="' . e((string)$classOrSize) . '" ', $svg);
         }

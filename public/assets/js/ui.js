@@ -209,6 +209,138 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Accessibility Font-Size Scaler
+  const scaleButtons = document.querySelectorAll('[data-action="font-scale"]');
+  const currentScale = localStorage.getItem('font_scale') || 'md';
+  scaleButtons.forEach(btn => {
+    if (btn.getAttribute('data-scale') === currentScale) {
+      btn.classList.add('is-active');
+    } else {
+      btn.classList.remove('is-active');
+    }
+
+    btn.addEventListener('click', () => {
+      const scale = btn.getAttribute('data-scale') || 'md';
+      document.documentElement.setAttribute('data-font-scale', scale);
+      try {
+        localStorage.setItem('font_scale', scale);
+      } catch (e) {}
+      scaleButtons.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+    });
+  });
+
+  // Cookie Consent Management
+  const cookieBanner = document.getElementById('cookie-consent-banner');
+  const cookieModal = document.getElementById('cookie-preferences-modal');
+  const cookieBackdrop = document.getElementById('cookie-modal-backdrop');
+
+  const consentData = (function () {
+    try {
+      const raw = localStorage.getItem('cookie_consent');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  if (!consentData && cookieBanner) {
+    cookieBanner.classList.remove('is-hidden');
+  }
+
+  function setConsent(prefs) {
+    const payload = Object.assign({
+      essential: true,
+      analytics: false,
+      personalization: false,
+      timestamp: Date.now()
+    }, prefs);
+
+    try {
+      localStorage.setItem('cookie_consent', JSON.stringify(payload));
+    } catch (e) {}
+
+    if (cookieBanner) {
+      cookieBanner.classList.add('is-hidden');
+    }
+    closeCookieModal();
+    if (window.showToast) {
+      window.showToast('Cookie preferences saved.', 'info');
+    }
+  }
+
+  function openCookieModal() {
+    if (cookieBackdrop) {
+      cookieBackdrop.classList.add('is-open');
+      cookieBackdrop.setAttribute('aria-hidden', 'false');
+      // Populate switches from storage if available
+      if (consentData) {
+        const pSwitch = document.getElementById('cookie-pref-personalization');
+        const aSwitch = document.getElementById('cookie-pref-analytics');
+        if (pSwitch) pSwitch.checked = !!consentData.personalization;
+        if (aSwitch) aSwitch.checked = !!consentData.analytics;
+      }
+    }
+  }
+
+  function closeCookieModal() {
+    if (cookieBackdrop) {
+      cookieBackdrop.classList.remove('is-open');
+      cookieBackdrop.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  // Accept All
+  document.querySelectorAll('[data-action="accept-all-cookies"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setConsent({ essential: true, analytics: true, personalization: true });
+    });
+  });
+
+  // Essential Only
+  document.querySelectorAll('[data-action="reject-optional-cookies"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setConsent({ essential: true, analytics: false, personalization: false });
+    });
+  });
+
+  // Open Preferences
+  document.querySelectorAll('[data-action="open-cookie-preferences"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCookieModal();
+    });
+  });
+
+  // Close Preferences
+  document.querySelectorAll('[data-action="close-cookie-preferences"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeCookieModal();
+    });
+  });
+
+  // Save Preferences
+  document.querySelectorAll('[data-action="save-cookie-preferences"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pSwitch = document.getElementById('cookie-pref-personalization');
+      const aSwitch = document.getElementById('cookie-pref-analytics');
+      setConsent({
+        essential: true,
+        personalization: pSwitch ? pSwitch.checked : false,
+        analytics: aSwitch ? aSwitch.checked : false
+      });
+    });
+  });
+
+  if (cookieBackdrop) {
+    cookieBackdrop.addEventListener('click', (e) => {
+      if (e.target === cookieBackdrop) {
+        closeCookieModal();
+      }
+    });
+  }
 });
 
 // Toast notification trigger

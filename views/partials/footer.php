@@ -43,6 +43,7 @@ $storeName = settings('store_name', 'GlassCart');
           <li><a href="<?= url('/page/privacy') ?>">Privacy Policy</a></li>
           <li><a href="<?= url('/page/terms') ?>">Terms of Service</a></li>
           <li><a href="<?= url('/sitemap.xml') ?>">XML Sitemap</a></li>
+          <li><a href="#cookie-settings" data-action="open-cookie-preferences">Cookie Preferences</a></li>
         </ul>
       </div>
     </div>

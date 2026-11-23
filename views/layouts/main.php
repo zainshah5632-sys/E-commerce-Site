@@ -41,6 +41,9 @@
   <!-- Toast Container -->
   <div class="toast-container" aria-live="polite"></div>
 
+  <!-- Cookie & Privacy Consent Component -->
+  <?php require dirname(__DIR__) . '/partials/cookie-consent.php'; ?>
+
   <!-- Deferred Vanilla Scripts (CSP compliant, no inline scripts per D-012) -->
   <script src="<?= asset('assets/js/ui.js') ?>" defer></script>
   <script src="<?= asset('assets/js/cart.js') ?>" defer></script>

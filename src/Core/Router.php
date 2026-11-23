@@ -140,7 +140,9 @@ final class Router
                     }
 
                     if (!$isAdmin) {
-                        return Response::redirect('/admin/login?error=denied');
+                        return Response::html(View::render('pages/403', [
+                            'title' => '403 Forbidden | Access Denied',
+                        ]), 403);
                     }
                     break;
 
