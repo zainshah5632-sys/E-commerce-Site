@@ -255,6 +255,84 @@ final class Auth
         $cleanProvider = strtolower(trim($provider));
         return "{$this->baseUrl}/auth/v1/authorize?provider={$cleanProvider}&redirect_to=" . urlencode($redirectTo);
     }
+
+    /**
+     * Checks if a specific OAuth provider is enabled in the Supabase project.
+     *
+     * @return array{enabled: bool, url: string, error?: string}
+     */
+    public function checkOAuthProvider(string $provider, string $callbackUrl): array
+    {
+        $cleanProvider = strtolower(trim($provider));
+        $url = $this->getOAuthUrl($cleanProvider, $callbackUrl);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_HEADER => true,
+            CURLOPT_TIMEOUT => 3,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $res = curl_exec($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($status === 400 && is_string($res) && str_contains(strtolower($res), 'not enabled')) {
+            return ['enabled' => false, 'error' => 'not_enabled', 'url' => $url];
+        }
+
+        return ['enabled' => true, 'url' => $url];
+    }
+
+    /**
+     * Exchanges an authorization code or PKCE code for tokens.
+     *
+     * @return array{ok: bool, data?: array, error?: string}
+     */
+    public function exchangeOAuthCode(string $code): array
+    {
+        $url = "{$this->baseUrl}/auth/v1/token?grant_type=authorization_code";
+        $headers = [
+            'apikey: ' . $this->publishableKey,
+            'Content-Type: application/json',
+        ];
+        $body = json_encode(['code' => $code]);
+        $res = $this->client->execute('POST', $url, $headers, $body !== false ? $body : '{}');
+        if ($res->ok && is_array($res->data) && !empty($res->data['access_token'])) {
+            return ['ok' => true, 'data' => $res->data];
+        }
+
+        $urlPkce = "{$this->baseUrl}/auth/v1/token?grant_type=pkce";
+        $bodyPkce = json_encode(['auth_code' => $code]);
+        $resPkce = $this->client->execute('POST', $urlPkce, $headers, $bodyPkce !== false ? $bodyPkce : '{}');
+        if ($resPkce->ok && is_array($resPkce->data) && !empty($resPkce->data['access_token'])) {
+            return ['ok' => true, 'data' => $resPkce->data];
+        }
+
+        return ['ok' => false, 'error' => $res->error ?: ($resPkce->error ?: 'Failed to exchange authorization code.')];
+    }
+
+    /**
+     * Retrieves user information from Supabase using an access token.
+     *
+     * @return array{ok: bool, user?: array, error?: string}
+     */
+    public function getUserFromToken(string $accessToken): array
+    {
+        $url = "{$this->baseUrl}/auth/v1/user";
+        $headers = [
+            'apikey: ' . $this->publishableKey,
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
+        ];
+        $res = $this->client->execute('GET', $url, $headers, null);
+        if ($res->ok && is_array($res->data) && !empty($res->data['id'])) {
+            return ['ok' => true, 'user' => $res->data];
+        }
+        return ['ok' => false, 'error' => $res->error ?: 'Invalid access token.'];
+    }
 }
 
 

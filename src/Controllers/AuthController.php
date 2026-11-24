@@ -321,30 +321,197 @@ final class AuthController
         return Response::redirect('/login');
     }
 
-    public function oauth(Request $request, string $provider): Response
+    public function oauth(Request $request): Response
     {
+        $provider = strtolower(trim((string)$request->param('provider', '')));
         $allowed = ['google', 'facebook'];
-        $cleanProvider = strtolower(trim($provider));
-        if (!in_array($cleanProvider, $allowed, true)) {
+        if (!in_array($provider, $allowed, true)) {
             return Response::redirect('/login');
         }
 
         $appUrl = rtrim(\App\Core\Env::get('APP_URL', 'http://localhost:8080'), '/');
         $callbackUrl = "{$appUrl}/auth/oauth/callback";
-        $oauthUrl = $this->auth->getOAuthUrl($cleanProvider, $callbackUrl);
 
-        return Response::redirect($oauthUrl);
+        // Preflight check against Supabase to handle unconfigured providers gracefully
+        $status = $this->auth->checkOAuthProvider($provider, $callbackUrl);
+        if (!$status['enabled']) {
+            $name = ucfirst($provider);
+            Session::instance()->flash(
+                'warning',
+                "{$name} Sign-In is not currently enabled in your Supabase project settings. Please sign in with email/password, or enable {$name} in your Supabase Dashboard under Authentication → Providers."
+            );
+            return Response::redirect('/login');
+        }
+
+        return Response::redirect($status['url']);
     }
 
     public function oauthCallback(Request $request): Response
     {
         $session = Session::instance();
-        // In local/demo or live OAuth callback, ensure session is preserved
-        $session->flash('success', 'Social authentication connected successfully.');
-        return Response::redirect('/account');
+
+        // 1. Check for provider/cancellation error in query string
+        $error = $request->query('error');
+        if ($error !== null && $error !== '') {
+            $desc = (string)$request->query('error_description', 'Social login was cancelled or failed.');
+            $session->flash('warning', $desc);
+            return Response::redirect('/login');
+        }
+
+        // 2. PKCE Authorization Code flow
+        $code = (string)$request->query('code', '');
+        if ($code !== '') {
+            $tokenRes = $this->auth->exchangeOAuthCode($code);
+            if ($tokenRes['ok'] && !empty($tokenRes['data']['access_token'])) {
+                $userData = $tokenRes['data']['user'] ?? null;
+                if (!$userData) {
+                    $userRes = $this->auth->getUserFromToken($tokenRes['data']['access_token']);
+                    $userData = $userRes['user'] ?? null;
+                }
+
+                if ($userData && !empty($userData['id'])) {
+                    $this->establishOAuthSession($userData);
+                    $session->flash('success', 'Social authentication connected successfully.');
+                    return Response::redirect('/account');
+                }
+            }
+
+            $session->flash('error', 'Unable to complete social sign-in. Please try again.');
+            return Response::redirect('/login');
+        }
+
+        // 3. Client-side hash fragment receiver (for implicit OAuth flow: #access_token=...)
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completing Sign-In | GlassCart</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0b0f19;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+    }
+    .card {
+      text-align: center;
+      padding: 2.5rem;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      backdrop-filter: blur(12px);
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h2 { margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 600; }
+    p { margin: 0; color: #94a3b8; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h2>Completing Sign-In</h2>
+    <p>Connecting your account securely...</p>
+  </div>
+  <script>
+    (function() {
+      var hash = window.location.hash.substring(1);
+      var params = new URLSearchParams(hash);
+      var token = params.get('access_token');
+      var err = params.get('error_description') || params.get('error');
+
+      if (token) {
+        fetch('/auth/oauth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: token })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.ok) {
+            window.location.replace(data.redirect || '/account');
+          } else {
+            window.location.replace('/login');
+          }
+        })
+        .catch(function() {
+          window.location.replace('/login');
+        });
+      } else if (err) {
+        window.location.replace('/login');
+      } else {
+        window.location.replace('/login');
+      }
+    })();
+  </script>
+</body>
+</html>
+HTML;
+
+        return Response::html($html);
     }
 
-    private function sanitizeNext(?string $next): string
+    public function oauthSession(Request $request): Response
+    {
+        $accessToken = (string)$request->input('access_token', '');
+        if ($accessToken === '') {
+            return Response::json(['ok' => false, 'error' => 'Missing access token.'], 400);
+        }
+
+        $res = $this->auth->getUserFromToken($accessToken);
+        if (!$res['ok'] || empty($res['user']['id'])) {
+            return Response::json(['ok' => false, 'error' => 'Invalid or expired session token.'], 401);
+        }
+
+        $this->establishOAuthSession($res['user']);
+        Session::instance()->flash('success', 'Social authentication connected successfully.');
+
+        return Response::json(['ok' => true, 'redirect' => '/account']);
+    }
+
+    private function establishOAuthSession(array $user): void
+    {
+        $uid = (string)$user['id'];
+        $email = strtolower(trim((string)($user['email'] ?? '')));
+        $meta = is_array($user['user_metadata'] ?? null) ? $user['user_metadata'] : [];
+        $fullName = trim((string)($meta['full_name'] ?? ($meta['name'] ?? '')));
+
+        // Check or upsert profile
+        $profile = ProfileRepository::find($uid);
+        if ($profile === null) {
+            ProfileRepository::upsert($uid, [
+                'email'     => $email,
+                'full_name' => $fullName !== '' ? $fullName : 'Customer',
+                'role'      => 'customer',
+            ]);
+            $role = 'customer';
+            $finalName = $fullName !== '' ? $fullName : 'Customer';
+        } else {
+            $role = (string)($profile['role'] ?? 'customer');
+            $finalName = (string)($profile['full_name'] ?? ($fullName !== '' ? $fullName : 'Customer'));
+        }
+
+        Session::instance()->setAuth($uid, $email, $finalName, $role);
+    }
+
+    public function sanitizeNext(?string $next): string
     {
         if ($next === null || $next === '' || !str_starts_with($next, '/') || str_starts_with($next, '//')) {
             return '/account';

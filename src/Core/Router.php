@@ -154,8 +154,9 @@ final class Router
 
     private function compilePattern(string $path): string
     {
-        // Replace {slug}, {id}, {number} with regexes
+        // Replace {slug}, {provider}, {id}, {number} with regexes
         $pattern = preg_replace('/\{slug\}/', '(?P<slug>[a-z0-9-]+)', $path);
+        $pattern = preg_replace('/\{provider\}/', '(?P<provider>[a-z0-9-]+)', (string)$pattern);
         $pattern = preg_replace('/\{id\}/', '(?P<id>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})', (string)$pattern);
         $pattern = preg_replace('/\{number\}/', '(?P<number>ORD-\d{6}-[A-Z0-9]{6})', (string)$pattern);
 

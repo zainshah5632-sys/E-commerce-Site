@@ -67,8 +67,9 @@ $router->get('/reset-password', [AuthController::class, 'resetPasswordForm'], ['
 $router->post('/reset-password', [AuthController::class, 'updatePassword'], ['guest', 'csrf']);
 
 // Social OAuth routes
-$router->get('/auth/oauth/{provider}', [AuthController::class, 'oauth']);
 $router->get('/auth/oauth/callback', [AuthController::class, 'oauthCallback']);
+$router->post('/auth/oauth/session', [AuthController::class, 'oauthSession']);
+$router->get('/auth/oauth/{provider}', [AuthController::class, 'oauth']);
 
 // Customer account routes
 $router->get('/account', [AccountController::class, 'index'], ['auth']);

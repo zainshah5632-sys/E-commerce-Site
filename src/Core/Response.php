@@ -31,8 +31,10 @@ final class Response
 
     public static function redirect(string $url, int $status = 302, array $headers = []): self
     {
-        // Prevent open redirect: must start with single slash, not //
-        if (!str_starts_with($url, '/') || str_starts_with($url, '//')) {
+        // Allow absolute HTTP/HTTPS redirects; for relative paths, enforce single leading slash to prevent open redirect
+        if (str_starts_with($url, 'https://') || str_starts_with($url, 'http://')) {
+            // Valid external/absolute redirect
+        } elseif (!str_starts_with($url, '/') || str_starts_with($url, '//')) {
             $url = '/';
         }
 
@@ -49,6 +51,21 @@ final class Response
     public function status(): int
     {
         return $this->status;
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->status;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    public function getBody(): string
+    {
+        return $this->body;
     }
 
     public function send(): void
