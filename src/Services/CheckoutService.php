@@ -41,16 +41,25 @@ final class CheckoutService
             'country'        => trim((string)($data['country'] ?? 'US')),
         ];
 
+        $receiptUrl = null;
+        if (!empty($data['payment_receipt_file']) && is_array($data['payment_receipt_file']) && !empty($data['payment_receipt_file']['tmp_name'])) {
+            $storage = new \App\Supabase\Storage();
+            $tempRef = 'ORD-' . date('ymd') . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
+            $receiptUrl = $storage->uploadPaymentReceipt($tempRef, $data['payment_receipt_file']);
+        }
+
         $rpcArgs = [
-            'user_id'          => $userId,
-            'email'            => trim((string)($data['email'] ?? '')),
-            'customer_name'    => trim((string)($data['customer_name'] ?? '')),
-            'phone'            => trim((string)($data['phone'] ?? '')),
-            'shipping_address' => $shippingAddress,
-            'payment_method'   => $data['payment_method'] ?? 'cod',
-            'notes'            => trim((string)($data['notes'] ?? '')),
-            'items'            => $orderItems,
-            'shipping_cents'   => (int)$cartSummary['shipping_cents'],
+            'user_id'             => $userId,
+            'email'               => trim((string)($data['email'] ?? '')),
+            'customer_name'       => trim((string)($data['customer_name'] ?? '')),
+            'phone'               => trim((string)($data['phone'] ?? '')),
+            'shipping_address'    => $shippingAddress,
+            'payment_method'      => $data['payment_method'] ?? 'cod',
+            'notes'               => trim((string)($data['notes'] ?? '')),
+            'items'               => $orderItems,
+            'shipping_cents'      => (int)$cartSummary['shipping_cents'],
+            'transaction_id'      => !empty($data['transaction_id']) ? trim((string)$data['transaction_id']) : null,
+            'payment_receipt_url' => $receiptUrl,
         ];
 
         $res = OrderRepository::createViaRpc($rpcArgs);
@@ -74,14 +83,41 @@ final class CheckoutService
         // On success: clear cart and store last_order number in session for success screen guard
         $orderData = $res['order'];
         $orderNumber = (string)($orderData['order_number'] ?? '');
+        $totalCents = (int)($orderData['total_cents'] ?? 0);
+
         CartService::clear();
         $session->set('last_order', $orderNumber);
+
+        // Record initial payment transaction log
+        PaymentService::recordTransaction(
+            $orderNumber,
+            $data['payment_method'] ?? 'cod',
+            $totalCents,
+            'pending',
+            $rpcArgs['transaction_id'],
+            $receiptUrl,
+            ['notes' => $rpcArgs['notes']]
+        );
+
+        // If card checkout selected, check if Stripe hosted checkout should be initiated
+        $redirectUrl = null;
+        if (($data['payment_method'] ?? '') === 'card') {
+            $stripeRes = PaymentService::createStripeCheckoutSession([
+                'order_number' => $orderNumber,
+                'email'        => $rpcArgs['email'],
+                'total_cents'  => $totalCents,
+            ]);
+            if ($stripeRes['ok'] && !empty($stripeRes['redirect_url'])) {
+                $redirectUrl = $stripeRes['redirect_url'];
+            }
+        }
 
         return [
             'ok'           => true,
             'order_number' => $orderNumber,
             'order_id'     => $orderData['order_id'] ?? null,
-            'total_cents'  => $orderData['total_cents'] ?? 0,
+            'total_cents'  => $totalCents,
+            'redirect_url' => $redirectUrl,
         ];
     }
 }

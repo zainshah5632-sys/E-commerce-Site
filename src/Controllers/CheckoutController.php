@@ -10,8 +10,10 @@ use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProfileRepository;
+use App\Repositories\SettingsRepository;
 use App\Services\CartService;
 use App\Services\CheckoutService;
+use App\Services\PaymentService;
 
 final class CheckoutController
 {
@@ -29,12 +31,19 @@ final class CheckoutController
             $userProfile = ProfileRepository::find((string)$session->userId());
         }
 
+        $settings = SettingsRepository::all();
+        $enabledMethods = SettingsRepository::enabledPaymentMethods();
+        $paymentMethodsInfo = PaymentService::supportedMethods();
+
         return Response::html(View::render('pages/checkout', [
-            'title'       => 'Secure Checkout — GlassCart',
-            'summary'     => $summary,
-            'userProfile' => $userProfile,
-            'errors'      => [],
-            'noindex'     => true,
+            'title'              => 'Secure Checkout — GlassCart',
+            'summary'            => $summary,
+            'userProfile'        => $userProfile,
+            'settings'           => $settings,
+            'enabledMethods'     => $enabledMethods,
+            'paymentMethodsInfo' => $paymentMethodsInfo,
+            'errors'             => [],
+            'noindex'            => true,
         ]));
     }
 
@@ -50,19 +59,25 @@ final class CheckoutController
         $phone = preg_replace('/[^0-9]/', '', $rawPhone);
         $countryCode = trim($request->string('country_code', '+1'));
 
+        $paymentMethod = $request->string('payment_method', 'cod');
+        $transactionId = $request->string('transaction_id');
+        $receiptFile = $request->file('payment_receipt');
+
         $data = [
-            'customer_name'  => $request->string('customer_name'),
-            'email'          => $request->string('email'),
-            'phone'          => $phone,
-            'country_code'   => $countryCode,
-            'address_line_1' => $request->string('address_line_1'),
-            'address_line_2' => $request->string('address_line_2'),
-            'city'           => $request->string('city'),
-            'state'          => $request->string('state'),
-            'postal_code'    => $request->string('postal_code'),
-            'country'        => $request->string('country', 'US'),
-            'payment_method' => $request->string('payment_method', 'cod'),
-            'notes'          => $request->string('notes'),
+            'customer_name'        => $request->string('customer_name'),
+            'email'                => $request->string('email'),
+            'phone'                => $phone,
+            'country_code'         => $countryCode,
+            'address_line_1'       => $request->string('address_line_1'),
+            'address_line_2'       => $request->string('address_line_2'),
+            'city'                 => $request->string('city'),
+            'state'                => $request->string('state'),
+            'postal_code'          => $request->string('postal_code'),
+            'country'              => $request->string('country', 'US'),
+            'payment_method'       => $paymentMethod,
+            'transaction_id'       => $transactionId !== '' ? $transactionId : null,
+            'payment_receipt_file' => $receiptFile,
+            'notes'                => $request->string('notes'),
         ];
 
         $validator = Validator::make($data, [
@@ -73,29 +88,67 @@ final class CheckoutController
             'city'           => 'required|min:2|max:80',
             'state'          => 'required|min:2|max:80',
             'postal_code'    => 'required|min:3|max:20',
-            'payment_method' => 'required|in:cod,bank_transfer',
+            'payment_method' => 'required|in:cod,bank_transfer,easypaisa,jazzcash,card',
         ]);
 
+        $settings = SettingsRepository::all();
+        $enabledMethods = SettingsRepository::enabledPaymentMethods();
+        $paymentMethodsInfo = PaymentService::supportedMethods();
+        $userProfile = $session->isAuthenticated() ? ProfileRepository::find((string)$session->userId()) : null;
 
         if ($validator->fails()) {
-            $userProfile = $session->isAuthenticated() ? ProfileRepository::find((string)$session->userId()) : null;
             return Response::html(View::render('pages/checkout', [
-                'title'       => 'Secure Checkout — GlassCart',
-                'summary'     => $summary,
-                'userProfile' => $userProfile,
-                'errors'      => $validator->errors(),
+                'title'              => 'Secure Checkout — GlassCart',
+                'summary'            => $summary,
+                'userProfile'        => $userProfile,
+                'settings'           => $settings,
+                'enabledMethods'     => $enabledMethods,
+                'paymentMethodsInfo' => $paymentMethodsInfo,
+                'errors'             => $validator->errors(),
             ]), 422);
+        }
+
+        if (!SettingsRepository::isPaymentMethodEnabled($paymentMethod)) {
+            return Response::html(View::render('pages/checkout', [
+                'title'              => 'Secure Checkout — GlassCart',
+                'summary'            => $summary,
+                'userProfile'        => $userProfile,
+                'settings'           => $settings,
+                'enabledMethods'     => $enabledMethods,
+                'paymentMethodsInfo' => $paymentMethodsInfo,
+                'errors'             => ['payment_method' => 'The selected payment method is currently disabled. Please choose another option.'],
+            ]), 422);
+        }
+
+        if ($receiptFile && !empty($receiptFile['tmp_name']) && is_file($receiptFile['tmp_name'])) {
+            if ($receiptFile['size'] > 5242880) {
+                return Response::html(View::render('pages/checkout', [
+                    'title'              => 'Secure Checkout — GlassCart',
+                    'summary'            => $summary,
+                    'userProfile'        => $userProfile,
+                    'settings'           => $settings,
+                    'enabledMethods'     => $enabledMethods,
+                    'paymentMethodsInfo' => $paymentMethodsInfo,
+                    'errors'             => ['payment_receipt' => 'Receipt file must not exceed 5 MB.'],
+                ]), 422);
+            }
         }
 
         $res = CheckoutService::process($data);
         if (!$res['ok']) {
-            $userProfile = $session->isAuthenticated() ? ProfileRepository::find((string)$session->userId()) : null;
             return Response::html(View::render('pages/checkout', [
-                'title'       => 'Secure Checkout — GlassCart',
-                'summary'     => $summary,
-                'userProfile' => $userProfile,
-                'errors'      => ['checkout' => $res['error']],
+                'title'              => 'Secure Checkout — GlassCart',
+                'summary'            => $summary,
+                'userProfile'        => $userProfile,
+                'settings'           => $settings,
+                'enabledMethods'     => $enabledMethods,
+                'paymentMethodsInfo' => $paymentMethodsInfo,
+                'errors'             => ['checkout' => $res['error']],
             ]), 400);
+        }
+
+        if (!empty($res['redirect_url'])) {
+            return Response::redirect($res['redirect_url']);
         }
 
         return Response::redirect('/order/success/' . $res['order_number']);

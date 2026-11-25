@@ -417,70 +417,243 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
             </div>
           </section>
 
-          <!-- Card: Direct Bank Settlement -->
-          <section class="settings-card" aria-labelledby="heading-bank">
+          <!-- Card: Payment Methods Enable / Disable Toggles -->
+          <section class="settings-card" aria-labelledby="heading-payment-methods">
             <div class="settings-card__header">
               <div>
-                <h2 id="heading-bank" class="settings-card__title">Direct Bank Settlement (Wire / BACS)</h2>
+                <h2 id="heading-payment-methods" class="settings-card__title">Payment Methods Activation</h2>
                 <p class="settings-card__desc">
-                  Custom wire transfer instructions, IBAN numbers, and routing details presented to buyers choosing manual bank settlement.
+                  Toggle supported customer payment channels on or off. Disabled methods are automatically hidden from checkout.
                 </p>
               </div>
             </div>
 
             <div class="settings-card__body">
-              <div class="settings-form-group">
-                <label for="set-bank" class="settings-form-label">
-                  Wire Instructions &amp; Bank Account Credentials
-                </label>
-                <textarea
-                  id="set-bank"
-                  name="bank_instructions"
-                  rows="4"
-                  class="settings-form-textarea font-mono text-xs"
-                  placeholder="Account Holder: GlassCart Inc&#10;IBAN: US98BANK000123456789&#10;Swift / BIC: GCARTUS33&#10;Routing: 021000021"
-                ><?= ea($settings['bank_instructions'] ?? '') ?></textarea>
-                <p class="settings-form-helper">Rendered directly on checkout receipt pages for wire payment selection.</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- Card: Active Payment Gateways -->
-          <section class="settings-card" aria-labelledby="heading-gateways">
-            <div class="settings-card__header">
-              <div>
-                <h2 id="heading-gateways" class="settings-card__title">Configured Payment Rails</h2>
-                <p class="settings-card__desc">Active settlement channels ready for customer checkouts.</p>
-              </div>
-            </div>
-
-            <div class="settings-card__body">
               <div class="settings-rail-list">
-                <div class="settings-rail-item">
-                  <div class="settings-rail-item__info">
-                    <span class="settings-rail-item__icon"><?= icon('credit-card', 16) ?></span>
-                    <div>
-                      <strong class="settings-rail-item__name">Direct Credit &amp; Debit Cards</strong>
-                      <p class="settings-rail-item__desc">Visa, Mastercard, American Express via secure tokenization.</p>
-                    </div>
-                  </div>
-                  <span class="settings-status-pill settings-status-pill--active">
-                    <span class="settings-status-dot"></span>
-                    <span>Ready</span>
-                  </span>
-                </div>
-
+                <!-- COD -->
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon"><?= icon('truck', 16) ?></span>
                     <div>
-                      <strong class="settings-rail-item__name">Express Digital Wallets</strong>
-                      <p class="settings-rail-item__desc">Apple Pay and Google Pay accelerated mobile sheet checkouts.</p>
+                      <strong class="settings-rail-item__name">Cash on Delivery (COD)</strong>
+                      <p class="settings-rail-item__desc">Collect physical cash upon doorstep package delivery.</p>
                     </div>
                   </div>
-                  <span class="settings-status-pill settings-status-pill--active">
-                    <span class="settings-status-dot"></span>
-                    <span>Active</span>
+                  <label class="switch" style="cursor: pointer;">
+                    <input type="checkbox" name="payment_cod_enabled" value="1" <?= !empty($settings['payment_cod_enabled']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <!-- Easypaisa -->
+                <div class="settings-rail-item">
+                  <div class="settings-rail-item__info">
+                    <span class="settings-rail-item__icon" style="color: #00B140; font-weight: 800; font-size: 0.8rem;">EP</span>
+                    <div>
+                      <strong class="settings-rail-item__name">Easypaisa Mobile Wallet</strong>
+                      <p class="settings-rail-item__desc">Receive instant wallet transfers via Easypaisa mobile account with TID confirmation.</p>
+                    </div>
+                  </div>
+                  <label class="switch" style="cursor: pointer;">
+                    <input type="checkbox" name="payment_easypaisa_enabled" value="1" <?= !empty($settings['payment_easypaisa_enabled']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <!-- JazzCash -->
+                <div class="settings-rail-item">
+                  <div class="settings-rail-item__info">
+                    <span class="settings-rail-item__icon" style="color: #FEBE10; background: #000; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">JC</span>
+                    <div>
+                      <strong class="settings-rail-item__name">JazzCash Mobile Account</strong>
+                      <p class="settings-rail-item__desc">Receive instant wallet transfers via JazzCash account with TID confirmation.</p>
+                    </div>
+                  </div>
+                  <label class="switch" style="cursor: pointer;">
+                    <input type="checkbox" name="payment_jazzcash_enabled" value="1" <?= !empty($settings['payment_jazzcash_enabled']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <!-- Bank Wire -->
+                <div class="settings-rail-item">
+                  <div class="settings-rail-item__info">
+                    <span class="settings-rail-item__icon"><?= icon('store', 16) ?></span>
+                    <div>
+                      <strong class="settings-rail-item__name">Direct Bank Transfer / IBAN / Raast</strong>
+                      <p class="settings-rail-item__desc">Allow online banking, Raast, and wire transfer with reference and receipt upload.</p>
+                    </div>
+                  </div>
+                  <label class="switch" style="cursor: pointer;">
+                    <input type="checkbox" name="payment_bank_enabled" value="1" <?= !empty($settings['payment_bank_enabled']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <!-- Visa / Mastercard Cards -->
+                <div class="settings-rail-item">
+                  <div class="settings-rail-item__info">
+                    <span class="settings-rail-item__icon"><?= icon('credit-card', 16) ?></span>
+                    <div>
+                      <strong class="settings-rail-item__name">Visa &amp; Mastercard (Cards)</strong>
+                      <p class="settings-rail-item__desc">Official PCI-DSS compliant credit and debit card settlement.</p>
+                    </div>
+                  </div>
+                  <label class="switch" style="cursor: pointer;">
+                    <input type="checkbox" name="payment_card_enabled" value="1" <?= !empty($settings['payment_card_enabled']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: Easypaisa Merchant Account Settings -->
+          <section class="settings-card" aria-labelledby="heading-easypaisa">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-easypaisa" class="settings-card__title">Easypaisa Wallet Credentials</h2>
+                <p class="settings-card__desc">Account title, mobile number, and transfer instructions shown to buyers at checkout.</p>
+              </div>
+            </div>
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <div class="settings-form-group">
+                  <label for="set-ep-title" class="settings-form-label">Account Title</label>
+                  <input type="text" id="set-ep-title" name="easypaisa_title" class="settings-form-input" placeholder="e.g. GlassCart Official" value="<?= ea($settings['easypaisa_title'] ?? 'GlassCart Official') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-ep-num" class="settings-form-label">Mobile Account Number</label>
+                  <input type="text" id="set-ep-num" name="easypaisa_number" class="settings-form-input font-mono" placeholder="03236701030" value="<?= ea($settings['easypaisa_number'] ?? '03236701030') ?>">
+                </div>
+              </div>
+              <div class="settings-form-group mt-3">
+                <label for="set-ep-inst" class="settings-form-label">Customer Payment Instructions</label>
+                <textarea id="set-ep-inst" name="easypaisa_instructions" rows="2" class="settings-form-textarea text-xs"><?= ea($settings['easypaisa_instructions'] ?? '') ?></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: JazzCash Merchant Account Settings -->
+          <section class="settings-card" aria-labelledby="heading-jazzcash">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-jazzcash" class="settings-card__title">JazzCash Merchant Credentials</h2>
+                <p class="settings-card__desc">Account title, mobile account number, and instructions for JazzCash transfers.</p>
+              </div>
+            </div>
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <div class="settings-form-group">
+                  <label for="set-jc-title" class="settings-form-label">Account Title</label>
+                  <input type="text" id="set-jc-title" name="jazzcash_title" class="settings-form-input" placeholder="e.g. GlassCart Official" value="<?= ea($settings['jazzcash_title'] ?? 'GlassCart Official') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-jc-num" class="settings-form-label">Mobile Account Number</label>
+                  <input type="text" id="set-jc-num" name="jazzcash_number" class="settings-form-input font-mono" placeholder="03001234567" value="<?= ea($settings['jazzcash_number'] ?? '03001234567') ?>">
+                </div>
+              </div>
+              <div class="settings-form-group mt-3">
+                <label for="set-jc-inst" class="settings-form-label">Customer Payment Instructions</label>
+                <textarea id="set-jc-inst" name="jazzcash_instructions" rows="2" class="settings-form-textarea text-xs"><?= ea($settings['jazzcash_instructions'] ?? '') ?></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: Direct Bank Settlement -->
+          <section class="settings-card" aria-labelledby="heading-bank">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-bank" class="settings-card__title">Direct Bank Settlement (IBAN &amp; Raast)</h2>
+                <p class="settings-card__desc">
+                  Official bank credentials presented to customers transferring funds via Online Banking, Raast, or ATM.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <div class="settings-form-group">
+                  <label for="set-bank-name" class="settings-form-label">Bank Name</label>
+                  <input type="text" id="set-bank-name" name="bank_name" class="settings-form-input" placeholder="Meezan Bank Ltd" value="<?= ea($settings['bank_name'] ?? 'Meezan Bank Ltd') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-bank-title" class="settings-form-label">Account Title</label>
+                  <input type="text" id="set-bank-title" name="bank_account_title" class="settings-form-input" placeholder="GlassCart Official" value="<?= ea($settings['bank_account_title'] ?? 'GlassCart Official') ?>">
+                </div>
+              </div>
+
+              <div class="settings-grid-2 mt-3">
+                <div class="settings-form-group">
+                  <label for="set-bank-acc" class="settings-form-label">Account Number</label>
+                  <input type="text" id="set-bank-acc" name="bank_account_number" class="settings-form-input font-mono" placeholder="01020304050607" value="<?= ea($settings['bank_account_number'] ?? '01020304050607') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-bank-iban" class="settings-form-label">IBAN (International Bank Account Number)</label>
+                  <input type="text" id="set-bank-iban" name="bank_iban" class="settings-form-input font-mono" placeholder="PK36MEZN0001020304050607" value="<?= ea($settings['bank_iban'] ?? 'PK36MEZN0001020304050607') ?>">
+                </div>
+              </div>
+
+              <div class="settings-form-group mt-3">
+                <label for="set-bank-branch" class="settings-form-label">Branch &amp; Swift / Routing Code</label>
+                <input type="text" id="set-bank-branch" name="bank_branch" class="settings-form-input" placeholder="Main Corporate Branch (Code 0101)" value="<?= ea($settings['bank_branch'] ?? 'Main Corporate Branch (0101)') ?>">
+              </div>
+
+              <div class="settings-form-group mt-3">
+                <label for="set-bank" class="settings-form-label">
+                  Wire Instructions
+                </label>
+                <textarea
+                  id="set-bank"
+                  name="bank_instructions"
+                  rows="3"
+                  class="settings-form-textarea font-mono text-xs"
+                ><?= ea($settings['bank_instructions'] ?? '') ?></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: Card Payment Gateway (Stripe) -->
+          <section class="settings-card" aria-labelledby="heading-stripe">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-stripe" class="settings-card__title">Visa &amp; Mastercard Payment Gateway</h2>
+                <p class="settings-card__desc">Official PCI-DSS compliant card processing via Stripe hosted checkout.</p>
+              </div>
+            </div>
+
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <div class="settings-form-group">
+                  <label for="set-stripe-mode" class="settings-form-label">Gateway Mode</label>
+                  <select id="set-stripe-mode" name="stripe_mode" class="settings-form-input">
+                    <option value="test" <?= ($settings['stripe_mode'] ?? 'test') === 'test' ? 'selected' : '' ?>>Test / Sandbox (Mock &amp; Safe Test Cards)</option>
+                    <option value="live" <?= ($settings['stripe_mode'] ?? '') === 'live' ? 'selected' : '' ?>>Live / Production (Real Card Processing)</option>
+                  </select>
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-stripe-pub" class="settings-form-label">Stripe Publishable Key</label>
+                  <input type="text" id="set-stripe-pub" name="stripe_publishable_key" class="settings-form-input font-mono text-xs" placeholder="pk_test_..." value="<?= ea($settings['stripe_publishable_key'] ?? '') ?>">
+                </div>
+              </div>
+
+              <div class="settings-grid-2 mt-3">
+                <div class="settings-form-group">
+                  <label for="set-stripe-sec" class="settings-form-label">Stripe Secret Key</label>
+                  <input type="password" id="set-stripe-sec" name="stripe_secret_key" class="settings-form-input font-mono text-xs" placeholder="sk_test_..." value="<?= ea($settings['stripe_secret_key'] ?? '') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-stripe-wh" class="settings-form-label">Stripe Webhook Signing Secret</label>
+                  <input type="password" id="set-stripe-wh" name="stripe_webhook_secret" class="settings-form-input font-mono text-xs" placeholder="whsec_..." value="<?= ea($settings['stripe_webhook_secret'] ?? '') ?>">
+                </div>
+              </div>
+
+              <div class="settings-callout settings-callout--brand mt-4">
+                <div class="settings-callout__icon"><?= icon('shield', 16) ?></div>
+                <div class="settings-callout__content">
+                  <strong class="settings-callout__title">Webhook Endpoint URL:</strong>
+                  <span class="settings-callout__desc">
+                    Register in your Stripe Dashboard &rarr; Webhooks: <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-indigo-700"><?= ea(\App\Core\Env::get('APP_URL', 'https://glass-cart.onrender.com')) ?>/webhook/stripe</code>
                   </span>
                 </div>
               </div>

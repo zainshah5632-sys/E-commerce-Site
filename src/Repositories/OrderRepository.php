@@ -24,8 +24,41 @@ final class OrderRepository
             'p_shipping_cents' => $args['shipping_cents'],
         ]);
 
+        // Graceful compatibility fallback if Supabase check constraint hasn't been migrated yet
+        if (!$res->ok && str_contains(strtolower($res->error ?? ''), 'orders_payment_method_check')) {
+            $safeAddress = $args['shipping_address'];
+            $safeAddress['payment_meta'] = [
+                'actual_method'  => $args['payment_method'],
+                'transaction_id' => $args['transaction_id'] ?? null,
+                'receipt_url'    => $args['payment_receipt_url'] ?? null,
+            ];
+
+            $res = $client->rpc('place_order', [
+                'p_user_id'        => $args['user_id'] ?? null,
+                'p_email'          => $args['email'],
+                'p_name'           => $args['customer_name'],
+                'p_phone'          => $args['phone'],
+                'p_address'        => $safeAddress,
+                'p_payment_method' => ($args['payment_method'] === 'cod') ? 'cod' : 'bank_transfer',
+                'p_notes'          => trim(($args['notes'] ?? '') . "\n[Payment: " . ucfirst($args['payment_method']) . (!empty($args['transaction_id']) ? " | TID: {$args['transaction_id']}" : '') . "]"),
+                'p_items'          => $args['items'],
+                'p_shipping_cents' => $args['shipping_cents'],
+            ]);
+        }
+
         if ($res->ok && is_array($res->data)) {
-            return ['ok' => true, 'order' => $res->data];
+            $order = $res->data;
+            $orderNumber = $order['order_number'] ?? '';
+
+            // Update order with payment proof if provided
+            if ($orderNumber !== '' && (!empty($args['transaction_id']) || !empty($args['payment_receipt_url']))) {
+                $client->update('orders', ['order_number' => 'eq.' . $orderNumber], [
+                    'transaction_id'      => $args['transaction_id'] ?? null,
+                    'payment_receipt_url' => $args['payment_receipt_url'] ?? null,
+                ]);
+            }
+
+            return ['ok' => true, 'order' => $order];
         }
 
         // Local fallback order generation when database service is unreachable
@@ -90,15 +123,40 @@ final class OrderRepository
         $client = new Client();
         $res = $client->get('orders', [
             'order_number' => 'eq.' . $orderNumber,
-            'select'       => 'id,order_number,user_id,email,customer_name,phone,shipping_address,payment_method,payment_status,status,subtotal_cents,shipping_cents,total_cents,notes,created_at,updated_at',
+            'select'       => 'id,order_number,user_id,email,customer_name,phone,shipping_address,payment_method,payment_status,status,subtotal_cents,shipping_cents,total_cents,notes,transaction_id,payment_receipt_url,payment_details,created_at,updated_at',
             'limit'        => '1',
         ], ['single' => true]);
+
+        // Graceful fallback if transaction_id columns are not yet migrated in Supabase
+        if (!$res->ok && str_contains(strtolower($res->error ?? ''), 'does not exist')) {
+            $res = $client->get('orders', [
+                'order_number' => 'eq.' . $orderNumber,
+                'select'       => 'id,order_number,user_id,email,customer_name,phone,shipping_address,payment_method,payment_status,status,subtotal_cents,shipping_cents,total_cents,notes,created_at,updated_at',
+                'limit'        => '1',
+            ], ['single' => true]);
+        }
 
         if (!$res->ok || !is_array($res->data)) {
             return null;
         }
 
         $order = $res->data;
+
+        // Hydrate from shipping_address payment_meta fallback if present
+        $addr = is_array($order['shipping_address'] ?? null) ? $order['shipping_address'] : [];
+        if (!empty($addr['payment_meta'])) {
+            $meta = $addr['payment_meta'];
+            if (!empty($meta['actual_method'])) {
+                $order['payment_method'] = $meta['actual_method'];
+            }
+            if (empty($order['transaction_id']) && !empty($meta['transaction_id'])) {
+                $order['transaction_id'] = $meta['transaction_id'];
+            }
+            if (empty($order['payment_receipt_url']) && !empty($meta['receipt_url'])) {
+                $order['payment_receipt_url'] = $meta['receipt_url'];
+            }
+        }
+
         // Fetch order items
         $itemsRes = $client->get('order_items', [
             'order_id' => 'eq.' . $order['id'],
@@ -145,6 +203,14 @@ final class OrderRepository
             $query['status'] = 'eq.' . $filters['status'];
         }
 
+        if (!empty($filters['payment_status'])) {
+            $query['payment_status'] = 'eq.' . $filters['payment_status'];
+        }
+
+        if (!empty($filters['payment_method'])) {
+            $query['payment_method'] = 'eq.' . $filters['payment_method'];
+        }
+
         if (!empty($filters['q'])) {
             $clean = preg_replace('/[,()*%\\\\]/', '', (string)$filters['q']);
             $clean = mb_substr(trim($clean ?? ''), 0, 60);
@@ -179,17 +245,36 @@ final class OrderRepository
         return $res->ok;
     }
 
-    public static function updatePayment(string $orderNumber, string $newPaymentStatus): bool
+    public static function updatePayment(string $orderNumber, string $newPaymentStatus, ?string $adminNotes = null): bool
     {
-        $allowed = ['pending', 'paid', 'failed', 'refunded'];
+        $allowed = ['pending', 'paid', 'failed', 'rejected', 'refunded'];
         if (!in_array($newPaymentStatus, $allowed, true)) {
             return false;
         }
 
         $client = new Client();
-        $res = $client->update('orders', ['order_number' => 'eq.' . $orderNumber], [
+        $payload = [
             'payment_status' => $newPaymentStatus,
-        ]);
+            'updated_at'     => date('c'),
+        ];
+
+        if ($adminNotes !== null && $adminNotes !== '') {
+            $existing = self::findByNumber($orderNumber);
+            $details = is_array($existing['payment_details'] ?? null) ? $existing['payment_details'] : [];
+            $details['audit_trail'][] = [
+                'status'    => $newPaymentStatus,
+                'notes'     => $adminNotes,
+                'timestamp' => date('c'),
+            ];
+            $payload['payment_details'] = json_encode($details, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        $res = $client->update('orders', ['order_number' => 'eq.' . $orderNumber], $payload);
+        if (!$res->ok && isset($payload['payment_details'])) {
+            unset($payload['payment_details']);
+            $res = $client->update('orders', ['order_number' => 'eq.' . $orderNumber], $payload);
+        }
+
         return $res->ok;
     }
 

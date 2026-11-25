@@ -72,7 +72,7 @@ foreach ($orders as $o) {
 
       <div class="filter-select-wrap">
         <select name="status" class="admin-select" onchange="this.form.submit()">
-          <option value="">All Fulfillment Statuses</option>
+          <option value="">All Fulfillment</option>
           <option value="pending" <?= ($filters['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
           <option value="confirmed" <?= ($filters['status'] ?? '') === 'confirmed' ? 'selected' : '' ?>>Confirmed</option>
           <option value="shipped" <?= ($filters['status'] ?? '') === 'shipped' ? 'selected' : '' ?>>Shipped</option>
@@ -81,12 +81,34 @@ foreach ($orders as $o) {
         </select>
       </div>
 
+      <div class="filter-select-wrap">
+        <select name="payment_status" class="admin-select" onchange="this.form.submit()">
+          <option value="">All Payment Statuses</option>
+          <option value="pending" <?= ($filters['payment_status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
+          <option value="paid" <?= ($filters['payment_status'] ?? '') === 'paid' ? 'selected' : '' ?>>Paid</option>
+          <option value="rejected" <?= ($filters['payment_status'] ?? '') === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+          <option value="failed" <?= ($filters['payment_status'] ?? '') === 'failed' ? 'selected' : '' ?>>Failed</option>
+          <option value="refunded" <?= ($filters['payment_status'] ?? '') === 'refunded' ? 'selected' : '' ?>>Refunded</option>
+        </select>
+      </div>
+
+      <div class="filter-select-wrap">
+        <select name="payment_method" class="admin-select" onchange="this.form.submit()">
+          <option value="">All Payment Methods</option>
+          <option value="cod" <?= ($filters['payment_method'] ?? '') === 'cod' ? 'selected' : '' ?>>Cash on Delivery</option>
+          <option value="easypaisa" <?= ($filters['payment_method'] ?? '') === 'easypaisa' ? 'selected' : '' ?>>Easypaisa</option>
+          <option value="jazzcash" <?= ($filters['payment_method'] ?? '') === 'jazzcash' ? 'selected' : '' ?>>JazzCash</option>
+          <option value="bank_transfer" <?= ($filters['payment_method'] ?? '') === 'bank_transfer' ? 'selected' : '' ?>>Bank Transfer</option>
+          <option value="card" <?= ($filters['payment_method'] ?? '') === 'card' ? 'selected' : '' ?>>Debit / Credit Card</option>
+        </select>
+      </div>
+
       <button type="submit" class="btn-admin-secondary">
         <?= icon('filter') ?>
         <span>Filter</span>
       </button>
 
-      <?php if (!empty($filters['q']) || !empty($filters['status'])): ?>
+      <?php if (!empty($filters['q']) || !empty($filters['status']) || !empty($filters['payment_status']) || !empty($filters['payment_method'])): ?>
         <a href="<?= url('/admin/orders') ?>" class="btn-admin-ghost">Clear Filters</a>
       <?php endif; ?>
     </form>
@@ -128,7 +150,20 @@ foreach ($orders as $o) {
                     'cancelled' => 'status-pill--cancelled',
                     default     => 'status-pill--pending',
                 };
-                $paymentPaid = (($ord['payment_status'] ?? '') === 'paid');
+                $pStatus = $ord['payment_status'] ?? 'pending';
+                $pColor = match($pStatus) {
+                    'paid'     => 'text-emerald',
+                    'rejected', 'failed' => 'text-danger',
+                    'refunded' => 'text-indigo',
+                    default    => 'text-amber',
+                };
+                $pMethodLabel = match($ord['payment_method'] ?? 'cod') {
+                    'easypaisa'     => 'Easypaisa',
+                    'jazzcash'      => 'JazzCash',
+                    'bank_transfer' => 'Bank Transfer',
+                    'card'          => 'Card',
+                    default         => 'COD',
+                };
               ?>
               <tr class="admin-table-row">
                 <td>
@@ -155,11 +190,11 @@ foreach ($orders as $o) {
                 </td>
                 <td>
                   <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span class="text-xs font-semibold <?= $paymentPaid ? 'text-emerald' : 'text-amber' ?>" style="text-transform: capitalize;">
-                      <?= e($ord['payment_status'] ?? 'pending') ?>
+                    <span class="text-xs font-semibold <?= $pColor ?>" style="text-transform: capitalize;">
+                      <?= e($pStatus) ?>
                     </span>
-                    <span class="text-xs text-slate-400" style="text-transform: uppercase;">
-                      <?= e($ord['payment_method']) ?>
+                    <span class="text-xs text-slate-500 font-medium">
+                      <?= e($pMethodLabel) ?>
                     </span>
                   </div>
                 </td>

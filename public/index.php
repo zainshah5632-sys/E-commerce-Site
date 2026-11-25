@@ -30,6 +30,7 @@ use App\Controllers\PageController;
 use App\Controllers\ProductController;
 use App\Controllers\SeoController;
 use App\Controllers\ShopController;
+use App\Controllers\WebhookController;
 use App\Core\Request;
 use App\Core\Router;
 
@@ -52,6 +53,7 @@ $router->post('/cart/remove', [CartController::class, 'remove'], ['csrf']);
 $router->get('/checkout', [CheckoutController::class, 'show']);
 $router->post('/checkout', [CheckoutController::class, 'place'], ['csrf']);
 $router->get('/order/success/{number}', [CheckoutController::class, 'success']);
+$router->post('/webhook/stripe', [WebhookController::class, 'stripe']);
 
 // Auth routes
 $router->get('/login', [AuthController::class, 'loginForm'], ['guest']);

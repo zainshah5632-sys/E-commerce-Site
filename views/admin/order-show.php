@@ -6,6 +6,12 @@ $items = $order['items'] ?? [];
 $shippingAddress = $order['shipping_address'] ?? [];
 $status = $order['status'] ?? 'pending';
 $paymentStatus = $order['payment_status'] ?? 'pending';
+$method = $order['payment_method'] ?? 'cod';
+$transactionId = $order['transaction_id'] ?? null;
+$paymentReceiptUrl = $order['payment_receipt_url'] ?? null;
+$paymentDetails = is_array($order['payment_details'] ?? null)
+    ? $order['payment_details']
+    : (json_decode($order['payment_details'] ?? '[]', true) ?: []);
 
 $statusClass = match($status) {
     'confirmed' => 'status-pill--confirmed',
@@ -15,6 +21,21 @@ $statusClass = match($status) {
     default     => 'status-pill--pending',
 };
 $paymentPaid = ($paymentStatus === 'paid');
+
+$methodLabel = match($method) {
+    'easypaisa'     => 'Easypaisa Mobile Wallet',
+    'jazzcash'      => 'JazzCash Mobile Account',
+    'bank_transfer' => 'Bank Transfer / IBAN',
+    'card'          => 'Credit / Debit Card (Stripe)',
+    default         => 'Cash on Delivery (COD)',
+};
+
+$paymentStatusBadgeClass = match($paymentStatus) {
+    'paid'     => 'text-emerald',
+    'rejected', 'failed' => 'text-danger',
+    'refunded' => 'text-indigo',
+    default    => 'text-amber',
+};
 ?>
 
 <div class="admin-page-container">
@@ -90,7 +111,7 @@ $paymentPaid = ($paymentStatus === 'paid');
     <!-- Payment Actions -->
     <div style="display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap;">
       <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Payment:</span>
-      <span class="admin-tag-badge <?= $paymentPaid ? 'text-emerald' : 'text-amber' ?>" style="text-transform: capitalize;">
+      <span class="admin-tag-badge <?= $paymentStatusBadgeClass ?>" style="text-transform: capitalize; font-weight: 700;">
         <?= e($paymentStatus) ?>
       </span>
 
@@ -98,9 +119,30 @@ $paymentPaid = ($paymentStatus === 'paid');
         <form action="<?= url('/admin/orders/' . rawurlencode($order['order_number']) . '/payment') ?>" method="POST" style="display:inline;">
           <?= csrf_field() ?>
           <input type="hidden" name="payment_status" value="paid">
-          <button type="submit" class="btn-admin-secondary btn-admin-sm">
+          <input type="hidden" name="admin_notes" value="Verified by administrator">
+          <button type="submit" class="btn-admin-primary btn-admin-sm" style="background: #059669; border-color: #059669;">
             <?= icon('check') ?>
-            <span>Record as Paid</span>
+            <span>Verify &amp; Mark Paid</span>
+          </button>
+        </form>
+
+        <?php if ($paymentStatus !== 'rejected'): ?>
+          <form action="<?= url('/admin/orders/' . rawurlencode($order['order_number']) . '/payment') ?>" method="POST" style="display:inline;" onsubmit="return confirm('Reject this payment verification? Customer will see this in their order status.');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="payment_status" value="rejected">
+            <input type="hidden" name="admin_notes" value="Payment rejected during administrative audit">
+            <button type="submit" class="btn-admin-ghost btn-admin-sm text-danger" style="color: #dc2626; border: 1px solid rgba(220,38,38,0.3);">
+              <span>Reject</span>
+            </button>
+          </form>
+        <?php endif; ?>
+      <?php else: ?>
+        <form action="<?= url('/admin/orders/' . rawurlencode($order['order_number']) . '/payment') ?>" method="POST" style="display:inline;" onsubmit="return confirm('Mark this paid order as Refunded?');">
+          <?= csrf_field() ?>
+          <input type="hidden" name="payment_status" value="refunded">
+          <input type="hidden" name="admin_notes" value="Refund issued by administrator">
+          <button type="submit" class="btn-admin-ghost btn-admin-sm" style="color: #6366f1; border: 1px solid rgba(99,102,241,0.3);">
+            <span>Issue Refund</span>
           </button>
         </form>
       <?php endif; ?>
@@ -217,17 +259,107 @@ $paymentPaid = ($paymentStatus === 'paid');
 
       <!-- Payment & Method Details -->
       <div class="admin-card">
-        <h3 class="card-section-title">Payment Transaction</h3>
-        <div style="display: flex; flex-direction: column; gap: var(--s-2); font-size: 0.9rem;">
-          <div style="display: flex; justify-content: space-between;">
-            <span class="text-slate-500">Method</span>
-            <span class="font-semibold uppercase text-slate-800"><?= e($order['payment_method'] ?? 'COD') ?></span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-3);">
+          <h3 class="card-section-title" style="margin: 0;">Payment &amp; Settlement</h3>
+          <span class="admin-tag-badge <?= $paymentStatusBadgeClass ?>" style="text-transform: capitalize; font-weight: 700;">
+            <?= e($paymentStatus) ?>
+          </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--s-3); font-size: 0.9rem;">
+          <!-- Method Rail -->
+          <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3);">
+            <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 4px;">Payment Method</div>
+            <div style="display: flex; align-items: center; gap: var(--s-2);">
+              <span class="font-semibold text-slate-900"><?= e($methodLabel) ?></span>
+              <span class="text-xs font-mono text-slate-500">(<?= strtoupper(e($method)) ?>)</span>
+            </div>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span class="text-slate-500">Status</span>
-            <span class="font-semibold <?= $paymentPaid ? 'text-emerald' : 'text-amber' ?>" style="text-transform: capitalize;">
-              <?= e($paymentStatus) ?>
-            </span>
+
+          <!-- Transaction ID (TID) -->
+          <?php if (!empty($transactionId)): ?>
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3);">
+              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 4px;">Customer Transaction ID (TID)</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);">
+                <code style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--text-1); word-break: break-all;"><?= e($transactionId) ?></code>
+                <button type="button" class="btn-admin-ghost btn-admin-sm" style="padding: 2px 8px; font-size: 0.75rem;" onclick="navigator.clipboard.writeText('<?= ea($transactionId) ?>'); alert('Transaction ID copied to clipboard!');">
+                  Copy
+                </button>
+              </div>
+            </div>
+          <?php endif; ?>
+
+          <!-- Receipt Proof -->
+          <?php if (!empty($paymentReceiptUrl)): ?>
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3);">
+              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 6px;">Customer Uploaded Receipt</div>
+              <?php
+                $isPdf = str_ends_with(strtolower(parse_url($paymentReceiptUrl, PHP_URL_PATH) ?? ''), '.pdf');
+              ?>
+              <?php if (!$isPdf): ?>
+                <div style="margin-bottom: var(--s-2); max-height: 220px; overflow: hidden; border-radius: var(--r-sm); border: 1px solid var(--line);">
+                  <a href="<?= ea($paymentReceiptUrl) ?>" target="_blank" rel="noopener">
+                    <img src="<?= ea($paymentReceiptUrl) ?>" alt="Payment Receipt" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 200px; background: rgba(0,0,0,0.03);">
+                  </a>
+                </div>
+              <?php endif; ?>
+              <a href="<?= ea($paymentReceiptUrl) ?>" target="_blank" rel="noopener" class="btn-admin-secondary btn-admin-sm" style="width: 100%; justify-content: center;">
+                <?= icon('arrow-right') ?>
+                <span><?= $isPdf ? 'Open PDF Receipt Document' : 'View Full Image Receipt' ?></span>
+              </a>
+            </div>
+          <?php endif; ?>
+
+          <!-- Stripe Session Info (if card) -->
+          <?php if (!empty($paymentDetails['stripe_session_id'])): ?>
+            <div style="font-size: 0.8rem; color: var(--text-3); word-break: break-all;">
+              Stripe Session: <code><?= e($paymentDetails['stripe_session_id']) ?></code>
+            </div>
+          <?php endif; ?>
+
+          <!-- Payment Audit Trail -->
+          <?php if (!empty($paymentDetails['audit_trail']) && is_array($paymentDetails['audit_trail'])): ?>
+            <div style="border-top: 1px solid var(--line); padding-top: var(--s-2);">
+              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 6px;">Audit Trail</div>
+              <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+                <?php foreach (array_reverse($paymentDetails['audit_trail']) as $log): ?>
+                  <div style="background: rgba(0,0,0,0.02); padding: 6px 8px; border-radius: 4px; border: 1px solid var(--line);">
+                    <div style="display: flex; justify-content: space-between; color: var(--text-3); font-size: 0.75rem;">
+                      <span class="font-semibold" style="text-transform: capitalize;"><?= e($log['status'] ?? '') ?></span>
+                      <span><?= !empty($log['timestamp']) ? date('M j, H:i', strtotime($log['timestamp'])) : '' ?></span>
+                    </div>
+                    <?php if (!empty($log['notes'])): ?>
+                      <div style="color: var(--text-2); margin-top: 2px;"><?= e($log['notes']) ?></div>
+                    <?php endif; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          <?php endif; ?>
+
+          <!-- Update Payment Status Form -->
+          <div style="border-top: 1px solid var(--line); padding-top: var(--s-3); margin-top: var(--s-1);">
+            <div class="text-xs text-slate-500 font-semibold uppercase" style="margin-bottom: var(--s-2);">Update Status &amp; Notes</div>
+            <form action="<?= url('/admin/orders/' . rawurlencode($order['order_number']) . '/payment') ?>" method="POST" style="display: flex; flex-direction: column; gap: var(--s-2);">
+              <?= csrf_field() ?>
+              <div>
+                <label class="text-xs text-slate-400">Payment Status</label>
+                <select name="payment_status" class="admin-select" style="width: 100%; margin-top: 2px;">
+                  <option value="pending" <?= $paymentStatus === 'pending' ? 'selected' : '' ?>>Pending</option>
+                  <option value="paid" <?= $paymentStatus === 'paid' ? 'selected' : '' ?>>Paid (Verified)</option>
+                  <option value="rejected" <?= $paymentStatus === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                  <option value="failed" <?= $paymentStatus === 'failed' ? 'selected' : '' ?>>Failed</option>
+                  <option value="refunded" <?= $paymentStatus === 'refunded' ? 'selected' : '' ?>>Refunded</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400">Admin Verification Notes</label>
+                <input type="text" name="admin_notes" class="admin-input" placeholder="e.g. Verified in Bank/Easypaisa statement" style="width: 100%; margin-top: 2px; font-size: 0.85rem;">
+              </div>
+              <button type="submit" class="btn-admin-secondary btn-admin-sm" style="margin-top: 4px; justify-content: center;">
+                Save Payment Update
+              </button>
+            </form>
           </div>
         </div>
       </div>

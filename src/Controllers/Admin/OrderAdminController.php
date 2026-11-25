@@ -15,8 +15,10 @@ final class OrderAdminController
     {
         $page = max(1, $request->int('page', 1));
         $filters = [
-            'status' => $request->query('status', ''),
-            'q'      => $request->query('q', ''),
+            'status'         => $request->query('status', ''),
+            'payment_status' => $request->query('payment_status', ''),
+            'payment_method' => $request->query('payment_method', ''),
+            'q'              => $request->query('q', ''),
         ];
 
         $data = OrderRepository::adminList($filters, $page, 20);
@@ -65,10 +67,18 @@ final class OrderAdminController
     {
         $number = (string)$request->param('number');
         $newPaymentStatus = $request->string('payment_status');
+        $adminNotes = $request->string('admin_notes');
 
-        $ok = OrderRepository::updatePayment($number, $newPaymentStatus);
+        $ok = OrderRepository::updatePayment($number, $newPaymentStatus, $adminNotes);
         if ($ok) {
-            Session::instance()->flash('success', "Payment status marked as {$newPaymentStatus}.");
+            $label = match($newPaymentStatus) {
+                'paid'     => 'verified and marked as Paid',
+                'rejected' => 'marked as Rejected',
+                'refunded' => 'marked as Refunded',
+                'failed'   => 'marked as Failed',
+                default    => "marked as {$newPaymentStatus}",
+            };
+            Session::instance()->flash('success', "Payment for order {$number} has been {$label}.");
         } else {
             Session::instance()->flash('error', 'Invalid payment status.');
         }

@@ -36,7 +36,38 @@ final class SettingsAdminController
             'free_shipping_threshold_cents' => (int)round($thresholdMajor * 100),
             'contact_email'                 => $request->string('contact_email'),
             'announcement'                  => $request->string('announcement'),
+
+            // Payment Methods Activation Toggles
+            'payment_cod_enabled'           => $request->bool('payment_cod_enabled'),
+            'payment_bank_enabled'          => $request->bool('payment_bank_enabled'),
+            'payment_easypaisa_enabled'     => $request->bool('payment_easypaisa_enabled'),
+            'payment_jazzcash_enabled'      => $request->bool('payment_jazzcash_enabled'),
+            'payment_card_enabled'          => $request->bool('payment_card_enabled'),
+
+            // Bank Account Settings
+            'bank_name'                     => $request->string('bank_name', 'Meezan Bank Ltd'),
+            'bank_account_title'            => $request->string('bank_account_title', 'GlassCart Official'),
+            'bank_account_number'           => $request->string('bank_account_number'),
+            'bank_iban'                     => $request->string('bank_iban'),
+            'bank_branch'                   => $request->string('bank_branch'),
             'bank_instructions'             => $request->string('bank_instructions'),
+
+            // Easypaisa Settings
+            'easypaisa_title'               => $request->string('easypaisa_title', 'GlassCart Official'),
+            'easypaisa_number'              => $request->string('easypaisa_number'),
+            'easypaisa_instructions'        => $request->string('easypaisa_instructions'),
+
+            // JazzCash Settings
+            'jazzcash_title'                => $request->string('jazzcash_title', 'GlassCart Official'),
+            'jazzcash_number'               => $request->string('jazzcash_number'),
+            'jazzcash_instructions'         => $request->string('jazzcash_instructions'),
+
+            // Visa / Mastercard (Card) Settings
+            'card_instructions'             => $request->string('card_instructions'),
+            'stripe_mode'                   => $request->string('stripe_mode', 'test'),
+            'stripe_publishable_key'        => $request->string('stripe_publishable_key'),
+            'stripe_secret_key'             => $request->string('stripe_secret_key'),
+            'stripe_webhook_secret'         => $request->string('stripe_webhook_secret'),
         ];
 
         $validator = Validator::make($payload, [
