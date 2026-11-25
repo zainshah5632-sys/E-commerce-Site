@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 $settings = $settings ?? [];
 $errors = $errors ?? [];
+$activeTab = $activeTab ?? 'general';
 
 $flatShippingMajor = isset($settings['flat_shipping_cents'])
     ? number_format((float)$settings['flat_shipping_cents'] / 100, 2, '.', '')
@@ -86,10 +87,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
           <!-- Tab 1: General Info -->
           <button
             type="button"
-            class="settings-nav-item settings-nav-item--active"
+            class="settings-nav-item <?= $activeTab === 'general' ? 'settings-nav-item--active' : '' ?>"
             data-tab-target="general"
             role="tab"
-            aria-selected="true"
+            aria-selected="<?= $activeTab === 'general' ? 'true' : 'false' ?>"
             aria-controls="pane-general"
             id="tab-general"
           >
@@ -105,10 +106,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
           <!-- Tab 2: Payments & Currency -->
           <button
             type="button"
-            class="settings-nav-item"
+            class="settings-nav-item <?= $activeTab === 'payments' ? 'settings-nav-item--active' : '' ?>"
             data-tab-target="payments"
             role="tab"
-            aria-selected="false"
+            aria-selected="<?= $activeTab === 'payments' ? 'true' : 'false' ?>"
             aria-controls="pane-payments"
             id="tab-payments"
           >
@@ -124,10 +125,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
           <!-- Tab 3: Shipping & Delivery -->
           <button
             type="button"
-            class="settings-nav-item"
+            class="settings-nav-item <?= $activeTab === 'shipping' ? 'settings-nav-item--active' : '' ?>"
             data-tab-target="shipping"
             role="tab"
-            aria-selected="false"
+            aria-selected="<?= $activeTab === 'shipping' ? 'true' : 'false' ?>"
             aria-controls="pane-shipping"
             id="tab-shipping"
           >
@@ -143,10 +144,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
           <!-- Tab 4: Notifications -->
           <button
             type="button"
-            class="settings-nav-item"
+            class="settings-nav-item <?= $activeTab === 'notifications' ? 'settings-nav-item--active' : '' ?>"
             data-tab-target="notifications"
             role="tab"
-            aria-selected="false"
+            aria-selected="<?= $activeTab === 'notifications' ? 'true' : 'false' ?>"
             aria-controls="pane-notifications"
             id="tab-notifications"
           >
@@ -162,10 +163,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
           <!-- Tab 5: API & Security -->
           <button
             type="button"
-            class="settings-nav-item"
+            class="settings-nav-item <?= $activeTab === 'security' ? 'settings-nav-item--active' : '' ?>"
             data-tab-target="security"
             role="tab"
-            aria-selected="false"
+            aria-selected="<?= $activeTab === 'security' ? 'true' : 'false' ?>"
             aria-controls="pane-security"
             id="tab-security"
           >
@@ -202,7 +203,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
         <!-- =====================================================================
              TAB 1: General Info
              ===================================================================== -->
-        <div data-tab-pane="general" id="pane-general" class="settings-pane" role="tabpanel" aria-labelledby="tab-general">
+        <div data-tab-pane="general" id="pane-general" class="settings-pane <?= $activeTab === 'general' ? '' : 'hidden' ?>" role="tabpanel" aria-labelledby="tab-general">
           
           <!-- Card: Storefront Identity -->
           <section class="settings-card" aria-labelledby="heading-identity">
@@ -343,7 +344,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
         <!-- =====================================================================
              TAB 2: Payments & Currency
              ===================================================================== -->
-        <div data-tab-pane="payments" id="pane-payments" class="settings-pane hidden" role="tabpanel" aria-labelledby="tab-payments">
+        <div data-tab-pane="payments" id="pane-payments" class="settings-pane <?= $activeTab === 'payments' ? '' : 'hidden' ?>" role="tabpanel" aria-labelledby="tab-payments">
           
           <!-- Card: Currency & Unit Pricing -->
           <section class="settings-card" aria-labelledby="heading-currency">
@@ -435,14 +436,14 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon"><?= icon('truck', 16) ?></span>
-                    <div>
+                    <div class="settings-rail-item__text">
                       <strong class="settings-rail-item__name">Cash on Delivery (COD)</strong>
                       <p class="settings-rail-item__desc">Collect physical cash upon doorstep package delivery.</p>
                     </div>
                   </div>
-                  <label class="switch" style="cursor: pointer;">
-                    <input type="checkbox" name="payment_cod_enabled" value="1" <?= !empty($settings['payment_cod_enabled']) ? 'checked' : '' ?>>
-                    <span class="slider"></span>
+                  <label class="settings-switch" for="pay-cod">
+                    <input type="checkbox" id="pay-cod" name="payment_cod_enabled" value="1" <?= !empty($settings['payment_cod_enabled']) ? 'checked' : '' ?> aria-label="Cash on Delivery (COD)">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -450,14 +451,14 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon" style="color: #00B140; font-weight: 800; font-size: 0.8rem;">EP</span>
-                    <div>
+                    <div class="settings-rail-item__text">
                       <strong class="settings-rail-item__name">Easypaisa Mobile Wallet</strong>
                       <p class="settings-rail-item__desc">Receive instant wallet transfers via Easypaisa mobile account with TID confirmation.</p>
                     </div>
                   </div>
-                  <label class="switch" style="cursor: pointer;">
-                    <input type="checkbox" name="payment_easypaisa_enabled" value="1" <?= !empty($settings['payment_easypaisa_enabled']) ? 'checked' : '' ?>>
-                    <span class="slider"></span>
+                  <label class="settings-switch" for="pay-easypaisa">
+                    <input type="checkbox" id="pay-easypaisa" name="payment_easypaisa_enabled" value="1" <?= !empty($settings['payment_easypaisa_enabled']) ? 'checked' : '' ?> aria-label="Easypaisa Mobile Wallet">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -465,14 +466,14 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon" style="color: #FEBE10; background: #000; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">JC</span>
-                    <div>
+                    <div class="settings-rail-item__text">
                       <strong class="settings-rail-item__name">JazzCash Mobile Account</strong>
                       <p class="settings-rail-item__desc">Receive instant wallet transfers via JazzCash account with TID confirmation.</p>
                     </div>
                   </div>
-                  <label class="switch" style="cursor: pointer;">
-                    <input type="checkbox" name="payment_jazzcash_enabled" value="1" <?= !empty($settings['payment_jazzcash_enabled']) ? 'checked' : '' ?>>
-                    <span class="slider"></span>
+                  <label class="settings-switch" for="pay-jazzcash">
+                    <input type="checkbox" id="pay-jazzcash" name="payment_jazzcash_enabled" value="1" <?= !empty($settings['payment_jazzcash_enabled']) ? 'checked' : '' ?> aria-label="JazzCash Mobile Account">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -480,14 +481,14 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon"><?= icon('store', 16) ?></span>
-                    <div>
+                    <div class="settings-rail-item__text">
                       <strong class="settings-rail-item__name">Direct Bank Transfer / IBAN / Raast</strong>
                       <p class="settings-rail-item__desc">Allow online banking, Raast, and wire transfer with reference and receipt upload.</p>
                     </div>
                   </div>
-                  <label class="switch" style="cursor: pointer;">
-                    <input type="checkbox" name="payment_bank_enabled" value="1" <?= !empty($settings['payment_bank_enabled']) ? 'checked' : '' ?>>
-                    <span class="slider"></span>
+                  <label class="settings-switch" for="pay-bank">
+                    <input type="checkbox" id="pay-bank" name="payment_bank_enabled" value="1" <?= !empty($settings['payment_bank_enabled']) ? 'checked' : '' ?> aria-label="Direct Bank Transfer / IBAN / Raast">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -495,14 +496,14 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-rail-item">
                   <div class="settings-rail-item__info">
                     <span class="settings-rail-item__icon"><?= icon('credit-card', 16) ?></span>
-                    <div>
+                    <div class="settings-rail-item__text">
                       <strong class="settings-rail-item__name">Visa &amp; Mastercard (Cards)</strong>
                       <p class="settings-rail-item__desc">Official PCI-DSS compliant credit and debit card settlement.</p>
                     </div>
                   </div>
-                  <label class="switch" style="cursor: pointer;">
-                    <input type="checkbox" name="payment_card_enabled" value="1" <?= !empty($settings['payment_card_enabled']) ? 'checked' : '' ?>>
-                    <span class="slider"></span>
+                  <label class="settings-switch" for="pay-card">
+                    <input type="checkbox" id="pay-card" name="payment_card_enabled" value="1" <?= !empty($settings['payment_card_enabled']) ? 'checked' : '' ?> aria-label="Visa &amp; Mastercard (Cards)">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
               </div>
@@ -773,7 +774,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
         <!-- =====================================================================
              TAB 3: Shipping & Delivery
              ===================================================================== -->
-        <div data-tab-pane="shipping" id="pane-shipping" class="settings-pane hidden" role="tabpanel" aria-labelledby="tab-shipping">
+        <div data-tab-pane="shipping" id="pane-shipping" class="settings-pane <?= $activeTab === 'shipping' ? '' : 'hidden' ?>" role="tabpanel" aria-labelledby="tab-shipping">
           
           <!-- Card: Shipping Rates & Free Tier -->
           <section class="settings-card" aria-labelledby="heading-shipping">
@@ -883,7 +884,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
         <!-- =====================================================================
              TAB 4: Notifications
              ===================================================================== -->
-        <div data-tab-pane="notifications" id="pane-notifications" class="settings-pane hidden" role="tabpanel" aria-labelledby="tab-notifications">
+        <div data-tab-pane="notifications" id="pane-notifications" class="settings-pane <?= $activeTab === 'notifications' ? '' : 'hidden' ?>" role="tabpanel" aria-labelledby="tab-notifications">
           
           <!-- Card: Customer Transactional Alerts -->
           <section class="settings-card" aria-labelledby="heading-cust-notif">
@@ -902,39 +903,36 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <!-- Toggle 1: Order Confirmation -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Customer Order Confirmations</span>
+                    <strong class="settings-toggle-card__title">Customer Order Confirmations</strong>
                     <p class="settings-toggle-card__desc">Dispatch itemized digital invoices and settlement confirmation immediately upon payment completion.</p>
                   </div>
-                  <label class="category-switch" for="notif-order-confirm">
-                    <input type="checkbox" id="notif-order-confirm" name="notif_order_confirm" value="1" <?= !empty($settings['notif_order_confirm']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle order confirmation emails</span>
+                  <label class="settings-switch" for="notif-order-confirm">
+                    <input type="checkbox" id="notif-order-confirm" name="notif_order_confirm" value="1" <?= !empty($settings['notif_order_confirm']) ? 'checked' : '' ?> aria-label="Customer Order Confirmations">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
                 <!-- Toggle 2: Shipment Dispatched -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Shipment Tracking &amp; Dispatch Notices</span>
+                    <strong class="settings-toggle-card__title">Shipment Tracking &amp; Dispatch Notices</strong>
                     <p class="settings-toggle-card__desc">Automatically notify buyers with their courier tracking code when orders transition to dispatched status.</p>
                   </div>
-                  <label class="category-switch" for="notif-shipping-update">
-                    <input type="checkbox" id="notif-shipping-update" name="notif_shipping_update" value="1" <?= !empty($settings['notif_shipping_update']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle shipment tracking notices</span>
+                  <label class="settings-switch" for="notif-shipping-update">
+                    <input type="checkbox" id="notif-shipping-update" name="notif_shipping_update" value="1" <?= !empty($settings['notif_shipping_update']) ? 'checked' : '' ?> aria-label="Shipment Tracking &amp; Dispatch Notices">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
                 <!-- Toggle 3: Refund Notifications -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Refund &amp; Cancellation Advisories</span>
+                    <strong class="settings-toggle-card__title">Refund &amp; Cancellation Advisories</strong>
                     <p class="settings-toggle-card__desc">Transmit credit adjustment documentation when an order is cancelled or refunded by administrators.</p>
                   </div>
-                  <label class="category-switch" for="notif-refund-advisory">
-                    <input type="checkbox" id="notif-refund-advisory" name="notif_refund_advisory" value="1" <?= !empty($settings['notif_refund_advisory']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle refund advisories</span>
+                  <label class="settings-switch" for="notif-refund-advisory">
+                    <input type="checkbox" id="notif-refund-advisory" name="notif_refund_advisory" value="1" <?= !empty($settings['notif_refund_advisory']) ? 'checked' : '' ?> aria-label="Refund &amp; Cancellation Advisories">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -959,26 +957,24 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <!-- Toggle 4: Low Stock Telemetry -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Low Stock Telemetry Alerts</span>
+                    <strong class="settings-toggle-card__title">Low Stock Telemetry Alerts</strong>
                     <p class="settings-toggle-card__desc">Notify administrative staff immediately when any product SKU stock falls below low inventory limit.</p>
                   </div>
-                  <label class="category-switch" for="notif-low-stock">
-                    <input type="checkbox" id="notif-low-stock" name="notif_low_stock" value="1" <?= !empty($settings['notif_low_stock']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle low stock alerts</span>
+                  <label class="settings-switch" for="notif-low-stock">
+                    <input type="checkbox" id="notif-low-stock" name="notif_low_stock" value="1" <?= !empty($settings['notif_low_stock']) ? 'checked' : '' ?> aria-label="Low Stock Telemetry Alerts">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
                 <!-- Toggle 5: Daily Order Summary -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Daily Morning Order Digest</span>
+                    <strong class="settings-toggle-card__title">Daily Morning Order Digest</strong>
                     <p class="settings-toggle-card__desc">Compile previous 24-hour gross volume, orders completed, and fulfillment queues into a daily digest.</p>
                   </div>
-                  <label class="category-switch" for="notif-daily-digest">
-                    <input type="checkbox" id="notif-daily-digest" name="notif_daily_digest" value="1" <?= !empty($settings['notif_daily_digest']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle daily morning order digest</span>
+                  <label class="settings-switch" for="notif-daily-digest">
+                    <input type="checkbox" id="notif-daily-digest" name="notif_daily_digest" value="1" <?= !empty($settings['notif_daily_digest']) ? 'checked' : '' ?> aria-label="Daily Morning Order Digest">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
@@ -1028,7 +1024,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
         <!-- =====================================================================
              TAB 5: API & Security
              ===================================================================== -->
-        <div data-tab-pane="security" id="pane-security" class="settings-pane hidden" role="tabpanel" aria-labelledby="tab-security">
+        <div data-tab-pane="security" id="pane-security" class="settings-pane <?= $activeTab === 'security' ? '' : 'hidden' ?>" role="tabpanel" aria-labelledby="tab-security">
           
           <!-- Card: Cloud Infrastructure -->
           <section class="settings-card" aria-labelledby="heading-infra">
@@ -1174,26 +1170,24 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <!-- Maintenance Mode -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Storefront Maintenance Mode</span>
+                    <strong class="settings-toggle-card__title">Storefront Maintenance Mode</strong>
                     <p class="settings-toggle-card__desc">Temporarily pause public checkout and show a scheduled maintenance advisory to visitors.</p>
                   </div>
-                  <label class="category-switch" for="set-maint-mode">
-                    <input type="checkbox" id="set-maint-mode" name="security_maintenance_mode" value="1" <?= !empty($settings['security_maintenance_mode']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle maintenance mode</span>
+                  <label class="settings-switch" for="set-maint-mode">
+                    <input type="checkbox" id="set-maint-mode" name="security_maintenance_mode" value="1" <?= !empty($settings['security_maintenance_mode']) ? 'checked' : '' ?> aria-label="Toggle Storefront Maintenance Mode">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
 
                 <!-- Enforce Strict SSL & Secure Cookies -->
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
-                    <span class="settings-toggle-card__title">Strict HTTPS &amp; Cookie Security Flags</span>
+                    <strong class="settings-toggle-card__title">Strict HTTPS &amp; Cookie Security Flags</strong>
                     <p class="settings-toggle-card__desc">Enforce HSTS, SameSite=Lax, and Secure cookie attributes across all customer requests.</p>
                   </div>
-                  <label class="category-switch" for="set-strict-ssl">
-                    <input type="checkbox" id="set-strict-ssl" name="security_strict_ssl" value="1" <?= !empty($settings['security_strict_ssl']) ? 'checked' : '' ?>>
-                    <span class="category-switch__slider" aria-hidden="true"></span>
-                    <span class="sr-only">Toggle strict SSL</span>
+                  <label class="settings-switch" for="set-strict-ssl">
+                    <input type="checkbox" id="set-strict-ssl" name="security_strict_ssl" value="1" <?= !empty($settings['security_strict_ssl']) ? 'checked' : '' ?> aria-label="Toggle Strict HTTPS &amp; Cookie Security Flags">
+                    <span class="settings-switch__slider" aria-hidden="true"></span>
                   </label>
                 </div>
               </div>
