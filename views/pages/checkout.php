@@ -371,8 +371,8 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
                 <div class="payment-data-row">
                   <span class="text-slate-600">Mobile Number:</span>
                   <div class="flex items-center gap-2">
-                    <strong class="font-mono text-emerald-700 text-sm font-bold"><?= e($settings['easypaisa_number'] ?? '03236701030') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['easypaisa_number'] ?? '03236701030') ?>">
+                    <strong class="font-mono text-emerald-700 text-sm font-bold"><?= e($settings['easypaisa_number'] ?? '03120246309') ?></strong>
+                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['easypaisa_number'] ?? '03120246309') ?>">
                       <?= icon('copy', 12) ?>
                       <span>Copy</span>
                     </button>
@@ -488,7 +488,7 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
                 </div>
                 <div class="payment-data-row">
                   <span class="text-slate-600">Bank Name:</span>
-                  <strong class="text-slate-900"><?= e($settings['bank_name'] ?? 'Meezan Bank Ltd') ?></strong>
+                  <strong class="text-slate-900"><?= e($settings['bank_name'] ?? 'United Bank Limited (UBL)') ?></strong>
                 </div>
                 <div class="payment-data-row">
                   <span class="text-slate-600">Account Title:</span>
@@ -497,18 +497,18 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
                 <div class="payment-data-row">
                   <span class="text-slate-600">Account Number:</span>
                   <div class="flex items-center gap-2">
-                    <strong class="font-mono text-slate-900"><?= e($settings['bank_account_number'] ?? '01020304050607') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_account_number'] ?? '01020304050607') ?>">
+                    <strong class="font-mono text-slate-900"><?= e($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?></strong>
+                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?>">
                       <?= icon('copy', 12) ?>
                       <span>Copy</span>
                     </button>
                   </div>
                 </div>
                 <div class="payment-data-row">
-                  <span class="text-slate-600">IBAN:</span>
+                  <span class="text-slate-600">IBAN / Raast:</span>
                   <div class="flex items-center gap-2">
-                    <strong class="font-mono text-indigo-700 text-xs font-bold"><?= e($settings['bank_iban'] ?? 'PK36MEZN0001020304050607') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_iban'] ?? 'PK36MEZN0001020304050607') ?>">
+                    <strong class="font-mono text-indigo-700 text-xs font-bold"><?= e($settings['bank_iban'] ?? '4214 6182 4622 1918') ?></strong>
+                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_iban'] ?? '4214 6182 4622 1918') ?>">
                       <?= icon('copy', 12) ?>
                       <span>Copy</span>
                     </button>

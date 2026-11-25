@@ -524,7 +524,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 </div>
                 <div class="settings-form-group">
                   <label for="set-ep-num" class="settings-form-label">Mobile Account Number</label>
-                  <input type="text" id="set-ep-num" name="easypaisa_number" class="settings-form-input font-mono" placeholder="03236701030" value="<?= ea($settings['easypaisa_number'] ?? '03236701030') ?>">
+                  <input type="text" id="set-ep-num" name="easypaisa_number" class="settings-form-input font-mono" placeholder="03120246309" value="<?= ea($settings['easypaisa_number'] ?? '03120246309') ?>">
                 </div>
               </div>
               <div class="settings-form-group mt-3">
@@ -575,7 +575,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
               <div class="settings-grid-2">
                 <div class="settings-form-group">
                   <label for="set-bank-name" class="settings-form-label">Bank Name</label>
-                  <input type="text" id="set-bank-name" name="bank_name" class="settings-form-input" placeholder="Meezan Bank Ltd" value="<?= ea($settings['bank_name'] ?? 'Meezan Bank Ltd') ?>">
+                  <input type="text" id="set-bank-name" name="bank_name" class="settings-form-input" placeholder="United Bank Limited (UBL)" value="<?= ea($settings['bank_name'] ?? 'United Bank Limited (UBL)') ?>">
                 </div>
                 <div class="settings-form-group">
                   <label for="set-bank-title" class="settings-form-label">Account Title</label>
@@ -586,17 +586,17 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
               <div class="settings-grid-2 mt-3">
                 <div class="settings-form-group">
                   <label for="set-bank-acc" class="settings-form-label">Account Number</label>
-                  <input type="text" id="set-bank-acc" name="bank_account_number" class="settings-form-input font-mono" placeholder="01020304050607" value="<?= ea($settings['bank_account_number'] ?? '01020304050607') ?>">
+                  <input type="text" id="set-bank-acc" name="bank_account_number" class="settings-form-input font-mono" placeholder="4214 6182 4622 1918" value="<?= ea($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?>">
                 </div>
                 <div class="settings-form-group">
-                  <label for="set-bank-iban" class="settings-form-label">IBAN (International Bank Account Number)</label>
-                  <input type="text" id="set-bank-iban" name="bank_iban" class="settings-form-input font-mono" placeholder="PK36MEZN0001020304050607" value="<?= ea($settings['bank_iban'] ?? 'PK36MEZN0001020304050607') ?>">
+                  <label for="set-bank-iban" class="settings-form-label">IBAN / Raast Account</label>
+                  <input type="text" id="set-bank-iban" name="bank_iban" class="settings-form-input font-mono" placeholder="4214 6182 4622 1918" value="<?= ea($settings['bank_iban'] ?? '4214 6182 4622 1918') ?>">
                 </div>
               </div>
 
               <div class="settings-form-group mt-3">
                 <label for="set-bank-branch" class="settings-form-label">Branch &amp; Swift / Routing Code</label>
-                <input type="text" id="set-bank-branch" name="bank_branch" class="settings-form-input" placeholder="Main Corporate Branch (Code 0101)" value="<?= ea($settings['bank_branch'] ?? 'Main Corporate Branch (0101)') ?>">
+                <input type="text" id="set-bank-branch" name="bank_branch" class="settings-form-input" placeholder="Online Banking / Raast Transfer" value="<?= ea($settings['bank_branch'] ?? 'Online Banking / Raast Transfer') ?>">
               </div>
 
               <div class="settings-form-group mt-3">

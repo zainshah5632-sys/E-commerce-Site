@@ -49,8 +49,8 @@ final class SettingsRepository
             'value' => json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
         ];
 
-        // PostgREST upsert with Prefer: resolution=merge-duplicates
-        $res = $client->insert('site_settings', $payload, false);
+        // PostgREST upsert with Prefer: resolution=merge-duplicates & on_conflict=key
+        $res = $client->upsert('site_settings', $payload, 'key');
         Cache::forget(self::CACHE_KEY);
         return $res->ok;
     }
@@ -64,7 +64,7 @@ final class SettingsRepository
                 'key'   => $k,
                 'value' => json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             ];
-            $res = $client->insert('site_settings', $payload, false);
+            $res = $client->upsert('site_settings', $payload, 'key');
             if (!$res->ok) {
                 $success = false;
             }
@@ -92,17 +92,17 @@ final class SettingsRepository
             'payment_card_enabled'          => true,
 
             // Bank Account Transfer Settings
-            'bank_name'                     => 'Meezan Bank Ltd',
+            'bank_name'                     => 'United Bank Limited (UBL)',
             'bank_account_title'            => 'GlassCart Official',
-            'bank_account_number'           => '01020304050607',
-            'bank_iban'                     => 'PK36MEZN0001020304050607',
-            'bank_branch'                   => 'Main Corporate Branch (0101)',
-            'bank_instructions'             => 'Transfer the total to: Meezan Bank, Title: GlassCart Official, Account: 01020304050607, IBAN: PK36MEZN0001020304050607. Enter your Transaction Reference ID below and upload your receipt screenshot.',
+            'bank_account_number'           => '4214 6182 4622 1918',
+            'bank_iban'                     => '4214 6182 4622 1918',
+            'bank_branch'                   => 'Online Banking / Raast Transfer',
+            'bank_instructions'             => 'Transfer the total order amount to: United Bank Limited (UBL), Title: GlassCart Official, Account: 4214 6182 4622 1918. Enter your Transaction Reference ID below and upload your receipt screenshot.',
 
             // Easypaisa Settings
             'easypaisa_title'               => 'GlassCart Official',
-            'easypaisa_number'              => '03236701030',
-            'easypaisa_instructions'        => '1. Open Easypaisa App. 2. Select Send Money -> Easypaisa Account. 3. Enter Mobile Number: 0323-6701030. 4. Enter the order total. 5. Complete payment and input your 3737 Transaction ID (TID) below with screenshot receipt.',
+            'easypaisa_number'              => '03120246309',
+            'easypaisa_instructions'        => '1. Open Easypaisa App. 2. Select Send Money -> Easypaisa Account. 3. Enter Mobile Number: 0312-0246309. 4. Enter the order total. 5. Complete payment and input your 3737 Transaction ID (TID) below with screenshot receipt.',
 
             // JazzCash Settings
             'jazzcash_title'                => 'GlassCart Official',
