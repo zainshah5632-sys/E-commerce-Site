@@ -57,6 +57,8 @@ if ($compareCents && $compareCents > $priceCents) {
       <p class="product-card__snippet">
         <?= e($product['short_description']) ?>
       </p>
+    <?php else: ?>
+      <p class="product-card__snippet product-card__snippet--empty" aria-hidden="true">&nbsp;</p>
     <?php endif; ?>
 
     <!-- Bottom Action Row: Price & Quick Add to Cart Button -->
@@ -68,7 +70,7 @@ if ($compareCents && $compareCents > $priceCents) {
         <?php endif; ?>
       </div>
 
-      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart">
+      <form action="<?= url('/cart/add') ?>" method="POST" class="js-add-to-cart product-card__cart-form">
         <?= csrf_field() ?>
         <input type="hidden" name="product_id" value="<?= ea($product['id']) ?>">
         <input type="hidden" name="quantity" value="1">
@@ -76,9 +78,10 @@ if ($compareCents && $compareCents > $priceCents) {
           type="submit"
           class="product-card__cart-btn"
           <?= $isOutOfStock ? 'disabled' : '' ?>
+          aria-label="<?= $isOutOfStock ? 'Sold Out' : 'Add ' . ea($product['name']) . ' to Cart' ?>"
           title="<?= $isOutOfStock ? 'Sold Out' : 'Add to Cart' ?>"
         >
-          <?= icon('cart') ?>
+          <?= icon('cart', 16) ?>
           <span><?= $isOutOfStock ? 'Sold Out' : 'Add to Cart' ?></span>
         </button>
       </form>

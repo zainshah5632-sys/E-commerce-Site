@@ -430,6 +430,8 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  container-type: inline-size;
+  min-width: 0;
 }
 
 .product-card:hover {
@@ -515,6 +517,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-width: 0;
 }
 
 .product-card__eyebrow {
@@ -531,15 +534,17 @@
   font-weight: 600;
   line-height: 1.35;
   margin: 0;
+  min-height: 2.7em; /* Reserves 2 lines for uniform row alignment */
 }
 
 .product-card__heading a {
   color: #0f172a;
   text-decoration: none;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
   transition: color 0.15s ease;
 }
 
@@ -557,10 +562,16 @@
   color: #64748b;     /* text-slate-500 */
   line-height: 1.45;
   margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 2.9em; /* Reserves 2 lines for consistent card height */
+}
+
+.product-card__snippet--empty {
+  visibility: hidden;
 }
 
 [data-theme="dark"] .product-card__snippet {
@@ -570,12 +581,14 @@
 /* Bottom Action Row: Price & Quick Add to Cart */
 .product-card__footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid #f1f5f9;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  min-width: 0;
 }
 
 [data-theme="dark"] .product-card__footer {
@@ -584,8 +597,11 @@
 
 .product-card__price-wrap {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .product-card__current-price {
@@ -593,6 +609,7 @@
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.015em;
+  white-space: nowrap;
 }
 
 [data-theme="dark"] .product-card__current-price {
@@ -604,23 +621,41 @@
   color: #94a3b8;     /* text-slate-400 */
   text-decoration: line-through;
   font-weight: 400;
+  white-space: nowrap;
+}
+
+.product-card__cart-form {
+  display: flex;
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .product-card__cart-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 0.375rem;
   background-color: #0f172a; /* bg-slate-900 */
   color: #ffffff;
   font-size: 0.75rem;        /* text-xs */
   font-weight: 600;
-  padding: 0.45rem 0.75rem;  /* px-3 py-2 */
+  padding: 0.5rem 0.85rem;
+  min-height: 2.375rem;      /* 38px touch target */
   border-radius: 0.75rem;    /* rounded-xl */
   border: none;
   cursor: pointer;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   transition: all 0.15s ease;
   white-space: nowrap;
+  max-width: 100%;
+  text-decoration: none;
+}
+
+.product-card__cart-btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  stroke: currentColor;
 }
 
 .product-card__cart-btn:hover {
@@ -644,6 +679,76 @@
 
 [data-theme="dark"] .product-card__cart-btn:hover {
   background-color: #6366f1;
+}
+
+/* =====================================================================
+   Product Card Stacking & A+ Font Scale Adaptations
+   ===================================================================== */
+/* When card container is under 280px wide, stack price & button vertically */
+@container (max-width: 280px) {
+  .product-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+  .product-card__price-wrap {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .product-card__cart-form {
+    width: 100%;
+  }
+  .product-card__cart-btn {
+    width: 100%;
+    min-height: 2.5rem;
+  }
+}
+
+/* When A+ (18px) or A++ (20px) accessibility scaling is active, stack footer to guarantee zero clipping */
+html[data-font-scale="lg"] .product-card__footer,
+html[data-font-scale="xl"] .product-card__footer {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.625rem;
+}
+
+html[data-font-scale="lg"] .product-card__price-wrap,
+html[data-font-scale="xl"] .product-card__price-wrap {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+html[data-font-scale="lg"] .product-card__cart-form,
+html[data-font-scale="xl"] .product-card__cart-form {
+  width: 100%;
+}
+
+html[data-font-scale="lg"] .product-card__cart-btn,
+html[data-font-scale="xl"] .product-card__cart-btn {
+  width: 100%;
+  min-height: 2.5rem;
+  font-size: 0.8125rem;
+}
+
+/* Mobile screen optimization (<= 520px) */
+@media (max-width: 520px) {
+  .product-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+  .product-card__price-wrap {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .product-card__cart-form {
+    width: 100%;
+  }
+  .product-card__cart-btn {
+    width: 100%;
+    min-height: 2.625rem; /* 42px comfortable mobile touch target */
+    padding: 0.55rem 1rem;
+  }
 }
 
 /* Drawer / Mini-Cart */

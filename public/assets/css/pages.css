@@ -754,47 +754,43 @@
 }
 
 /* =====================================================================
-   Product Grid System (1 to 4 responsive columns with gap-6 / 24px)
+   Product Grid System (Responsive auto-fill columns with adaptive minmax)
    ===================================================================== */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem; /* gap-6 */
 }
 
-@media (min-width: 640px) {
+@media (max-width: 580px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 }
 
-@media (min-width: 768px) {
-  .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .product-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* In Shop layout (where 260px sidebar is present) */
+/* In Shop layout (where sidebar is present) */
 .shop-layout .product-grid {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 580px) {
   .shop-layout .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 }
 
-@media (min-width: 1100px) {
-  .shop-layout .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+/* Adaptive column sizing for larger font accessibility modes */
+html[data-font-scale="lg"] .product-grid,
+html[data-font-scale="xl"] .product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+}
+
+html[data-font-scale="lg"] .shop-layout .product-grid,
+html[data-font-scale="xl"] .shop-layout .product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 /* Shop Layout with Sticky Sidebar */
@@ -807,7 +803,7 @@
 
 @media (min-width: 900px) {
   .shop-layout {
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 280px 1fr;
     align-items: start;
   }
 }
@@ -837,6 +833,37 @@
   letter-spacing: 0.04em;
   color: var(--text-2);
   margin-bottom: var(--s-2);
+}
+
+/* Sidebar Price Filter Range Inputs */
+.filter-price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.filter-price-input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  padding: 0.5rem 0.625rem !important;
+  font-size: 0.875rem;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.filter-price-input::-webkit-outer-spin-button,
+.filter-price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.filter-price-sep {
+  color: var(--text-3);
+  font-weight: 600;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 /* =====================================================================
