@@ -37,7 +37,7 @@ $jsonLd = [
     'sku'         => $product['sku'] ?? $product['slug'],
     'offers'      => [
         '@type'         => 'Offer',
-        'priceCurrency' => settings('currency_code', 'USD'),
+        'priceCurrency' => settings('currency_code', 'PKR'),
         'price'         => number_format($priceCents / 100, 2, '.', ''),
         'availability'  => $isOutOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
     ],

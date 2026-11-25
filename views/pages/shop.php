@@ -102,11 +102,11 @@ $allTotal = $allTotal ?? $total;
 
         <!-- Price Range -->
         <div class="filter-group">
-          <div class="filter-group__title">Price Range ($)</div>
+          <div class="filter-group__title">Price Range (<?= e(settings('currency_symbol', 'Rs')) ?>)</div>
           <div style="display: flex; gap: var(--s-2); align-items: center;">
-            <input type="number" name="min_price" class="form-input" placeholder="Min" value="<?= ea($minPrice) ?>" min="0" step="5" style="padding: 8px 12px;">
+            <input type="number" name="min_price" class="form-input" placeholder="Min (2000)" value="<?= ea($minPrice) ?>" min="0" step="100" style="padding: 8px 12px;">
             <span style="color: var(--text-3);">&ndash;</span>
-            <input type="number" name="max_price" class="form-input" placeholder="Max" value="<?= ea($maxPrice) ?>" min="0" step="5" style="padding: 8px 12px;">
+            <input type="number" name="max_price" class="form-input" placeholder="Max (5000)" value="<?= ea($maxPrice) ?>" min="0" step="100" style="padding: 8px 12px;">
           </div>
         </div>
 

@@ -141,10 +141,10 @@ $currentImages = is_array($product['images'] ?? null) ? $product['images'] : [];
         <div class="form-grid-3">
           <div class="form-group">
             <label for="prod-price" class="admin-label">
-              <span>Selling Price ($ USD) <span class="required">*</span></span>
+              <span>Selling Price (<?= e(settings('currency_symbol', 'Rs')) ?>) <span class="required">*</span></span>
             </label>
             <div class="admin-input-prefix-wrap">
-              <span class="prefix">$</span>
+              <span class="prefix"><?= e(settings('currency_symbol', 'Rs')) ?></span>
               <input
                 type="number"
                 id="prod-price"
@@ -153,7 +153,7 @@ $currentImages = is_array($product['images'] ?? null) ? $product['images'] : [];
                 value="<?= ea(old('price', $priceMajor)) ?>"
                 step="0.01"
                 min="0"
-                placeholder="0.00"
+                placeholder="2000.00"
                 required
               >
             </div>
@@ -164,10 +164,10 @@ $currentImages = is_array($product['images'] ?? null) ? $product['images'] : [];
 
           <div class="form-group">
             <label for="prod-compare" class="admin-label">
-              <span>Compare-At Price ($ USD)</span>
+              <span>Compare-At Price (<?= e(settings('currency_symbol', 'Rs')) ?>)</span>
             </label>
             <div class="admin-input-prefix-wrap">
-              <span class="prefix">$</span>
+              <span class="prefix"><?= e(settings('currency_symbol', 'Rs')) ?></span>
               <input
                 type="number"
                 id="prod-compare"
@@ -176,7 +176,7 @@ $currentImages = is_array($product['images'] ?? null) ? $product['images'] : [];
                 value="<?= ea(old('compare_at_price', $compareMajor)) ?>"
                 step="0.01"
                 min="0"
-                placeholder="0.00"
+                placeholder="2500.00"
               >
             </div>
             <span class="admin-help-text">Shows crossed-out original price.</span>

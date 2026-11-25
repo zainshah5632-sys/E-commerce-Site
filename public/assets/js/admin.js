@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (announcementInput && announcementPreviewText) {
     announcementInput.addEventListener('input', () => {
       const val = announcementInput.value.trim();
-      announcementPreviewText.textContent = val || 'Complimentary worldwide express shipping on orders over $75';
+      announcementPreviewText.textContent = val || 'Free delivery across Pakistan on orders over Rs 5,000';
     });
   }
 
@@ -141,14 +141,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateCurrencyPreview() {
     if (pricePreviewDemo && currencySymbolInput && currencyCodeInput) {
-      const sym = currencySymbolInput.value.trim() || '$';
-      const code = currencyCodeInput.value.trim().toUpperCase() || 'USD';
-      pricePreviewDemo.textContent = `${sym}149.00 ${code}`;
+      const sym = currencySymbolInput.value.trim() || 'Rs';
+      const code = currencyCodeInput.value.trim().toUpperCase() || 'PKR';
+      const sep = ['$', '€', '£', '¥'].includes(sym) ? '' : ' ';
+      pricePreviewDemo.textContent = `${sym}${sep}2,500.00 ${code}`;
     }
     if (thresholdDemo && thresholdInput && currencySymbolInput) {
-      const sym = currencySymbolInput.value.trim() || '$';
-      const thresh = parseFloat(thresholdInput.value) || 75;
-      thresholdDemo.textContent = `${sym}${thresh.toFixed(2)}`;
+      const sym = currencySymbolInput.value.trim() || 'Rs';
+      const thresh = parseFloat(thresholdInput.value) || 5000;
+      const sep = ['$', '€', '£', '¥'].includes(sym) ? '' : ' ';
+      thresholdDemo.textContent = `${sym}${sep}${thresh.toFixed(2)}`;
     }
   }
 

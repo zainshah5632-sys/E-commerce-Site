@@ -24,12 +24,12 @@ final class PricingService
             return 0;
         }
 
-        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 7500);
+        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 500000);
         if ($subtotalCents >= $threshold) {
             return 0;
         }
 
-        return (int)SettingsRepository::get('flat_shipping_cents', 500);
+        return (int)SettingsRepository::get('flat_shipping_cents', 25000);
     }
 
     public static function total(int $subtotalCents, int $shippingCents): int
@@ -39,13 +39,13 @@ final class PricingService
 
     public static function freeShippingRemaining(int $subtotalCents): int
     {
-        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 7500);
+        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 500000);
         return max(0, $threshold - $subtotalCents);
     }
 
     public static function freeShippingProgressPercent(int $subtotalCents): int
     {
-        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 7500);
+        $threshold = (int)SettingsRepository::get('free_shipping_threshold_cents', 500000);
         if ($threshold <= 0) {
             return 100;
         }

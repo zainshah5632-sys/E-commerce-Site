@@ -78,11 +78,11 @@ final class SettingsRepository
         return [
             'store_name'                    => 'GlassCart',
             'currency_code'                 => 'PKR',
-            'currency_symbol'               => 'Rs.',
-            'flat_shipping_cents'           => 25000, // Rs. 250 in paise
-            'free_shipping_threshold_cents' => 500000, // Rs. 5,000 in paise
+            'currency_symbol'               => 'Rs',
+            'flat_shipping_cents'           => 25000, // Rs 250 in paise
+            'free_shipping_threshold_cents' => 500000, // Rs 5,000 in paise
             'contact_email'                 => 'hello@example.com',
-            'announcement'                  => 'Free delivery on orders over Rs. 5,000',
+            'announcement'                  => 'Free delivery across Pakistan on orders over Rs 5,000',
 
             // Automated Payment Methods Activation Toggles
             'payment_cod_enabled'           => true,

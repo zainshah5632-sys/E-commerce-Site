@@ -44,9 +44,13 @@ if (!function_exists('asset')) {
 if (!function_exists('money')) {
     function money(int $cents): string
     {
-        $symbol = settings('currency_symbol', '$');
+        $symbol = trim((string)settings('currency_symbol', 'Rs'));
+        if ($symbol === '') {
+            $symbol = 'Rs';
+        }
         $formatted = number_format($cents / 100, 2);
-        return $symbol . $formatted;
+        $prefix = in_array($symbol, ['$', '€', '£', '¥'], true) ? $symbol : $symbol . ' ';
+        return $prefix . $formatted;
     }
 }
 

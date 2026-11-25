@@ -371,11 +371,11 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     maxlength="5"
                     class="settings-form-input font-mono uppercase <?= !empty($errors['currency_code']) ? 'settings-form-input--error' : '' ?>"
                     required
-                    placeholder="USD"
-                    value="<?= ea($settings['currency_code'] ?? 'USD') ?>"
+                    placeholder="PKR"
+                    value="<?= ea($settings['currency_code'] ?? 'PKR') ?>"
                     autocomplete="off"
                   >
-                  <p class="settings-form-helper">3-letter standard ISO currency code (e.g. USD, EUR, GBP, JPY).</p>
+                  <p class="settings-form-helper">3-letter standard ISO currency code (e.g. PKR, USD, EUR, GBP).</p>
                   <?php if (!empty($errors['currency_code'])): ?>
                     <span class="settings-field-error"><?= e($errors['currency_code']) ?></span>
                   <?php endif; ?>
@@ -393,11 +393,11 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     maxlength="5"
                     class="settings-form-input <?= !empty($errors['currency_symbol']) ? 'settings-form-input--error' : '' ?>"
                     required
-                    placeholder="$"
-                    value="<?= ea($settings['currency_symbol'] ?? '$') ?>"
+                    placeholder="Rs"
+                    value="<?= ea($settings['currency_symbol'] ?? 'Rs') ?>"
                     autocomplete="off"
                   >
-                  <p class="settings-form-helper">Character symbol prefixed to product prices (e.g. $, &euro;, &pound;).</p>
+                  <p class="settings-form-helper">Character symbol prefixed to product prices (e.g. Rs, $, &euro;).</p>
                   <?php if (!empty($errors['currency_symbol'])): ?>
                     <span class="settings-field-error"><?= e($errors['currency_symbol']) ?></span>
                   <?php endif; ?>
@@ -412,7 +412,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-callout__content">
                   <strong class="settings-callout__title">Storefront Price Preview:</strong>
                   <span class="settings-callout__desc">
-                    Products will display as: <strong id="price-preview-demo" class="font-mono text-indigo-700 font-bold"><?= ea($settings['currency_symbol'] ?? '$') ?>149.00 <?= ea($settings['currency_code'] ?? 'USD') ?></strong>
+                    Products will display as: <strong id="price-preview-demo" class="font-mono text-indigo-700 font-bold"><?= ea($settings['currency_symbol'] ?? 'Rs') ?> 2,500.00 <?= ea($settings['currency_code'] ?? 'PKR') ?></strong>
                   </span>
                 </div>
               </div>
@@ -792,10 +792,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <!-- Standard Flat Shipping -->
                 <div class="settings-form-group">
                   <label for="set-flat-shipping" class="settings-form-label">
-                    Standard Flat Shipping Fee ($) <span class="text-rose-500">*</span>
+                    Standard Flat Shipping Fee (<?= ea($settings['currency_symbol'] ?? 'Rs') ?>) <span class="text-rose-500">*</span>
                   </label>
                   <div class="settings-input-group">
-                    <span class="settings-input-affix" aria-hidden="true">$</span>
+                    <span class="settings-input-affix" aria-hidden="true"><?= ea($settings['currency_symbol'] ?? 'Rs') ?></span>
                     <input
                       type="number"
                       step="0.01"
@@ -813,10 +813,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <!-- Free Shipping Threshold -->
                 <div class="settings-form-group">
                   <label for="set-free-threshold" class="settings-form-label">
-                    Free Shipping Cart Threshold ($) <span class="text-rose-500">*</span>
+                    Free Shipping Cart Threshold (<?= ea($settings['currency_symbol'] ?? 'Rs') ?>) <span class="text-rose-500">*</span>
                   </label>
                   <div class="settings-input-group">
-                    <span class="settings-input-affix" aria-hidden="true">$</span>
+                    <span class="settings-input-affix" aria-hidden="true"><?= ea($settings['currency_symbol'] ?? 'Rs') ?></span>
                     <input
                       type="number"
                       step="0.01"
