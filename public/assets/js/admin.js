@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchSettingsTab(targetId) {
     if (!targetId || !settingsPanes.length) return;
 
+    // Normalize targetId (strip leading # if provided)
+    targetId = targetId.replace(/^#/, '');
+
     let found = false;
     settingsPanes.forEach(pane => {
       if (pane.getAttribute('data-tab-pane') === targetId) {
@@ -65,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (item.classList.contains('settings-nav-item')) {
           item.classList.toggle('settings-nav-item--active', isActive);
           item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          if (isActive && window.innerWidth <= 992) {
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
         }
 
         // Legacy horizontal tab support
@@ -78,6 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       });
+
+      // Synchronize hidden active_tab input for persistent server roundtrips
+      const activeTabInput = document.getElementById('settings-active-tab');
+      if (activeTabInput) {
+        activeTabInput.value = targetId;
+      }
 
       // Update URL hash without scroll jump
       if (history.replaceState) {
@@ -100,6 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (initialHash) {
       switchSettingsTab(initialHash);
     }
+
+    // Listen for browser forward / back button navigation
+    window.addEventListener('hashchange', () => {
+      const currentHash = window.location.hash.replace('#', '');
+      if (currentHash) {
+        switchSettingsTab(currentHash);
+      }
+    });
   }
 
   // Interactive Live Announcement Preview in Settings
@@ -446,54 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // Product Editor: Live Discount & Margin Calculator
-  const prodPriceInput = document.getElementById('prod-price');
-  const prodCompareInput = document.getElementById('prod-compare');
-  const discountBadge = document.getElementById('discount-calc-badge');
-
-  function updateDiscountBadge() {
-    if (!prodPriceInput || !prodCompareInput || !discountBadge) return;
-    const price = parseFloat(prodPriceInput.value) || 0;
-    const compare = parseFloat(prodCompareInput.value) || 0;
-
-    if (compare > price && price > 0) {
-      const discountPct = Math.round(((compare - price) / compare) * 100);
-      const savings = (compare - price).toFixed(2);
-      discountBadge.textContent = `${discountPct}% Off (Save $${savings})`;
-      discountBadge.style.display = 'inline-flex';
-    } else {
-      discountBadge.style.display = 'none';
-    }
-  }
-
-  if (prodPriceInput && prodCompareInput) {
-    prodPriceInput.addEventListener('input', updateDiscountBadge);
-    prodCompareInput.addEventListener('input', updateDiscountBadge);
-    updateDiscountBadge();
-  }
-
-  // Quick Discount Presets
-  document.querySelectorAll('[data-action="apply-discount"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (!prodPriceInput || !prodCompareInput) return;
-      const pct = parseFloat(btn.getAttribute('data-pct')) || 0;
-      let compare = parseFloat(prodCompareInput.value);
-
-      if (!compare || isNaN(compare) || compare <= 0) {
-        compare = parseFloat(prodPriceInput.value) || 0;
-        if (compare > 0) {
-          prodCompareInput.value = compare.toFixed(2);
-        }
-      }
-
-      if (compare > 0 && pct > 0) {
-        const discounted = compare * (1 - pct / 100);
-        prodPriceInput.value = discounted.toFixed(2);
-        updateDiscountBadge();
-      }
-    });
-  });
 
   // Product Title to Slug Auto-generator
   const prodNameInput = document.getElementById('prod-name');

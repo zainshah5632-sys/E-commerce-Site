@@ -112,6 +112,28 @@ final class SettingsRepository
             'stripe_publishable_key'        => '',
             'stripe_secret_key'             => '',
             'stripe_webhook_secret'         => '',
+
+            // Merchant Settlement Details
+            'easypaisa_merchant_number'     => '03120246309',
+            'bank_name'                     => 'United Bank Limited (UBL)',
+            'bank_account_title'            => 'GlassCart Retail',
+            'bank_account_number'           => '4214 6182 4622 1918',
+
+            // Notification Preferences
+            'notif_order_confirm'           => true,
+            'notif_shipping_update'         => true,
+            'notif_refund_advisory'         => true,
+            'notif_low_stock'               => true,
+            'notif_low_stock_threshold'     => 3,
+            'notif_daily_digest'            => false,
+            'notif_admin_email'             => 'admin@glasscart.local',
+
+            // Security & Session Policies
+            'security_session_timeout'      => 120, // minutes
+            'security_max_login_attempts'   => 5,
+            'security_maintenance_mode'     => false,
+            'security_strict_ssl'           => true,
+            'api_webhook_secret'            => 'whsec_98fbc184013490aa8efb019349cde012',
         ];
     }
 

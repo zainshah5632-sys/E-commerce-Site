@@ -197,6 +197,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
     <main class="settings-content-column">
       <form action="<?= url('/admin/settings') ?>" method="POST" id="settings-form" class="settings-form">
         <?= csrf_field() ?>
+        <input type="hidden" name="active_tab" id="settings-active-tab" value="<?= ea($activeTab ?? 'general') ?>">
 
         <!-- =====================================================================
              TAB 1: General Info
@@ -503,6 +504,92 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     <input type="checkbox" name="payment_card_enabled" value="1" <?= !empty($settings['payment_card_enabled']) ? 'checked' : '' ?>>
                     <span class="slider"></span>
                   </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: Merchant Bank Settlement & Mobile Wallet Accounts -->
+          <section class="settings-card" aria-labelledby="heading-settlement-accounts">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-settlement-accounts" class="settings-card__title">Merchant Settlement &amp; Payout Accounts</h2>
+                <p class="settings-card__desc">
+                  Designated official bank accounts and mobile wallet numbers used for customer transfers, reconciliations, and payout sweeps.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <!-- Easypaisa Settlement Wallet Number -->
+                <div class="settings-form-group">
+                  <label for="set-ep-merchant-number" class="settings-form-label">
+                    Easypaisa Settlement Mobile Account
+                  </label>
+                  <input
+                    type="text"
+                    id="set-ep-merchant-number"
+                    name="easypaisa_merchant_number"
+                    class="settings-form-input font-mono"
+                    placeholder="03120246309"
+                    value="<?= ea($settings['easypaisa_merchant_number'] ?? '03120246309') ?>"
+                    autocomplete="off"
+                  >
+                  <p class="settings-form-helper">Official registered Easypaisa merchant wallet number for customer peer-to-merchant settlements.</p>
+                </div>
+
+                <!-- Settlement Bank Name -->
+                <div class="settings-form-group">
+                  <label for="set-bank-name" class="settings-form-label">
+                    Settlement Bank Institution
+                  </label>
+                  <input
+                    type="text"
+                    id="set-bank-name"
+                    name="bank_name"
+                    class="settings-form-input"
+                    placeholder="United Bank Limited (UBL)"
+                    value="<?= ea($settings['bank_name'] ?? 'United Bank Limited (UBL)') ?>"
+                    autocomplete="off"
+                  >
+                  <p class="settings-form-helper">Scheduled clearing bank for direct customer IBAN / Raast deposits.</p>
+                </div>
+              </div>
+
+              <div class="settings-grid-2 mt-3">
+                <!-- Settlement Account Title -->
+                <div class="settings-form-group">
+                  <label for="set-bank-title" class="settings-form-label">
+                    Bank Account Title / Beneficiary Name
+                  </label>
+                  <input
+                    type="text"
+                    id="set-bank-title"
+                    name="bank_account_title"
+                    class="settings-form-input"
+                    placeholder="GlassCart Retail"
+                    value="<?= ea($settings['bank_account_title'] ?? 'GlassCart Retail') ?>"
+                    autocomplete="off"
+                  >
+                  <p class="settings-form-helper">Official business or entity account name verified on bank statements.</p>
+                </div>
+
+                <!-- Settlement Account Number / IBAN -->
+                <div class="settings-form-group">
+                  <label for="set-bank-account-num" class="settings-form-label">
+                    Bank Account Number / IBAN
+                  </label>
+                  <input
+                    type="text"
+                    id="set-bank-account-num"
+                    name="bank_account_number"
+                    class="settings-form-input font-mono"
+                    placeholder="4214 6182 4622 1918"
+                    value="<?= ea($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?>"
+                    autocomplete="off"
+                  >
+                  <p class="settings-form-helper">Official UBL / Raast clearing account number for wire transfers.</p>
                 </div>
               </div>
             </div>
@@ -819,7 +906,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     <p class="settings-toggle-card__desc">Dispatch itemized digital invoices and settlement confirmation immediately upon payment completion.</p>
                   </div>
                   <label class="category-switch" for="notif-order-confirm">
-                    <input type="checkbox" id="notif-order-confirm" name="notif_order_confirm" value="1" checked>
+                    <input type="checkbox" id="notif-order-confirm" name="notif_order_confirm" value="1" <?= !empty($settings['notif_order_confirm']) ? 'checked' : '' ?>>
                     <span class="category-switch__slider" aria-hidden="true"></span>
                     <span class="sr-only">Toggle order confirmation emails</span>
                   </label>
@@ -832,7 +919,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     <p class="settings-toggle-card__desc">Automatically notify buyers with their courier tracking code when orders transition to dispatched status.</p>
                   </div>
                   <label class="category-switch" for="notif-shipping-update">
-                    <input type="checkbox" id="notif-shipping-update" name="notif_shipping_update" value="1" checked>
+                    <input type="checkbox" id="notif-shipping-update" name="notif_shipping_update" value="1" <?= !empty($settings['notif_shipping_update']) ? 'checked' : '' ?>>
                     <span class="category-switch__slider" aria-hidden="true"></span>
                     <span class="sr-only">Toggle shipment tracking notices</span>
                   </label>
@@ -845,7 +932,7 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     <p class="settings-toggle-card__desc">Transmit credit adjustment documentation when an order is cancelled or refunded by administrators.</p>
                   </div>
                   <label class="category-switch" for="notif-refund-advisory">
-                    <input type="checkbox" id="notif-refund-advisory" name="notif_refund_advisory" value="1" checked>
+                    <input type="checkbox" id="notif-refund-advisory" name="notif_refund_advisory" value="1" <?= !empty($settings['notif_refund_advisory']) ? 'checked' : '' ?>>
                     <span class="category-switch__slider" aria-hidden="true"></span>
                     <span class="sr-only">Toggle refund advisories</span>
                   </label>
@@ -873,10 +960,10 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <div class="settings-toggle-card">
                   <div class="settings-toggle-card__info">
                     <span class="settings-toggle-card__title">Low Stock Telemetry Alerts</span>
-                    <p class="settings-toggle-card__desc">Notify administrative staff immediately when any product SKU stock falls below 3 units in inventory.</p>
+                    <p class="settings-toggle-card__desc">Notify administrative staff immediately when any product SKU stock falls below low inventory limit.</p>
                   </div>
                   <label class="category-switch" for="notif-low-stock">
-                    <input type="checkbox" id="notif-low-stock" name="notif_low_stock" value="1" checked>
+                    <input type="checkbox" id="notif-low-stock" name="notif_low_stock" value="1" <?= !empty($settings['notif_low_stock']) ? 'checked' : '' ?>>
                     <span class="category-switch__slider" aria-hidden="true"></span>
                     <span class="sr-only">Toggle low stock alerts</span>
                   </label>
@@ -889,12 +976,49 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                     <p class="settings-toggle-card__desc">Compile previous 24-hour gross volume, orders completed, and fulfillment queues into a daily digest.</p>
                   </div>
                   <label class="category-switch" for="notif-daily-digest">
-                    <input type="checkbox" id="notif-daily-digest" name="notif_daily_digest" value="1">
+                    <input type="checkbox" id="notif-daily-digest" name="notif_daily_digest" value="1" <?= !empty($settings['notif_daily_digest']) ? 'checked' : '' ?>>
                     <span class="category-switch__slider" aria-hidden="true"></span>
                     <span class="sr-only">Toggle daily morning order digest</span>
                   </label>
                 </div>
 
+              </div>
+
+              <!-- Admin Operational Alerts Config -->
+              <div class="settings-grid-2 mt-4 pt-4 border-t border-slate-100">
+                <div class="settings-form-group">
+                  <label for="set-low-stock-thresh" class="settings-form-label">
+                    Low Stock Threshold (Units)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    id="set-low-stock-thresh"
+                    name="notif_low_stock_threshold"
+                    class="settings-form-input font-mono"
+                    value="<?= ea($settings['notif_low_stock_threshold'] ?? 3) ?>"
+                  >
+                  <p class="settings-form-helper">Dispatches stock restock alerts when available inventory drops to or below this quantity.</p>
+                </div>
+
+                <div class="settings-form-group">
+                  <label for="set-notif-admin-email" class="settings-form-label">
+                    Alert Dispatch Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="set-notif-admin-email"
+                    name="notif_admin_email"
+                    class="settings-form-input <?= !empty($errors['notif_admin_email']) ? 'settings-form-input--error' : '' ?>"
+                    placeholder="admin@glasscart.local"
+                    value="<?= ea($settings['notif_admin_email'] ?? ($settings['contact_email'] ?? '')) ?>"
+                  >
+                  <p class="settings-form-helper">Primary inbox where stock threshold warnings and operational reports are routed.</p>
+                  <?php if (!empty($errors['notif_admin_email'])): ?>
+                    <span class="settings-field-error"><?= e($errors['notif_admin_email']) ?></span>
+                  <?php endif; ?>
+                </div>
               </div>
             </div>
           </section>
@@ -1004,6 +1128,78 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
             </div>
           </section>
 
+          <!-- Card: Security & Session Policies -->
+          <section class="settings-card" aria-labelledby="heading-policies">
+            <div class="settings-card__header">
+              <div>
+                <h2 id="heading-policies" class="settings-card__title">Storefront Security &amp; Access Policies</h2>
+                <p class="settings-card__desc">
+                  Authentication limits, session lifecycle expiration, maintenance mode, and transport encryption.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-card__body">
+              <div class="settings-grid-2">
+                <!-- Session Timeout -->
+                <div class="settings-form-group">
+                  <label for="set-session-timeout" class="settings-form-label">Admin Session Inactivity Timeout</label>
+                  <select id="set-session-timeout" name="security_session_timeout" class="settings-form-input">
+                    <option value="30" <?= ((int)($settings['security_session_timeout'] ?? 120)) === 30 ? 'selected' : '' ?>>30 Minutes</option>
+                    <option value="60" <?= ((int)($settings['security_session_timeout'] ?? 120)) === 60 ? 'selected' : '' ?>>1 Hour</option>
+                    <option value="120" <?= ((int)($settings['security_session_timeout'] ?? 120)) === 120 ? 'selected' : '' ?>>2 Hours (Recommended)</option>
+                    <option value="240" <?= ((int)($settings['security_session_timeout'] ?? 120)) === 240 ? 'selected' : '' ?>>4 Hours</option>
+                    <option value="480" <?= ((int)($settings['security_session_timeout'] ?? 120)) === 480 ? 'selected' : '' ?>>8 Hours</option>
+                  </select>
+                  <p class="settings-form-helper">Inactivity interval before an administrator session requires re-authentication.</p>
+                </div>
+
+                <!-- Max Login Attempts -->
+                <div class="settings-form-group">
+                  <label for="set-max-attempts" class="settings-form-label">Max Login Attempts Rate Limiting</label>
+                  <input
+                    type="number"
+                    min="3"
+                    max="20"
+                    id="set-max-attempts"
+                    name="security_max_login_attempts"
+                    class="settings-form-input font-mono"
+                    value="<?= ea($settings['security_max_login_attempts'] ?? 5) ?>"
+                  >
+                  <p class="settings-form-helper">Failed authentication trials before an IP is throttled for 15 minutes.</p>
+                </div>
+              </div>
+
+              <div class="settings-toggle-stack mt-4 pt-4 border-t border-slate-100">
+                <!-- Maintenance Mode -->
+                <div class="settings-toggle-card">
+                  <div class="settings-toggle-card__info">
+                    <span class="settings-toggle-card__title">Storefront Maintenance Mode</span>
+                    <p class="settings-toggle-card__desc">Temporarily pause public checkout and show a scheduled maintenance advisory to visitors.</p>
+                  </div>
+                  <label class="category-switch" for="set-maint-mode">
+                    <input type="checkbox" id="set-maint-mode" name="security_maintenance_mode" value="1" <?= !empty($settings['security_maintenance_mode']) ? 'checked' : '' ?>>
+                    <span class="category-switch__slider" aria-hidden="true"></span>
+                    <span class="sr-only">Toggle maintenance mode</span>
+                  </label>
+                </div>
+
+                <!-- Enforce Strict SSL & Secure Cookies -->
+                <div class="settings-toggle-card">
+                  <div class="settings-toggle-card__info">
+                    <span class="settings-toggle-card__title">Strict HTTPS &amp; Cookie Security Flags</span>
+                    <p class="settings-toggle-card__desc">Enforce HSTS, SameSite=Lax, and Secure cookie attributes across all customer requests.</p>
+                  </div>
+                  <label class="category-switch" for="set-strict-ssl">
+                    <input type="checkbox" id="set-strict-ssl" name="security_strict_ssl" value="1" <?= !empty($settings['security_strict_ssl']) ? 'checked' : '' ?>>
+                    <span class="category-switch__slider" aria-hidden="true"></span>
+                    <span class="sr-only">Toggle strict SSL</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <!-- Card: API Endpoint & Developer Keys -->
           <section class="settings-card" aria-labelledby="heading-api-keys">
             <div class="settings-card__header">
@@ -1043,11 +1239,11 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
                 <label for="api-webhook-secret" class="settings-form-label">Webhook HMAC Signing Key</label>
                 <div class="settings-copy-input-wrap">
                   <input
-                    type="password"
+                    type="text"
                     id="api-webhook-secret"
+                    name="api_webhook_secret"
                     class="settings-form-input font-mono text-xs"
-                    readonly
-                    value="whsec_98fbc184013490aa8efb019349cde012"
+                    value="<?= ea($settings['api_webhook_secret'] ?? 'whsec_98fbc184013490aa8efb019349cde012') ?>"
                   >
                   <button
                     type="button"
@@ -1095,3 +1291,125 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
     </main>
   </div>
 </div>
+
+<script>
+(function() {
+  function activateSettingsTab(targetId) {
+    if (!targetId) return;
+    targetId = targetId.replace(/^#/, '');
+
+    const panes = document.querySelectorAll('.settings-pane');
+    const navItems = document.querySelectorAll('.settings-nav-item, .settings-tab');
+    if (!panes.length || !navItems.length) return;
+
+    let matched = false;
+    panes.forEach(function(pane) {
+      if (pane.getAttribute('data-tab-pane') === targetId) {
+        pane.classList.remove('hidden');
+        pane.style.display = 'block';
+        matched = true;
+      } else {
+        pane.classList.add('hidden');
+        pane.style.display = 'none';
+      }
+    });
+
+    if (matched) {
+      navItems.forEach(function(item) {
+        const itemTarget = item.getAttribute('data-tab-target');
+        const isActive = (itemTarget === targetId);
+
+        if (item.classList.contains('settings-nav-item')) {
+          item.classList.toggle('settings-nav-item--active', isActive);
+          item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          if (isActive && window.innerWidth <= 992) {
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+
+        if (item.classList.contains('settings-tab')) {
+          if (isActive) {
+            item.classList.add('bg-white', 'text-slate-900', 'font-semibold', 'shadow-sm');
+            item.classList.remove('text-slate-600', 'font-medium');
+          } else {
+            item.classList.remove('bg-white', 'text-slate-900', 'font-semibold', 'shadow-sm');
+            item.classList.add('text-slate-600', 'hover:text-slate-900', 'font-medium');
+          }
+        }
+      });
+
+      const activeInput = document.getElementById('settings-active-tab');
+      if (activeInput) {
+        activeInput.value = targetId;
+      }
+
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#' + targetId);
+      }
+    }
+  }
+
+  // Make globally available
+  window.switchSettingsTab = activateSettingsTab;
+
+  function initSettingsTabs() {
+    // Attach click handlers to all settings tabs
+    document.querySelectorAll('.settings-nav-item, .settings-tab').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = this.getAttribute('data-tab-target');
+        activateSettingsTab(target);
+      });
+    });
+
+    // Check URL hash or server-rendered active tab
+    const urlHash = (window.location.hash || '').replace('#', '');
+    const defaultTab = '<?= ea($activeTab ?? "general") ?>';
+    const initialTarget = urlHash || defaultTab;
+    if (initialTarget) {
+      activateSettingsTab(initialTarget);
+    }
+
+    // Listen for browser forward/back buttons
+    window.addEventListener('hashchange', function() {
+      const hash = (window.location.hash || '').replace('#', '');
+      if (hash) {
+        activateSettingsTab(hash);
+      }
+    });
+
+    // Copy to clipboard helpers
+    document.querySelectorAll('[data-copy-target]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-copy-target');
+        const input = document.getElementById(targetId);
+        if (!input) return;
+
+        const val = input.value || input.innerText;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(val).then(function() {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span>Copied!</span>';
+            btn.style.color = '#10b981';
+            btn.style.borderColor = '#10b981';
+            setTimeout(function() {
+              btn.innerHTML = orig;
+              btn.style.color = '';
+              btn.style.borderColor = '';
+            }, 2000);
+          });
+        } else {
+          input.select();
+          document.execCommand('copy');
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSettingsTabs);
+  } else {
+    initSettingsTabs();
+  }
+})();
+</script>
