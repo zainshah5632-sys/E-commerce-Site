@@ -58,31 +58,33 @@ $statusBadge = match($paymentStatus) {
       <span><?= e($statusBadge['label']) ?></span>
     </div>
 
-    <!-- Settlement Verification & Proof Details -->
-    <?php if (!empty($order['transaction_id']) || !empty($order['payment_receipt_url'])): ?>
+    <!-- Gateway Settlement Reference Details -->
+    <?php if (!empty($order['transaction_id'])): ?>
       <div class="glass" style="text-align: left; padding: var(--s-4); border-radius: var(--r-md); margin-bottom: var(--s-5); border-left: 4px solid var(--brand-600);">
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-1); margin-bottom: 6px;">Submitted Settlement Proof:</div>
-        <?php if (!empty($order['transaction_id'])): ?>
-          <div style="font-size: 0.88rem; color: var(--text-2);">
-            Transaction ID (TID): <strong class="font-mono" style="color: var(--text-1);"><?= e($order['transaction_id']) ?></strong>
-          </div>
-        <?php endif; ?>
-        <?php if (!empty($order['payment_receipt_url'])): ?>
-          <div style="margin-top: 6px; font-size: 0.88rem;">
-            Receipt Document: <a href="<?= ea($order['payment_receipt_url']) ?>" target="_blank" rel="noopener" style="color: var(--brand-600); font-weight: 600; text-decoration: underline;">View Attached Receipt &rarr;</a>
-          </div>
-        <?php endif; ?>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-1); margin-bottom: 4px;">Gateway Settlement Reference:</div>
+        <div style="font-size: 0.88rem; color: var(--text-2);">
+          Transaction ID (TID): <strong class="font-mono" style="color: var(--text-1);"><?= e($order['transaction_id']) ?></strong>
+        </div>
       </div>
     <?php endif; ?>
 
-    <!-- Method Specific Reassurance -->
-    <?php if (in_array($method, ['easypaisa', 'jazzcash', 'bank_transfer'], true)): ?>
-      <div class="alert alert--info glass--strong" style="text-align: left; margin-bottom: var(--s-5);">
-        <div style="font-size: 0.88rem; line-height: 1.5;">
-          <strong>Manual Transfer Settlement Notice:</strong><br>
-          Our finance department verifies incoming manual transfers within business hours. Once verified against your submitted transaction ID, your order fulfillment will begin immediately.
+    <!-- Method Specific Real-Time Reassurance -->
+    <?php if (in_array($method, ['easypaisa', 'jazzcash', 'bank_transfer', 'card'], true)): ?>
+      <?php if ($paymentStatus === 'paid'): ?>
+        <div class="alert alert--success glass--strong" style="text-align: left; margin-bottom: var(--s-5);">
+          <div style="font-size: 0.88rem; line-height: 1.5;">
+            <strong>Online Payment Confirmed:</strong><br>
+            Your transaction was authenticated and verified through the official payment gateway. Your order is now being processed for dispatch!
+          </div>
         </div>
-      </div>
+      <?php else: ?>
+        <div class="alert alert--info glass--strong" style="text-align: left; margin-bottom: var(--s-5);">
+          <div style="font-size: 0.88rem; line-height: 1.5;">
+            <strong>Awaiting Authorization / Processing:</strong><br>
+            If you received a push prompt or USSD notification on your registered mobile number, please enter your PIN/MPIN on your handset. Your order will update automatically once confirmed.
+          </div>
+        </div>
+      <?php endif; ?>
     <?php elseif ($method === 'cod'): ?>
       <div class="alert alert--info glass--strong" style="text-align: left; margin-bottom: var(--s-5);">
         <div style="font-size: 0.88rem; line-height: 1.5;">

@@ -357,233 +357,198 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
 
             <!-- Dynamic Payment Details Panels -->
             
-            <!-- Panel: Easypaisa -->
+            <!-- Panel: Easypaisa (Automated Mobile Wallet Debit) -->
             <div id="pane-easypaisa" class="payment-detail-pane <?= $selectedPayment === 'easypaisa' ? 'is-active' : '' ?>">
               <div class="payment-info-box">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 font-mono">Easypaisa Business Wallet</span>
-                  <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Active</span>
+                  <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 font-mono">Easypaisa Real-Time Wallet Debit</span>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                    <?= icon('shield', 12) ?>
+                    <span>Official Gateway</span>
+                  </span>
                 </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Account Title:</span>
-                  <strong class="text-slate-900"><?= e($settings['easypaisa_title'] ?? 'GlassCart Official') ?></strong>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Mobile Number:</span>
-                  <div class="flex items-center gap-2">
-                    <strong class="font-mono text-emerald-700 text-sm font-bold"><?= e($settings['easypaisa_number'] ?? '03120246309') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['easypaisa_number'] ?? '03120246309') ?>">
-                      <?= icon('copy', 12) ?>
-                      <span>Copy</span>
-                    </button>
-                  </div>
-                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                  Direct automated wallet settlement. Enter your registered Easypaisa mobile number below. When you click <strong>Pay via Easypaisa</strong>, an automated approval push notification or OTP request will be dispatched to your Easypaisa mobile app.
+                </p>
                 <div class="payment-data-row">
                   <span class="text-slate-600">Payable Amount:</span>
-                  <strong class="text-slate-900 font-mono"><?= money($total) ?></strong>
+                  <strong class="text-slate-900 font-mono text-sm"><?= money($total) ?></strong>
                 </div>
               </div>
 
-              <div class="text-xs text-slate-600 leading-relaxed mb-4">
-                <strong>Instructions:</strong>
-                <p class="mt-1"><?= nl2br(e($settings['easypaisa_instructions'] ?? 'Transfer total to Easypaisa account and provide TID below.')) ?></p>
-              </div>
-
-              <!-- Transaction ID Input -->
+              <!-- Automated Mobile Number Input -->
               <div class="mb-3">
-                <label for="ep-tid" class="checkout-field-label">
-                  Easypaisa Transaction ID (TID) <span class="text-rose-500">*</span>
+                <label for="ep-mobile" class="checkout-field-label">
+                  Registered Easypaisa Mobile Number <span class="text-rose-500">*</span>
                 </label>
                 <input
-                  type="text"
-                  id="ep-tid"
-                  name="transaction_id"
+                  type="tel"
+                  id="ep-mobile"
+                  name="easypaisa_mobile"
                   class="checkout-field-input font-mono"
-                  placeholder="e.g. 1029384756 (from 3737 SMS)"
-                  value="<?= ea(old('transaction_id')) ?>"
+                  placeholder="03XXXXXXXXX"
+                  maxlength="11"
+                  value="<?= ea(old('easypaisa_mobile')) ?>"
                 >
-                <span class="checkout-field-helper">Enter the confirmation transaction ID received on your phone.</span>
+                <span class="checkout-field-helper">Enter the 11-digit mobile number associated with your active Easypaisa account.</span>
               </div>
 
-              <!-- Payment Proof Upload -->
-              <div>
-                <label class="checkout-field-label">Upload Transfer Receipt / Screenshot <span class="text-slate-400 font-normal">(Optional)</span></label>
-                <div class="payment-receipt-dropzone">
-                  <input type="file" name="payment_receipt" id="ep-receipt" accept="image/jpeg,image/png,image/webp,application/pdf" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                  <div class="flex flex-col items-center pointer-events-none">
-                    <?= icon('upload-cloud', 22) ?>
-                    <span class="text-xs font-semibold text-slate-700 mt-1.5" id="ep-receipt-name">Click or drop screenshot (JPG, PNG, PDF &le; 5MB)</span>
-                  </div>
+              <div class="rounded-lg bg-emerald-50 border border-emerald-200/80 p-3 text-xs text-emerald-950 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                  <?= icon('check', 14) ?>
+                  <span>Automated Instant Settlement Flow:</span>
                 </div>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-1">
+                  <li>Click <strong>Pay via Easypaisa</strong> below.</li>
+                  <li>An authorization push prompt will pop up on your Easypaisa phone/app.</li>
+                  <li>Enter your 5-digit secret PIN on your mobile screen to approve.</li>
+                  <li>Your order will instantly confirm online without manual verification.</li>
+                </ol>
               </div>
             </div>
 
-            <!-- Panel: JazzCash -->
+            <!-- Panel: JazzCash (Automated MWALLET & MPIN Push) -->
             <div id="pane-jazzcash" class="payment-detail-pane <?= $selectedPayment === 'jazzcash' ? 'is-active' : '' ?>">
               <div class="payment-info-box">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-amber-700 font-mono">JazzCash Merchant Account</span>
-                  <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Active</span>
+                  <span class="text-xs font-bold uppercase tracking-wider text-amber-700 font-mono">JazzCash Mobile Account (MWALLET)</span>
+                  <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                    <?= icon('shield', 12) ?>
+                    <span>Official Gateway</span>
+                  </span>
                 </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Account Title:</span>
-                  <strong class="text-slate-900"><?= e($settings['jazzcash_title'] ?? 'GlassCart Official') ?></strong>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Mobile Account Number:</span>
-                  <div class="flex items-center gap-2">
-                    <strong class="font-mono text-amber-700 text-sm font-bold"><?= e($settings['jazzcash_number'] ?? '03001234567') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['jazzcash_number'] ?? '03001234567') ?>">
-                      <?= icon('copy', 12) ?>
-                      <span>Copy</span>
-                    </button>
-                  </div>
-                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                  Real-time direct mobile account debit. Enter your registered JazzCash mobile number and the last 6 digits of your CNIC. An automated USSD pop-up will appear directly on your phone requesting your MPIN.
+                </p>
                 <div class="payment-data-row">
                   <span class="text-slate-600">Payable Amount:</span>
-                  <strong class="text-slate-900 font-mono"><?= money($total) ?></strong>
+                  <strong class="text-slate-900 font-mono text-sm"><?= money($total) ?></strong>
                 </div>
               </div>
 
-              <div class="text-xs text-slate-600 leading-relaxed mb-4">
-                <strong>Instructions:</strong>
-                <p class="mt-1"><?= nl2br(e($settings['jazzcash_instructions'] ?? 'Transfer total to JazzCash mobile number and enter 8585 TID below.')) ?></p>
-              </div>
-
-              <!-- Transaction ID Input -->
-              <div class="mb-3">
-                <label for="jc-tid" class="checkout-field-label">
-                  JazzCash Transaction ID (TID) <span class="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="jc-tid"
-                  name="transaction_id"
-                  class="checkout-field-input font-mono"
-                  placeholder="e.g. 858512345678"
-                  value="<?= ea(old('transaction_id')) ?>"
-                >
-                <span class="checkout-field-helper">Enter the 8585 transaction reference number.</span>
-              </div>
-
-              <!-- Payment Proof Upload -->
-              <div>
-                <label class="checkout-field-label">Upload Transfer Receipt / Screenshot <span class="text-slate-400 font-normal">(Optional)</span></label>
-                <div class="payment-receipt-dropzone">
-                  <input type="file" name="payment_receipt" id="jc-receipt" accept="image/jpeg,image/png,image/webp,application/pdf" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                  <div class="flex flex-col items-center pointer-events-none">
-                    <?= icon('upload-cloud', 22) ?>
-                    <span class="text-xs font-semibold text-slate-700 mt-1.5" id="jc-receipt-name">Click or drop screenshot (JPG, PNG, PDF &le; 5MB)</span>
-                  </div>
+              <!-- Automated Inputs: Mobile & CNIC -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label for="jc-mobile" class="checkout-field-label">
+                    Registered JazzCash Mobile Number <span class="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="jc-mobile"
+                    name="jazzcash_mobile"
+                    class="checkout-field-input font-mono"
+                    placeholder="03XXXXXXXXX"
+                    maxlength="11"
+                    value="<?= ea(old('jazzcash_mobile')) ?>"
+                  >
+                  <span class="checkout-field-helper">11-digit JazzCash mobile number.</span>
                 </div>
+                <div>
+                  <label for="jc-cnic" class="checkout-field-label">
+                    CNIC (Last 6 Digits) <span class="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="jc-cnic"
+                    name="jazzcash_cnic"
+                    class="checkout-field-input font-mono"
+                    placeholder="e.g. 123456"
+                    maxlength="6"
+                    value="<?= ea(old('jazzcash_cnic')) ?>"
+                  >
+                  <span class="checkout-field-helper">State Bank requirement for MPIN 2FA.</span>
+                </div>
+              </div>
+
+              <div class="rounded-lg bg-amber-50 border border-amber-200/80 p-3 text-xs text-amber-950 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-amber-800">
+                  <?= icon('check', 14) ?>
+                  <span>Automated MPIN Approval Flow:</span>
+                </div>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-1">
+                  <li>Click <strong>Pay via JazzCash</strong> below.</li>
+                  <li>A USSD prompt or push notification will pop up on your mobile handset.</li>
+                  <li>Enter your 4-digit MPIN on your handset screen to authorize.</li>
+                  <li>Your payment is verified and confirmed automatically in real-time.</li>
+                </ol>
               </div>
             </div>
 
-            <!-- Panel: Direct Bank Transfer / IBAN -->
+            <!-- Panel: Direct Bank Transfer / Raast (Real-Time Online Banking) -->
             <div id="pane-bank_transfer" class="payment-detail-pane <?= $selectedPayment === 'bank_transfer' ? 'is-active' : '' ?>">
               <div class="payment-info-box">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 font-mono">Bank Account Transfer (IBAN)</span>
-                  <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-semibold">Verified</span>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Bank Name:</span>
-                  <strong class="text-slate-900"><?= e($settings['bank_name'] ?? 'United Bank Limited (UBL)') ?></strong>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Account Title:</span>
-                  <strong class="text-slate-900"><?= e($settings['bank_account_title'] ?? 'GlassCart Official') ?></strong>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">Account Number:</span>
-                  <div class="flex items-center gap-2">
-                    <strong class="font-mono text-slate-900"><?= e($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?>">
-                      <?= icon('copy', 12) ?>
-                      <span>Copy</span>
-                    </button>
-                  </div>
-                </div>
-                <div class="payment-data-row">
-                  <span class="text-slate-600">IBAN / Raast:</span>
-                  <div class="flex items-center gap-2">
-                    <strong class="font-mono text-indigo-700 text-xs font-bold"><?= e($settings['bank_iban'] ?? '4214 6182 4622 1918') ?></strong>
-                    <button type="button" class="payment-copy-btn" data-copy="<?= ea($settings['bank_iban'] ?? '4214 6182 4622 1918') ?>">
-                      <?= icon('copy', 12) ?>
-                      <span>Copy</span>
-                    </button>
-                  </div>
-                </div>
-                <?php if (!empty($settings['bank_branch'])): ?>
-                  <div class="payment-data-row">
-                    <span class="text-slate-600">Branch Details:</span>
-                    <span class="text-slate-700 text-xs"><?= e($settings['bank_branch']) ?></span>
-                  </div>
-                <?php endif; ?>
-              </div>
-
-              <div class="text-xs text-slate-600 leading-relaxed mb-4">
-                <strong>Settlement Instructions:</strong>
-                <p class="mt-1"><?= nl2br(e($settings['bank_instructions'] ?? 'Transfer via Raast or Online Banking. Upload receipt below.')) ?></p>
-              </div>
-
-              <!-- Transaction Reference ID Input -->
-              <div class="mb-3">
-                <label for="bank-ref" class="checkout-field-label">
-                  Bank Reference / Transaction ID <span class="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="bank-ref"
-                  name="transaction_id"
-                  class="checkout-field-input font-mono"
-                  placeholder="e.g. FT26112500001234 or Raast ID"
-                  value="<?= ea(old('transaction_id')) ?>"
-                >
-                <span class="checkout-field-helper">Enter the transaction reference from your bank receipt.</span>
-              </div>
-
-              <!-- Payment Proof Upload -->
-              <div>
-                <label class="checkout-field-label">Upload Transfer Receipt / Screenshot <span class="text-slate-400 font-normal">(Optional)</span></label>
-                <div class="payment-receipt-dropzone">
-                  <input type="file" name="payment_receipt" id="bank-receipt" accept="image/jpeg,image/png,image/webp,application/pdf" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
-                  <div class="flex flex-col items-center pointer-events-none">
-                    <?= icon('upload-cloud', 22) ?>
-                    <span class="text-xs font-semibold text-slate-700 mt-1.5" id="bank-receipt-name">Click or drop receipt (JPG, PNG, PDF &le; 5MB)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Panel: Visa & Mastercard -->
-            <div id="pane-card" class="payment-detail-pane <?= $selectedPayment === 'card' ? 'is-active' : '' ?>">
-              <div class="payment-info-box">
-                <div class="flex items-center gap-2 mb-2 text-indigo-700">
-                  <?= icon('shield', 18) ?>
-                  <strong class="text-sm">Official Hosted Card Checkout</strong>
-                </div>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                  Upon placing your order, you will be securely redirected to the official encrypted checkout gateway (Stripe) to authenticate your Visa or Mastercard.
-                </p>
-                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <span>PCI-DSS Level 1 Encrypted</span>
-                  <span class="text-emerald-600 font-semibold flex items-center gap-1">
-                    <?= icon('check', 14) ?>
-                    <span>Zero Card Data Stored</span>
+                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 font-mono">Real-Time Online Banking &amp; Raast</span>
+                  <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                    <?= icon('shield', 12) ?>
+                    <span>SBP Regulated Gateway</span>
                   </span>
                 </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                  Direct automated bank debit supporting 40+ Pakistani commercial and Islamic banks via 1LINK &amp; SBP Raast. No manual bank numbers to copy and zero receipt uploads.
+                </p>
+                <div class="payment-data-row">
+                  <span class="text-slate-600">Payable Amount:</span>
+                  <strong class="text-slate-900 font-mono text-sm"><?= money($total) ?></strong>
+                </div>
+              </div>
+
+              <div class="rounded-lg bg-indigo-50 border border-indigo-200/80 p-3 text-xs text-indigo-950 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-indigo-800">
+                  <?= icon('check', 14) ?>
+                  <span>Automated Online Banking Process:</span>
+                </div>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-1">
+                  <li>Click <strong>Pay via Bank / Raast</strong> below.</li>
+                  <li>You will be securely redirected to the SBP-regulated gateway portal.</li>
+                  <li>Authorize the transaction with your bank's instant SMS / email OTP.</li>
+                  <li>Settlement is verified automatically and your order confirms immediately.</li>
+                </ol>
               </div>
             </div>
 
-            <!-- Panel: COD -->
+            <!-- Panel: Visa & Mastercard (Official 3D Secure Hosted Checkout) -->
+            <div id="pane-card" class="payment-detail-pane <?= $selectedPayment === 'card' ? 'is-active' : '' ?>">
+              <div class="payment-info-box">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">Visa &amp; Mastercard (Debit &amp; Credit)</span>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                    <?= icon('shield', 12) ?>
+                    <span>PCI-DSS Level 1</span>
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                  Fast and secure online card checkout. You will be redirected to the official encrypted checkout gateway to authenticate with your bank's 3D Secure SMS OTP.
+                </p>
+                <div class="payment-data-row">
+                  <span class="text-slate-600">Payable Amount:</span>
+                  <strong class="text-slate-900 font-mono text-sm"><?= money($total) ?></strong>
+                </div>
+              </div>
+
+              <div class="rounded-lg bg-slate-50 border border-slate-200/80 p-3 text-xs text-slate-700 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-slate-900">
+                  <?= icon('lock', 14) ?>
+                  <span>Bank-Grade Card Security:</span>
+                </div>
+                <p class="text-slate-600 mt-1 leading-relaxed">
+                  GlassCart never collects or stores card numbers, expiration dates, PINs, or CVV security codes. Transactions are processed over end-to-end 256-bit encrypted channels directly with your card issuer.
+                </p>
+              </div>
+            </div>
+
+            <!-- Panel: Cash on Delivery (COD) -->
             <div id="pane-cod" class="payment-detail-pane <?= $selectedPayment === 'cod' ? 'is-active' : '' ?>">
               <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200/60 text-xs text-emerald-900 leading-relaxed">
                 <div class="flex items-center gap-2 font-bold text-emerald-800 mb-1">
                   <?= icon('check', 16) ?>
                   <span>Cash on Delivery Selected</span>
                 </div>
-                No advance online payment is required. You will pay the courier in cash when your package is delivered to your address.
+                <p>No advance online payment required. You will pay the courier in cash when your package arrives at your delivery destination.</p>
+                <div class="payment-data-row mt-2">
+                  <span class="text-slate-600">Total Payable upon Delivery:</span>
+                  <strong class="text-slate-900 font-mono text-sm"><?= money($total) ?></strong>
+                </div>
               </div>
             </div>
 
@@ -602,17 +567,20 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
             </div>
 
             <!-- Place Order CTA Button -->
-            <button type="submit" class="checkout-submit-btn">
-              <span>Place Order (<?= money($total) ?>)</span>
+            <button type="submit" class="checkout-submit-btn" id="checkout-submit-btn">
+              <span id="submit-btn-text">Pay Now (<?= money($total) ?>)</span>
               <?= icon('arrow-right', 16) ?>
             </button>
           </div>
         </div>
 
-        <!-- Dynamic Payment Client-Side Switching & Copy Handler -->
+        <!-- Dynamic Payment Client-Side Switching & Submit Label Handler -->
         <script>
           document.addEventListener('DOMContentLoaded', function() {
             var radios = document.querySelectorAll('input[name="payment_method"]');
+            var btnText = document.getElementById('submit-btn-text');
+            var totalStr = '<?= ea(money($total)) ?>';
+
             var panes = {
               'cod': document.getElementById('pane-cod'),
               'easypaisa': document.getElementById('pane-easypaisa'),
@@ -621,9 +589,18 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
               'card': document.getElementById('pane-card')
             };
 
+            var labels = {
+              'cod': 'Place Order & Pay on Delivery (' + totalStr + ')',
+              'easypaisa': 'Pay via Easypaisa (' + totalStr + ')',
+              'jazzcash': 'Pay via JazzCash (' + totalStr + ')',
+              'bank_transfer': 'Pay via Bank / Raast (' + totalStr + ')',
+              'card': 'Pay with Card (' + totalStr + ')'
+            };
+
             function updatePanes() {
               var selected = document.querySelector('input[name="payment_method"]:checked');
               var val = selected ? selected.value : 'cod';
+
               for (var key in panes) {
                 if (panes[key]) {
                   if (key === val) {
@@ -633,42 +610,18 @@ $selectedPayment = old('payment_method', in_array('cod', $enabledMethods, true) 
                   }
                 }
               }
+
+              if (btnText && labels[val]) {
+                btnText.textContent = labels[val];
+              }
             }
 
             radios.forEach(function(r) {
               r.addEventListener('change', updatePanes);
             });
 
-            // 1-Click Copy Handler
-            document.querySelectorAll('[data-copy]').forEach(function(btn) {
-              btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                var text = btn.getAttribute('data-copy');
-                if (navigator.clipboard && text) {
-                  navigator.clipboard.writeText(text).then(function() {
-                    var span = btn.querySelector('span');
-                    if (span) {
-                      var old = span.textContent;
-                      span.textContent = 'Copied!';
-                      setTimeout(function() { span.textContent = old; }, 2000);
-                    }
-                  });
-                }
-              });
-            });
-
-            // File Upload Name Display
-            ['ep-receipt', 'jc-receipt', 'bank-receipt'].forEach(function(id) {
-              var input = document.getElementById(id);
-              if (input) {
-                input.addEventListener('change', function() {
-                  var label = document.getElementById(id + '-name');
-                  if (label && input.files && input.files[0]) {
-                    label.textContent = 'Selected: ' + input.files[0].name;
-                  }
-                });
-              }
-            });
+            // Initial call to set initial button label and pane
+            updatePanes();
           });
         </script>
 

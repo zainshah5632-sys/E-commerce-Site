@@ -279,34 +279,13 @@ $paymentStatusBadgeClass = match($paymentStatus) {
           <!-- Transaction ID (TID) -->
           <?php if (!empty($transactionId)): ?>
             <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3);">
-              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 4px;">Customer Transaction ID (TID)</div>
+              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 4px;">Gateway Transaction Reference (TID)</div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);">
                 <code style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--text-1); word-break: break-all;"><?= e($transactionId) ?></code>
-                <button type="button" class="btn-admin-ghost btn-admin-sm" style="padding: 2px 8px; font-size: 0.75rem;" onclick="navigator.clipboard.writeText('<?= ea($transactionId) ?>'); alert('Transaction ID copied to clipboard!');">
+                <button type="button" class="btn-admin-ghost btn-admin-sm" style="padding: 2px 8px; font-size: 0.75rem;" onclick="navigator.clipboard.writeText('<?= ea($transactionId) ?>'); alert('Gateway Transaction ID copied to clipboard!');">
                   Copy
                 </button>
               </div>
-            </div>
-          <?php endif; ?>
-
-          <!-- Receipt Proof -->
-          <?php if (!empty($paymentReceiptUrl)): ?>
-            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3);">
-              <div class="text-xs text-slate-400 font-semibold uppercase" style="margin-bottom: 6px;">Customer Uploaded Receipt</div>
-              <?php
-                $isPdf = str_ends_with(strtolower(parse_url($paymentReceiptUrl, PHP_URL_PATH) ?? ''), '.pdf');
-              ?>
-              <?php if (!$isPdf): ?>
-                <div style="margin-bottom: var(--s-2); max-height: 220px; overflow: hidden; border-radius: var(--r-sm); border: 1px solid var(--line);">
-                  <a href="<?= ea($paymentReceiptUrl) ?>" target="_blank" rel="noopener">
-                    <img src="<?= ea($paymentReceiptUrl) ?>" alt="Payment Receipt" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 200px; background: rgba(0,0,0,0.03);">
-                  </a>
-                </div>
-              <?php endif; ?>
-              <a href="<?= ea($paymentReceiptUrl) ?>" target="_blank" rel="noopener" class="btn-admin-secondary btn-admin-sm" style="width: 100%; justify-content: center;">
-                <?= icon('arrow-right') ?>
-                <span><?= $isPdf ? 'Open PDF Receipt Document' : 'View Full Image Receipt' ?></span>
-              </a>
             </div>
           <?php endif; ?>
 

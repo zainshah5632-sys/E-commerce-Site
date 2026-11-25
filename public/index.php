@@ -53,7 +53,20 @@ $router->post('/cart/remove', [CartController::class, 'remove'], ['csrf']);
 $router->get('/checkout', [CheckoutController::class, 'show']);
 $router->post('/checkout', [CheckoutController::class, 'place'], ['csrf']);
 $router->get('/order/success/{number}', [CheckoutController::class, 'success']);
+
+// Official Payment Gateway Webhooks (IPN)
 $router->post('/webhook/stripe', [WebhookController::class, 'stripe']);
+$router->post('/webhook/jazzcash', [WebhookController::class, 'jazzcash']);
+$router->post('/webhook/easypaisa', [WebhookController::class, 'easypaisa']);
+$router->post('/webhook/payfast', [WebhookController::class, 'payfast']);
+
+// Payment Gateway Return Callbacks
+$router->get('/payment/callback/jazzcash', [WebhookController::class, 'jazzcashCallback']);
+$router->post('/payment/callback/jazzcash', [WebhookController::class, 'jazzcashCallback']);
+$router->get('/payment/callback/easypaisa', [WebhookController::class, 'easypaisaCallback']);
+$router->post('/payment/callback/easypaisa', [WebhookController::class, 'easypaisaCallback']);
+$router->get('/payment/callback/payfast', [WebhookController::class, 'payfastCallback']);
+$router->post('/payment/callback/payfast', [WebhookController::class, 'payfastCallback']);
 
 // Auth routes
 $router->get('/login', [AuthController::class, 'loginForm'], ['guest']);

@@ -77,41 +77,38 @@ final class SettingsRepository
     {
         return [
             'store_name'                    => 'GlassCart',
-            'currency_code'                 => 'USD',
-            'currency_symbol'               => '$',
-            'flat_shipping_cents'           => 500,
-            'free_shipping_threshold_cents' => 7500,
+            'currency_code'                 => 'PKR',
+            'currency_symbol'               => 'Rs.',
+            'flat_shipping_cents'           => 25000, // Rs. 250 in paise
+            'free_shipping_threshold_cents' => 500000, // Rs. 5,000 in paise
             'contact_email'                 => 'hello@example.com',
-            'announcement'                  => 'Free shipping on orders over $75',
+            'announcement'                  => 'Free delivery on orders over Rs. 5,000',
 
-            // Payment Methods Activation Toggles
+            // Automated Payment Methods Activation Toggles
             'payment_cod_enabled'           => true,
             'payment_bank_enabled'          => true,
             'payment_easypaisa_enabled'     => true,
             'payment_jazzcash_enabled'      => true,
             'payment_card_enabled'          => true,
 
-            // Bank Account Transfer Settings
-            'bank_name'                     => 'United Bank Limited (UBL)',
-            'bank_account_title'            => 'GlassCart Official',
-            'bank_account_number'           => '4214 6182 4622 1918',
-            'bank_iban'                     => '4214 6182 4622 1918',
-            'bank_branch'                   => 'Online Banking / Raast Transfer',
-            'bank_instructions'             => 'Transfer the total order amount to: United Bank Limited (UBL), Title: GlassCart Official, Account: 4214 6182 4622 1918. Enter your Transaction Reference ID below and upload your receipt screenshot.',
+            // Automated JazzCash Gateway Credentials (MWALLET & Hosted)
+            'jazzcash_mode'                 => 'sandbox', // 'sandbox' or 'live'
+            'jazzcash_merchant_id'          => '',
+            'jazzcash_password'             => '',
+            'jazzcash_integrity_salt'       => '',
 
-            // Easypaisa Settings
-            'easypaisa_title'               => 'GlassCart Official',
-            'easypaisa_number'              => '03120246309',
-            'easypaisa_instructions'        => '1. Open Easypaisa App. 2. Select Send Money -> Easypaisa Account. 3. Enter Mobile Number: 0312-0246309. 4. Enter the order total. 5. Complete payment and input your 3737 Transaction ID (TID) below with screenshot receipt.',
+            // Automated Easypaisa Gateway Credentials (Direct MA API & Hosted)
+            'easypaisa_mode'                => 'sandbox', // 'sandbox' or 'live'
+            'easypaisa_store_id'            => '',
+            'easypaisa_hash_key'            => '',
 
-            // JazzCash Settings
-            'jazzcash_title'                => 'GlassCart Official',
-            'jazzcash_number'               => '03001234567',
-            'jazzcash_instructions'         => '1. Open JazzCash App or dial *786#. 2. Select Send Money to JazzCash Account. 3. Enter Mobile Number: 0300-1234567. 4. Complete transaction and enter the 8585 Transaction ID (TID) below with screenshot receipt.',
+            // Automated Bank / Raast Gateway Credentials (PayFast / SBP Aggregator)
+            'payfast_mode'                  => 'sandbox', // 'sandbox' or 'live'
+            'payfast_merchant_id'           => '',
+            'payfast_secured_key'           => '',
 
-            // Visa / Mastercard (Card) Settings
-            'card_instructions'             => 'Pay securely using any Visa or Mastercard debit/credit card via official encrypted hosted payment checkout.',
-            'stripe_mode'                   => 'test',
+            // Automated Visa / Mastercard Gateway Credentials (Stripe / 3DS)
+            'stripe_mode'                   => 'test', // 'test' or 'live'
             'stripe_publishable_key'        => '',
             'stripe_secret_key'             => '',
             'stripe_webhook_secret'         => '',

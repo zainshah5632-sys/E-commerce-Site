@@ -81,8 +81,14 @@ $statusBadge = match($order['status'] ?? 'pending') {
           </div>
           <div style="display: flex; justify-content: space-between; color: var(--text-2);">
             <span>Payment Status</span>
-            <span style="text-transform: capitalize;"><?= e($order['payment_status'] ?? '') ?></span>
+            <span style="text-transform: capitalize; font-weight: 600; color: <?= ($order['payment_status'] ?? '') === 'paid' ? '#059669' : '#d97706' ?>;"><?= e($order['payment_status'] ?? 'pending') ?></span>
           </div>
+          <?php if (!empty($order['transaction_id'])): ?>
+            <div style="display: flex; justify-content: space-between; color: var(--text-2);">
+              <span>Gateway Ref (TID)</span>
+              <span class="font-mono" style="font-weight: 600; font-size: 0.82rem;"><?= e($order['transaction_id']) ?></span>
+            </div>
+          <?php endif; ?>
           <div style="display: flex; justify-content: space-between; color: var(--text-2);">
             <span>Subtotal</span>
             <span><?= money((int)($order['subtotal_cents'] ?? 0)) ?></span>

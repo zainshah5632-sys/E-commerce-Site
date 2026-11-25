@@ -508,65 +508,96 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
             </div>
           </section>
 
-          <!-- Card: Easypaisa Merchant Account Settings -->
+          <!-- Card: Easypaisa Official Gateway Credentials -->
           <section class="settings-card" aria-labelledby="heading-easypaisa">
             <div class="settings-card__header">
               <div>
-                <h2 id="heading-easypaisa" class="settings-card__title">Easypaisa Wallet Credentials</h2>
-                <p class="settings-card__desc">Account title, mobile number, and transfer instructions shown to buyers at checkout.</p>
+                <h2 id="heading-easypaisa" class="settings-card__title">Easypaisa Automated Gateway Credentials</h2>
+                <p class="settings-card__desc">Official Easypaisa Open API credentials for automated mobile wallet debits and in-app PIN prompts.</p>
               </div>
             </div>
             <div class="settings-card__body">
               <div class="settings-grid-2">
                 <div class="settings-form-group">
-                  <label for="set-ep-title" class="settings-form-label">Account Title</label>
-                  <input type="text" id="set-ep-title" name="easypaisa_title" class="settings-form-input" placeholder="e.g. GlassCart Official" value="<?= ea($settings['easypaisa_title'] ?? 'GlassCart Official') ?>">
+                  <label for="set-ep-mode" class="settings-form-label">Gateway Environment</label>
+                  <select id="set-ep-mode" name="easypaisa_mode" class="settings-form-input">
+                    <option value="sandbox" <?= ($settings['easypaisa_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' ?>>Sandbox / Staging (easypaystg.easypaisa.com.pk)</option>
+                    <option value="live" <?= ($settings['easypaisa_mode'] ?? '') === 'live' ? 'selected' : '' ?>>Production / Live (easypay.easypaisa.com.pk)</option>
+                  </select>
                 </div>
                 <div class="settings-form-group">
-                  <label for="set-ep-num" class="settings-form-label">Mobile Account Number</label>
-                  <input type="text" id="set-ep-num" name="easypaisa_number" class="settings-form-input font-mono" placeholder="03120246309" value="<?= ea($settings['easypaisa_number'] ?? '03120246309') ?>">
+                  <label for="set-ep-store" class="settings-form-label">Easypaisa Store ID</label>
+                  <input type="text" id="set-ep-store" name="easypaisa_store_id" class="settings-form-input font-mono" placeholder="e.g. 12345" value="<?= ea($settings['easypaisa_store_id'] ?? '') ?>">
                 </div>
               </div>
               <div class="settings-form-group mt-3">
-                <label for="set-ep-inst" class="settings-form-label">Customer Payment Instructions</label>
-                <textarea id="set-ep-inst" name="easypaisa_instructions" rows="2" class="settings-form-textarea text-xs"><?= ea($settings['easypaisa_instructions'] ?? '') ?></textarea>
+                <label for="set-ep-key" class="settings-form-label">Easypaisa Hash Key / API Credentials</label>
+                <input type="password" id="set-ep-key" name="easypaisa_hash_key" class="settings-form-input font-mono text-xs" placeholder="Secret Hash Key from Easypaisa Merchant Portal" value="<?= ea($settings['easypaisa_hash_key'] ?? '') ?>">
+              </div>
+              <div class="settings-callout settings-callout--brand mt-3">
+                <div class="settings-callout__icon"><?= icon('shield', 16) ?></div>
+                <div class="settings-callout__content">
+                  <strong class="settings-callout__title">Easypaisa IPN Callback URL:</strong>
+                  <span class="settings-callout__desc">
+                    Register in your Easypaisa Merchant Portal: <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-indigo-700"><?= ea(\App\Core\Env::get('APP_URL', 'https://glass-cart.onrender.com')) ?>/webhook/easypaisa</code>
+                  </span>
+                </div>
               </div>
             </div>
           </section>
 
-          <!-- Card: JazzCash Merchant Account Settings -->
+          <!-- Card: JazzCash Official Gateway Credentials -->
           <section class="settings-card" aria-labelledby="heading-jazzcash">
             <div class="settings-card__header">
               <div>
-                <h2 id="heading-jazzcash" class="settings-card__title">JazzCash Merchant Credentials</h2>
-                <p class="settings-card__desc">Account title, mobile account number, and instructions for JazzCash transfers.</p>
+                <h2 id="heading-jazzcash" class="settings-card__title">JazzCash Automated Gateway Credentials (MWALLET)</h2>
+                <p class="settings-card__desc">Official JazzCash HTTP POST / REST API credentials for automated mobile account MPIN push prompts.</p>
               </div>
             </div>
             <div class="settings-card__body">
               <div class="settings-grid-2">
                 <div class="settings-form-group">
-                  <label for="set-jc-title" class="settings-form-label">Account Title</label>
-                  <input type="text" id="set-jc-title" name="jazzcash_title" class="settings-form-input" placeholder="e.g. GlassCart Official" value="<?= ea($settings['jazzcash_title'] ?? 'GlassCart Official') ?>">
+                  <label for="set-jc-mode" class="settings-form-label">Gateway Environment</label>
+                  <select id="set-jc-mode" name="jazzcash_mode" class="settings-form-input">
+                    <option value="sandbox" <?= ($settings['jazzcash_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' ?>>Sandbox / Test (sandbox.jazzcash.com.pk)</option>
+                    <option value="live" <?= ($settings['jazzcash_mode'] ?? '') === 'live' ? 'selected' : '' ?>>Production / Live (payments.jazzcash.com.pk)</option>
+                  </select>
                 </div>
                 <div class="settings-form-group">
-                  <label for="set-jc-num" class="settings-form-label">Mobile Account Number</label>
-                  <input type="text" id="set-jc-num" name="jazzcash_number" class="settings-form-input font-mono" placeholder="03001234567" value="<?= ea($settings['jazzcash_number'] ?? '03001234567') ?>">
+                  <label for="set-jc-mid" class="settings-form-label">JazzCash Merchant ID</label>
+                  <input type="text" id="set-jc-mid" name="jazzcash_merchant_id" class="settings-form-input font-mono" placeholder="e.g. MC12345" value="<?= ea($settings['jazzcash_merchant_id'] ?? '') ?>">
                 </div>
               </div>
-              <div class="settings-form-group mt-3">
-                <label for="set-jc-inst" class="settings-form-label">Customer Payment Instructions</label>
-                <textarea id="set-jc-inst" name="jazzcash_instructions" rows="2" class="settings-form-textarea text-xs"><?= ea($settings['jazzcash_instructions'] ?? '') ?></textarea>
+              <div class="settings-grid-2 mt-3">
+                <div class="settings-form-group">
+                  <label for="set-jc-pwd" class="settings-form-label">Merchant Password</label>
+                  <input type="password" id="set-jc-pwd" name="jazzcash_password" class="settings-form-input font-mono text-xs" placeholder="API Password" value="<?= ea($settings['jazzcash_password'] ?? '') ?>">
+                </div>
+                <div class="settings-form-group">
+                  <label for="set-jc-salt" class="settings-form-label">Integrity Salt (HMAC-SHA256 Hash Key)</label>
+                  <input type="password" id="set-jc-salt" name="jazzcash_integrity_salt" class="settings-form-input font-mono text-xs" placeholder="Secret Integrity Salt from JazzCash Portal" value="<?= ea($settings['jazzcash_integrity_salt'] ?? '') ?>">
+                </div>
+              </div>
+              <div class="settings-callout settings-callout--brand mt-3">
+                <div class="settings-callout__icon"><?= icon('shield', 16) ?></div>
+                <div class="settings-callout__content">
+                  <strong class="settings-callout__title">JazzCash IPN &amp; Return Callback URLs:</strong>
+                  <span class="settings-callout__desc">
+                    IPN URL: <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-indigo-700"><?= ea(\App\Core\Env::get('APP_URL', 'https://glass-cart.onrender.com')) ?>/webhook/jazzcash</code><br>
+                    Return URL: <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-indigo-700"><?= ea(\App\Core\Env::get('APP_URL', 'https://glass-cart.onrender.com')) ?>/payment/callback/jazzcash</code>
+                  </span>
+                </div>
               </div>
             </div>
           </section>
 
-          <!-- Card: Direct Bank Settlement -->
+          <!-- Card: Bank Account & Raast Gateway Credentials (PayFast / SBP Aggregator) -->
           <section class="settings-card" aria-labelledby="heading-bank">
             <div class="settings-card__header">
               <div>
-                <h2 id="heading-bank" class="settings-card__title">Direct Bank Settlement (IBAN &amp; Raast)</h2>
+                <h2 id="heading-bank" class="settings-card__title">Bank Account &amp; Raast Gateway Credentials</h2>
                 <p class="settings-card__desc">
-                  Official bank credentials presented to customers transferring funds via Online Banking, Raast, or ATM.
+                  SBP-regulated online banking &amp; Raast real-time settlement gateway (PayFast / 1LINK).
                 </p>
               </div>
             </div>
@@ -574,41 +605,31 @@ $freeThresholdMajor = isset($settings['free_shipping_threshold_cents'])
             <div class="settings-card__body">
               <div class="settings-grid-2">
                 <div class="settings-form-group">
-                  <label for="set-bank-name" class="settings-form-label">Bank Name</label>
-                  <input type="text" id="set-bank-name" name="bank_name" class="settings-form-input" placeholder="United Bank Limited (UBL)" value="<?= ea($settings['bank_name'] ?? 'United Bank Limited (UBL)') ?>">
+                  <label for="set-pf-mode" class="settings-form-label">Gateway Environment</label>
+                  <select id="set-pf-mode" name="payfast_mode" class="settings-form-input">
+                    <option value="sandbox" <?= ($settings['payfast_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' ?>>Sandbox / Staging (ipgtest.apps.net.pk)</option>
+                    <option value="live" <?= ($settings['payfast_mode'] ?? '') === 'live' ? 'selected' : '' ?>>Production / Live (ipg.apps.net.pk)</option>
+                  </select>
                 </div>
                 <div class="settings-form-group">
-                  <label for="set-bank-title" class="settings-form-label">Account Title</label>
-                  <input type="text" id="set-bank-title" name="bank_account_title" class="settings-form-input" placeholder="GlassCart Official" value="<?= ea($settings['bank_account_title'] ?? 'GlassCart Official') ?>">
-                </div>
-              </div>
-
-              <div class="settings-grid-2 mt-3">
-                <div class="settings-form-group">
-                  <label for="set-bank-acc" class="settings-form-label">Account Number</label>
-                  <input type="text" id="set-bank-acc" name="bank_account_number" class="settings-form-input font-mono" placeholder="4214 6182 4622 1918" value="<?= ea($settings['bank_account_number'] ?? '4214 6182 4622 1918') ?>">
-                </div>
-                <div class="settings-form-group">
-                  <label for="set-bank-iban" class="settings-form-label">IBAN / Raast Account</label>
-                  <input type="text" id="set-bank-iban" name="bank_iban" class="settings-form-input font-mono" placeholder="4214 6182 4622 1918" value="<?= ea($settings['bank_iban'] ?? '4214 6182 4622 1918') ?>">
+                  <label for="set-pf-mid" class="settings-form-label">PayFast Merchant ID</label>
+                  <input type="text" id="set-pf-mid" name="payfast_merchant_id" class="settings-form-input font-mono" placeholder="e.g. 10001" value="<?= ea($settings['payfast_merchant_id'] ?? '') ?>">
                 </div>
               </div>
 
               <div class="settings-form-group mt-3">
-                <label for="set-bank-branch" class="settings-form-label">Branch &amp; Swift / Routing Code</label>
-                <input type="text" id="set-bank-branch" name="bank_branch" class="settings-form-input" placeholder="Online Banking / Raast Transfer" value="<?= ea($settings['bank_branch'] ?? 'Online Banking / Raast Transfer') ?>">
+                <label for="set-pf-key" class="settings-form-label">Secured API Key</label>
+                <input type="password" id="set-pf-key" name="payfast_secured_key" class="settings-form-input font-mono text-xs" placeholder="Secured Key from PayFast Portal" value="<?= ea($settings['payfast_secured_key'] ?? '') ?>">
               </div>
 
-              <div class="settings-form-group mt-3">
-                <label for="set-bank" class="settings-form-label">
-                  Wire Instructions
-                </label>
-                <textarea
-                  id="set-bank"
-                  name="bank_instructions"
-                  rows="3"
-                  class="settings-form-textarea font-mono text-xs"
-                ><?= ea($settings['bank_instructions'] ?? '') ?></textarea>
+              <div class="settings-callout settings-callout--brand mt-3">
+                <div class="settings-callout__icon"><?= icon('shield', 16) ?></div>
+                <div class="settings-callout__content">
+                  <strong class="settings-callout__title">PayFast Webhook Endpoint:</strong>
+                  <span class="settings-callout__desc">
+                    IPN URL: <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-indigo-700"><?= ea(\App\Core\Env::get('APP_URL', 'https://glass-cart.onrender.com')) ?>/webhook/payfast</code>
+                  </span>
+                </div>
               </div>
             </div>
           </section>

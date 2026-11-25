@@ -44,26 +44,23 @@ final class SettingsAdminController
             'payment_jazzcash_enabled'      => $request->bool('payment_jazzcash_enabled'),
             'payment_card_enabled'          => $request->bool('payment_card_enabled'),
 
-            // Bank Account Settings
-            'bank_name'                     => $request->string('bank_name', 'Meezan Bank Ltd'),
-            'bank_account_title'            => $request->string('bank_account_title', 'GlassCart Official'),
-            'bank_account_number'           => $request->string('bank_account_number'),
-            'bank_iban'                     => $request->string('bank_iban'),
-            'bank_branch'                   => $request->string('bank_branch'),
-            'bank_instructions'             => $request->string('bank_instructions'),
+            // Automated JazzCash Gateway Credentials
+            'jazzcash_mode'                 => $request->string('jazzcash_mode', 'sandbox'),
+            'jazzcash_merchant_id'          => $request->string('jazzcash_merchant_id'),
+            'jazzcash_password'             => $request->string('jazzcash_password'),
+            'jazzcash_integrity_salt'       => $request->string('jazzcash_integrity_salt'),
 
-            // Easypaisa Settings
-            'easypaisa_title'               => $request->string('easypaisa_title', 'GlassCart Official'),
-            'easypaisa_number'              => $request->string('easypaisa_number'),
-            'easypaisa_instructions'        => $request->string('easypaisa_instructions'),
+            // Automated Easypaisa Gateway Credentials
+            'easypaisa_mode'                => $request->string('easypaisa_mode', 'sandbox'),
+            'easypaisa_store_id'            => $request->string('easypaisa_store_id'),
+            'easypaisa_hash_key'            => $request->string('easypaisa_hash_key'),
 
-            // JazzCash Settings
-            'jazzcash_title'                => $request->string('jazzcash_title', 'GlassCart Official'),
-            'jazzcash_number'               => $request->string('jazzcash_number'),
-            'jazzcash_instructions'         => $request->string('jazzcash_instructions'),
+            // Automated Bank / Raast Gateway Credentials (PayFast / SBP Aggregator)
+            'payfast_mode'                  => $request->string('payfast_mode', 'sandbox'),
+            'payfast_merchant_id'           => $request->string('payfast_merchant_id'),
+            'payfast_secured_key'           => $request->string('payfast_secured_key'),
 
-            // Visa / Mastercard (Card) Settings
-            'card_instructions'             => $request->string('card_instructions'),
+            // Visa / Mastercard (Stripe) Credentials
             'stripe_mode'                   => $request->string('stripe_mode', 'test'),
             'stripe_publishable_key'        => $request->string('stripe_publishable_key'),
             'stripe_secret_key'             => $request->string('stripe_secret_key'),
