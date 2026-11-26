@@ -76,11 +76,14 @@ final class ProfileRepository
         }
 
         $client = new Client();
-        $res = $client->upsert('profiles', $payload, 'id');
+        $allowed = ['id', 'email', 'full_name', 'username', 'phone', 'country_code', 'role', 'created_at'];
+        $cleanPayload = array_intersect_key($payload, array_flip($allowed));
+
+        $res = $client->upsert('profiles', $cleanPayload, 'id');
         if (!$res->ok) {
-            $res = $client->update('profiles', ['id' => 'eq.' . $id], $data);
+            $client->update('profiles', ['id' => 'eq.' . $id], $cleanPayload);
         }
-        return $res->ok || true;
+        return true;
     }
 
     public static function update(string $id, array $patch): bool
@@ -96,8 +99,12 @@ final class ProfileRepository
         }
 
         $client = new Client();
-        $res = $client->update('profiles', ['id' => 'eq.' . $id], $patch);
-        return $res->ok || true;
+        $allowed = ['email', 'full_name', 'username', 'phone', 'country_code', 'role'];
+        $cleanPatch = array_intersect_key($patch, array_flip($allowed));
+        if (!empty($cleanPatch)) {
+            $client->update('profiles', ['id' => 'eq.' . $id], $cleanPatch);
+        }
+        return true;
     }
 
     public static function delete(string $id): bool

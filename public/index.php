@@ -75,6 +75,12 @@ $router->get('/register', [AuthController::class, 'registerForm'], ['guest']);
 $router->post('/register', [AuthController::class, 'register'], ['guest', 'csrf']);
 $router->post('/logout', [AuthController::class, 'logout'], ['csrf']);
 
+// Email Verification routes
+$router->get('/verify-email', [AuthController::class, 'verifyEmailForm']);
+$router->post('/verify-email', [AuthController::class, 'verifyEmail'], ['csrf']);
+$router->post('/verify-email/resend', [AuthController::class, 'resendVerification'], ['csrf']);
+$router->get('/verify-email/confirm', [AuthController::class, 'confirmEmailLink']);
+
 // Password Recovery routes
 $router->get('/forgot-password', [AuthController::class, 'forgotPasswordForm'], ['guest']);
 $router->post('/forgot-password', [AuthController::class, 'sendPasswordReset'], ['guest', 'csrf']);

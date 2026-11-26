@@ -4,14 +4,18 @@
 
 -- ---------- Tables ----------
 create table if not exists public.profiles (
-  id           uuid primary key references auth.users(id) on delete cascade,
-  full_name    text,
-  username     text unique,
-  phone        text,
-  country_code text default '+1',
-  role         text not null default 'customer' check (role in ('customer','admin')),
-  created_at   timestamptz not null default now()
+  id                uuid primary key references auth.users(id) on delete cascade,
+  full_name         text,
+  username          text unique,
+  phone             text,
+  country_code      text default '+1',
+  role              text not null default 'customer' check (role in ('customer','admin')),
+  is_verified       boolean not null default false,
+  email_verified_at timestamptz,
+  created_at        timestamptz not null default now()
 );
+alter table public.profiles add column if not exists is_verified boolean not null default false;
+alter table public.profiles add column if not exists email_verified_at timestamptz;
 
 create table if not exists public.categories (
   id          uuid primary key default gen_random_uuid(),

@@ -18,6 +18,14 @@ $oldIdentifier = old('identifier', old('email', ''));
     <?php if (!empty($errors['login'])): ?>
       <div class="alert alert--error glass--strong">
         <span><?= e($errors['login']) ?></span>
+        <?php if (!empty($unverified_email)): ?>
+          <div style="margin-top: 10px;">
+            <a href="<?= url('/verify-email?email=' . urlencode($unverified_email)) ?>" class="btn btn--primary btn--sm" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+              <span>Enter Verification Code</span>
+              <?= icon('arrow-right') ?>
+            </a>
+          </div>
+        <?php endif; ?>
       </div>
     <?php endif; ?>
 

@@ -27,7 +27,7 @@
 | D-004 | **Stateless encrypted-cookie sessions** (libsodium) | Render free has no persistent disk and restarts often; zero DB round-trips for sessions |
 | D-005 | Cart stored in cookie as `[{p,q}]`, prices always re-fetched | Never trust client prices; max 20 lines keeps cookie < 4 KB |
 | D-006 | Atomic order placement via Postgres function `place_order` | Prevents overselling, one round-trip |
-| D-007 | Registration via Supabase Admin API with `email_confirm: true` | Avoids free-tier auth email limits; no SMTP needed in MVP |
+| D-007 | Secure Email Verification via 6-digit OTP & link via SMTP | Enforces verified email before activation/login; 5-min expiry, 60s cooldown |
 | D-008 | Money as integer cents; settings in `site_settings` table | No float bugs; owner edits config without deploys |
 | D-009 | Payments: COD + bank transfer only | Free, no gateway dependency; gateway left as extension point |
 | D-010 | Hosting: Render free (Docker `php:8.3-apache`); keep-alive via GitHub Actions cron every 3 days | Free; avoids Supabase 7-day inactivity pause |
@@ -42,7 +42,7 @@
 
 ## 3. Environment (names only — never store values here)
 
-`APP_ENV` · `APP_URL` · `APP_SECRET` · `SUPABASE_URL` · `SUPABASE_PUBLISHABLE_KEY` · `SUPABASE_SECRET_KEY` · `SUPABASE_STORAGE_BUCKET`
+`APP_ENV` · `APP_URL` · `APP_SECRET` · `SUPABASE_URL` · `SUPABASE_PUBLISHABLE_KEY` · `SUPABASE_SECRET_KEY` · `SUPABASE_STORAGE_BUCKET` · `SMTP_HOST` · `SMTP_PORT` · `SMTP_SECURE` · `SMTP_USER` · `SMTP_PASS` · `SMTP_FROM_EMAIL` · `SMTP_FROM_NAME`
 
 Local dev: `.env` (gitignored). Render: dashboard env vars. GitHub: secret `APP_URL`.
 

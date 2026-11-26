@@ -10,6 +10,7 @@ use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\ProfileRepository;
 use App\Services\RateLimiter;
+use App\Services\VerificationService;
 use App\Supabase\Auth;
 
 final class AuthController
@@ -93,6 +94,19 @@ final class AuthController
 
         if (!$res['ok'] || empty($res['user'])) {
             RateLimiter::hit($rateKey, 5, 900);
+
+            // If the user's email is not confirmed, block login and direct them to verification
+            if (($res['error'] ?? '') === 'email_not_confirmed') {
+                $session->set('pending_verification_email', $targetEmail);
+                return Response::html(View::render('pages/login', [
+                    'title'            => 'Sign In | GlassCart',
+                    'next'             => $next,
+                    'errors'           => ['login' => 'Your email address has not been verified yet. Please enter the 6-digit code sent to your email to activate your account.'],
+                    'unverified_email' => $targetEmail,
+                    'noindex'          => true,
+                ]), 403);
+            }
+
             return Response::html(View::render('pages/login', [
                 'title'   => 'Sign In | GlassCart',
                 'next'    => $next,
@@ -211,25 +225,157 @@ final class AuthController
         // Clear old input on success
         $session->remove('_old_input');
 
-        // Auto-login after registration (Decision D-007)
         $user = $regRes['user'] ?? [];
-        $uid = $user['id'] ?? null;
-        if ($uid) {
-            $session->setAuth((string)$uid, $email, $fullName, 'customer');
-            $session->flash('success', 'Your account has been created successfully!');
-            return Response::redirect('/account');
+        $uid = (string)($user['id'] ?? '');
+
+        // Generate 6-digit OTP code and dispatch branded verification email via SMTP
+        VerificationService::createAndSend($uid, $email, $fullName);
+
+        // Store pending email in session and redirect to verification screen
+        $session->set('pending_verification_email', $email);
+        $session->flash('info', "We've sent a 6-digit verification code to {$email}. Please verify your email to activate your account.");
+
+        return Response::redirect('/verify-email?email=' . urlencode($email));
+    }
+
+    public function verifyEmailForm(Request $request): Response
+    {
+        $session = Session::instance();
+
+        // Check if user clicked a direct verification link from email
+        $token = trim($request->query('token', ''));
+        $email = strtolower(trim($request->query('email') ?: (string)$session->get('pending_verification_email', '')));
+
+        if (!empty($token) && !empty($email)) {
+            $verifyRes = VerificationService::verifyToken($email, $token);
+            if ($verifyRes['ok'] && !empty($verifyRes['user'])) {
+                $user = $verifyRes['user'];
+                $session->remove('pending_verification_email');
+                $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
+                $session->flash('success', 'Your email address has been successfully verified! Welcome to GlassCart.');
+                return Response::redirect('/account');
+            }
+
+            $errors = ['general' => $verifyRes['error'] ?? 'Invalid or expired verification link.'];
+        } else {
+            $errors = $session->get('_errors', []);
         }
 
-        $loginRes = $this->auth->login($email, $password);
-        if ($loginRes['ok'] && !empty($loginRes['user'])) {
-            $user = $loginRes['user'];
-            $session->setAuth($user['uid'], $user['email'], $user['name'], $user['role']);
-            $session->flash('success', 'Your account has been created successfully!');
-            return Response::redirect('/account');
+        if (empty($email)) {
+            $session->flash('info', 'Please sign in or register to verify your email address.');
+            return Response::redirect('/login');
         }
 
-        $session->flash('success', 'Registration successful! Please sign in with your credentials.');
-        return Response::redirect('/login');
+        $remainingCooldown = VerificationService::getRemainingCooldown($email);
+
+        return Response::html(View::render('pages/verify-email', [
+            'title'             => 'Verify Email | GlassCart',
+            'email'             => $email,
+            'errors'            => $errors,
+            'successMessage'    => $session->get('_flash_success'),
+            'remainingCooldown' => $remainingCooldown,
+            'noindex'           => true,
+        ]));
+    }
+
+    public function verifyEmail(Request $request): Response
+    {
+        $session = Session::instance();
+        $email = strtolower(trim($request->string('email') ?: (string)$session->get('pending_verification_email', '')));
+        $otp = trim($request->string('otp', ''));
+
+        if (empty($email)) {
+            $session->flash('error', 'Session expired. Please sign in or register again.');
+            return Response::redirect('/login');
+        }
+
+        $rateKey = 'verify_otp_' . md5($request->ip() . '_' . $email);
+        if (RateLimiter::tooManyAttempts($rateKey, 10, 300)) {
+            $seconds = RateLimiter::availableIn($rateKey, 300);
+            return Response::html(View::render('pages/verify-email', [
+                'title'             => 'Verify Email | GlassCart',
+                'email'             => $email,
+                'errors'            => ['otp' => "Too many verification attempts. Please wait {$seconds} seconds before trying again."],
+                'remainingCooldown' => VerificationService::getRemainingCooldown($email),
+                'noindex'           => true,
+            ]), 429);
+        }
+
+        $res = VerificationService::verifyOtp($email, $otp);
+        if (!$res['ok']) {
+            RateLimiter::hit($rateKey, 10, 300);
+            return Response::html(View::render('pages/verify-email', [
+                'title'             => 'Verify Email | GlassCart',
+                'email'             => $email,
+                'errors'            => ['otp' => $res['error'] ?? 'Invalid verification code.'],
+                'remainingCooldown' => VerificationService::getRemainingCooldown($email),
+                'noindex'           => true,
+            ]), 422);
+        }
+
+        RateLimiter::clear($rateKey);
+
+        $user = $res['user'];
+        $session->remove('pending_verification_email');
+        $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
+        $session->flash('success', 'Your email address has been verified successfully! Welcome to GlassCart.');
+
+        return Response::redirect('/account');
+    }
+
+    public function resendVerification(Request $request): Response
+    {
+        $session = Session::instance();
+        $email = strtolower(trim($request->string('email') ?: (string)$session->get('pending_verification_email', '')));
+
+        if (empty($email)) {
+            $session->flash('error', 'Unable to determine email address for resend. Please try signing in.');
+            return Response::redirect('/login');
+        }
+
+        // IP-based rate limiting on resend requests (max 6 per hour per IP)
+        $ipKey = 'resend_otp_ip_' . md5($request->ip());
+        if (RateLimiter::tooManyAttempts($ipKey, 6, 3600)) {
+            $seconds = RateLimiter::availableIn($ipKey, 3600);
+            $minutes = max(1, (int)ceil($seconds / 60));
+            $session->flash('error', "Too many resend requests from your network. Please wait {$minutes} minute(s) before requesting again.");
+            return Response::redirect('/verify-email?email=' . urlencode($email));
+        }
+
+        $res = VerificationService::resend($email);
+        if (!$res['ok']) {
+            $session->flash('error', $res['error'] ?? 'Could not resend verification code.');
+            return Response::redirect('/verify-email?email=' . urlencode($email));
+        }
+
+        RateLimiter::hit($ipKey, 6, 3600);
+        $session->flash('success', "A fresh 6-digit verification code has been dispatched to {$email}.");
+        return Response::redirect('/verify-email?email=' . urlencode($email));
+    }
+
+    public function confirmEmailLink(Request $request): Response
+    {
+        $session = Session::instance();
+        $token = trim($request->query('token', ''));
+        $email = strtolower(trim($request->query('email', '')));
+
+        if (empty($token) || empty($email)) {
+            $session->flash('error', 'Invalid verification link.');
+            return Response::redirect('/login');
+        }
+
+        $res = VerificationService::verifyToken($email, $token);
+        if (!$res['ok']) {
+            $session->flash('error', $res['error'] ?? 'Verification link is invalid or has expired.');
+            return Response::redirect('/verify-email?email=' . urlencode($email));
+        }
+
+        $user = $res['user'];
+        $session->remove('pending_verification_email');
+        $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
+        $session->flash('success', 'Your email address has been verified successfully! Welcome to GlassCart.');
+
+        return Response::redirect('/account');
     }
 
     public function logout(Request $request): Response
