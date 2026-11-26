@@ -229,10 +229,13 @@ final class AuthController
         $uid = (string)($user['id'] ?? '');
 
         // Generate 6-digit OTP code and dispatch branded verification email via SMTP
-        VerificationService::createAndSend($uid, $email, $fullName);
+        $verRes = VerificationService::createAndSend($uid, $email, $fullName);
 
         // Store pending email in session and redirect to verification screen
         $session->set('pending_verification_email', $email);
+        if (!empty($verRes['otp'])) {
+            $session->set('dev_verification_code', $verRes['otp']);
+        }
         $session->flash('info', "We've sent a 6-digit verification code to {$email}. Please verify your email to activate your account.");
 
         return Response::redirect('/verify-email?email=' . urlencode($email));
@@ -251,6 +254,7 @@ final class AuthController
             if ($verifyRes['ok'] && !empty($verifyRes['user'])) {
                 $user = $verifyRes['user'];
                 $session->remove('pending_verification_email');
+                $session->remove('dev_verification_code');
                 $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
                 $session->flash('success', 'Your email address has been successfully verified! Welcome to GlassCart.');
                 return Response::redirect('/account');
@@ -267,6 +271,8 @@ final class AuthController
         }
 
         $remainingCooldown = VerificationService::getRemainingCooldown($email);
+        $isSmtpConfigured = !empty(\App\Core\Env::get('SMTP_HOST')) && !empty(\App\Core\Env::get('SMTP_USER'));
+        $devCode = $session->get('dev_verification_code');
 
         return Response::html(View::render('pages/verify-email', [
             'title'             => 'Verify Email | GlassCart',
@@ -274,6 +280,8 @@ final class AuthController
             'errors'            => $errors,
             'successMessage'    => $session->get('_flash_success'),
             'remainingCooldown' => $remainingCooldown,
+            'unconfiguredSmtp'  => !$isSmtpConfigured,
+            'devCode'           => $devCode,
             'noindex'           => true,
         ]));
     }
@@ -297,6 +305,8 @@ final class AuthController
                 'email'             => $email,
                 'errors'            => ['otp' => "Too many verification attempts. Please wait {$seconds} seconds before trying again."],
                 'remainingCooldown' => VerificationService::getRemainingCooldown($email),
+                'unconfiguredSmtp'  => empty(\App\Core\Env::get('SMTP_HOST')),
+                'devCode'           => $session->get('dev_verification_code'),
                 'noindex'           => true,
             ]), 429);
         }
@@ -309,6 +319,8 @@ final class AuthController
                 'email'             => $email,
                 'errors'            => ['otp' => $res['error'] ?? 'Invalid verification code.'],
                 'remainingCooldown' => VerificationService::getRemainingCooldown($email),
+                'unconfiguredSmtp'  => empty(\App\Core\Env::get('SMTP_HOST')),
+                'devCode'           => $session->get('dev_verification_code'),
                 'noindex'           => true,
             ]), 422);
         }
@@ -317,6 +329,7 @@ final class AuthController
 
         $user = $res['user'];
         $session->remove('pending_verification_email');
+        $session->remove('dev_verification_code');
         $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
         $session->flash('success', 'Your email address has been verified successfully! Welcome to GlassCart.');
 
@@ -348,6 +361,10 @@ final class AuthController
             return Response::redirect('/verify-email?email=' . urlencode($email));
         }
 
+        if (!empty($res['otp'])) {
+            $session->set('dev_verification_code', $res['otp']);
+        }
+
         RateLimiter::hit($ipKey, 6, 3600);
         $session->flash('success', "A fresh 6-digit verification code has been dispatched to {$email}.");
         return Response::redirect('/verify-email?email=' . urlencode($email));
@@ -372,6 +389,7 @@ final class AuthController
 
         $user = $res['user'];
         $session->remove('pending_verification_email');
+        $session->remove('dev_verification_code');
         $session->setAuth((string)$user['uid'], $user['email'], $user['name'], $user['role']);
         $session->flash('success', 'Your email address has been verified successfully! Welcome to GlassCart.');
 

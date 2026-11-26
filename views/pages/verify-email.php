@@ -48,6 +48,26 @@ $remainingCooldown = $remainingCooldown ?? 0;
       </div>
     <?php endif; ?>
 
+    <?php if (!empty($unconfiguredSmtp)): ?>
+      <div class="alert alert--warning glass--strong" style="margin-bottom: var(--s-4); border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+        <div style="font-weight: 700; color: #b45309; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>SMTP Not Configured on Server</span>
+        </div>
+        <p style="font-size: 0.84rem; margin-bottom: 8px; color: var(--text-2); line-height: 1.45;">
+          Email delivery is currently simulated because SMTP credentials have not been added to your Render Environment Variables.
+        </p>
+        <?php if (!empty($devCode)): ?>
+          <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.06); border-radius: 8px; margin-bottom: 6px;">
+            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); display: block; margin-bottom: 4px;">Your 6-Digit Code for Testing:</span>
+            <span style="font-size: 1.6rem; font-weight: 800; letter-spacing: 4px; font-family: monospace; color: var(--brand-600);"><?= e($devCode) ?></span>
+          </div>
+        <?php endif; ?>
+        <p style="font-size: 0.78rem; color: var(--text-3); margin: 0;">
+          To receive codes directly in your real Gmail inbox, add <code style="background: rgba(0,0,0,0.06); padding: 2px 4px; border-radius: 4px;">SMTP_USER</code> and <code style="background: rgba(0,0,0,0.06); padding: 2px 4px; border-radius: 4px;">SMTP_PASS</code> in Render.
+        </p>
+      </div>
+    <?php endif; ?>
+
     <!-- 6-Digit OTP Form -->
     <form action="<?= url('/verify-email') ?>" method="POST" id="verify-otp-form" novalidate>
       <?= csrf_field() ?>

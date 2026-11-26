@@ -72,6 +72,7 @@ final class VerificationService
 
         return [
             'ok'               => true,
+            'otp'              => $otp,
             'expires_at'       => $expiresAt,
             'cooldown_seconds' => self::RESEND_COOLDOWN_SECONDS,
             'mail_result'      => $mailResult,
@@ -202,7 +203,11 @@ final class VerificationService
             return ['ok' => false, 'error' => $result['error'] ?? 'Unable to send verification code. Please try again.'];
         }
 
-        return ['ok' => true, 'remaining_seconds' => self::RESEND_COOLDOWN_SECONDS];
+        return [
+            'ok'                => true,
+            'otp'               => $result['otp'] ?? null,
+            'remaining_seconds' => self::RESEND_COOLDOWN_SECONDS,
+        ];
     }
 
     /**
